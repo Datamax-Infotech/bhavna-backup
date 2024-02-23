@@ -2,7 +2,7 @@
         $meeting_filter = " and attendee_id='".$_COOKIE['b2b_id']."'";
         $sql_main = db_query("SELECT mm.id, mm.meeting_name FROM meeting_attendees as ma JOIN meeting_master as mm ON mm.id = ma.meeting_id 
         where mm.status = 1 $meeting_filter GROUP By ma.meeting_id 
-        union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name ", db());
+        union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name ", db_project_mgmt());
         $meeting_options="";
         while( $meeting_data = array_shift($sql_main)){
             $meeting_options.="<option value='".$meeting_data['id']."'>".$meeting_data['meeting_name']."</option>";
@@ -80,52 +80,10 @@
                      <div class="col-md-6 form-group">
 						<label>Select Owner<span class="text-danger">*</span> </label>
                         <? 
-                            /*$select_level=db_query("SELECT level from loop_employees where b2b_id =".$_COOKIE['b2b_id'], db());
+                            /*$select_level=db_query("SELECT level from loop_employees where b2b_id =".$_COOKIE['b2b_id'], db_project_mgmt());
                             $emp_level = array_shift($select_level)['level'];
                           */
                         ?>
-						<!--<select class="form-control form-control-sm  owner_id_dp" add_type="top" id="owner_id" name="owner_id" <? echo $emp_level!=2 ? "disabled='true'" : "";?>>
-							<option value="0">All</option>
-							<?
-								/*$dept_id="";	
-								$sql = "SELECT name, initials, employeeID,is_supervisor, loopID, dept_id FROM employees where status = 'Active' and is_supervisor = 'Yes' order by name" ;
-								$result = db_query($sql , db_b2b() );
-								while ($myrowsel = array_shift($result)) {
-                                    if($myrowsel["employeeID"] == $_COOKIE["b2b_id"]){
-                                        $dept_id=$myrowsel['dept_id'];
-                                    }
-									
-                                    if($myrowsel['is_supervisor']=="Yes"){
-                                        echo '<optgroup label="'.$myrowsel["name"].'">';
-                                        echo "<option value=".$myrowsel["employeeID"]." ";
-                                        if ($myrowsel["employeeID"] == $_COOKIE["b2b_id"]) echo " selected ";
-									    echo " >". $myrowsel["name"] . "</option>";
-                                        $select_sql=db_query("SELECT employeeID,name, dept_id FROM employees where status = 'Active' and supervisor_name=".$myrowsel["loopID"],db_b2b());
-                                        while($r=array_shift($select_sql)){
-											if($r["employeeID"] == $_COOKIE["b2b_id"]){
-												$dept_id = $r['dept_id'];
-											}
-											
-                                            echo "<option value=".$r["employeeID"]." ";
-                                            if ($r["employeeID"] == $_COOKIE["b2b_id"]) echo " selected ";
-                                            echo " >". $r["name"] ."</option>";
-                                        }
-										echo '</optgroup>';
-                                    }
-								 } 
-								$sql = "SELECT name, initials, employeeID,is_supervisor, loopID, dept_id FROM employees where status = 'Active' and supervisor_name = '' order by name" ;
-								$result = db_query($sql , db_b2b() );
-								while ($myrowsel = array_shift($result)) {
-                                    if($myrowsel["employeeID"] == $_COOKIE["b2b_id"]){
-                                        $dept_id=$myrowsel['dept_id'];
-                                    };
-									
-									echo "<option value=".$myrowsel["employeeID"]." ";
-									if ($myrowsel["employeeID"] == $_COOKIE["b2b_id"]) echo " selected ";
-									echo " >". $myrowsel["name"] . "</option>";
-								 } */ ?>
-						</select>
-                            -->
                         <?php 
                                 $user_check_sql = db_query("SELECT id,name,	level,is_supervisor,b2b_id,dept_id FROM loop_employees where b2b_id='".$_COOKIE['b2b_id']."'",db());
                                 $loggedin_user=array_shift($user_check_sql);
@@ -137,7 +95,7 @@
                                         $other_user_sql=db_query("SELECT id,name,b2b_id,dept_id from loop_employees where status = 'Active' ORDER BY name ASC",db()); 
                                     }else{
                                         // echo "SELECT id,name,b2b_id from loop_employees where status = 'Active' and supervisor_name = '".$loggedin_user['b2b_id']."' ORDER BY name ASC";
-                                        $other_user_sql=db_query("SELECT id,name,b2b_id,dept_id from loop_employees where status = 'Active' and supervisor_name = '".$loggedin_user['b2b_id']."' ORDER BY name ASC",db());
+                                        $other_user_sql=db_query("SELECT id,name,b2b_id,dept_id from loop_employees where status = 'Active' and supervisor_name = '".$loggedin_user['b2b_id']."' ORDER BY name ASC",db_project_mgmt());
                                         $dept_id=$loggedin_user['dept_id'];
                                         ?>
                                         <option value="<?= $loggedin_user['b2b_id']; ?>"><?= $loggedin_user['name'];?></option>
@@ -168,7 +126,7 @@
 						<select class="form-control form-control-sm" id="dept_id" name="dept_id">
 							<option value=""></option>
 							<?	
-								$query = db_query( "SELECT * FROM project_dept_master order by dept_order", db() );
+								$query = db_query( "SELECT * FROM project_dept_master order by dept_order", db_project_mgmt() );
 								while ($rowsel_getdata = array_shift($query)) {
 									$tmp_str = "";
 									if ($dept_id == $rowsel_getdata["id"]) {
@@ -189,7 +147,7 @@
 						<label>Priority<span class="text-danger">*</span> </label>
 						<select class="form-control form-control-sm" id="project_priority_id" name="project_priority_id">
 							<?	
-								$query = db_query( "SELECT * FROM project_priority_master order by unqid", db() );
+								$query = db_query( "SELECT * FROM project_priority_master order by unqid", db_project_mgmt() );
 								while ($rowsel_getdata = array_shift($query)) {
 									$tmp_str = "";
 									if (isset($_REQUEST["project_priority_id"])) {
@@ -212,7 +170,7 @@
 						<label>Status<span class="text-danger">*</span> </label>
 						<select class="form-control form-control-sm" id="pstatus_id" name="pstatus_id">
 							<?	
-								$query = db_query("SELECT * FROM project_status order by id", db() );
+								$query = db_query("SELECT * FROM project_status order by id", db_project_mgmt() );
 								while ($rowsel_getdata = array_shift($query)) {
 								?>
 									<option value="<? echo $rowsel_getdata["id"];?>" ><? echo $rowsel_getdata['status'];?></option>
@@ -377,7 +335,7 @@
                                         $other_user_sql=db_query("SELECT id,name,b2b_id,dept_id from loop_employees where status = 'Active' ORDER BY name ASC",db()); 
                                     }else{
                                         // echo "SELECT id,name,b2b_id from loop_employees where status = 'Active' and supervisor_name = '".$loggedin_user['b2b_id']."' ORDER BY name ASC";
-                                        $other_user_sql=db_query("SELECT id,name,b2b_id,dept_id from loop_employees where status = 'Active' and supervisor_name = '".$loggedin_user['b2b_id']."' ORDER BY name ASC",db());
+                                        $other_user_sql=db_query("SELECT id,name,b2b_id,dept_id from loop_employees where status = 'Active' and supervisor_name = '".$loggedin_user['b2b_id']."' ORDER BY name ASC",db_project_mgmt());
                                         $dept_id=$loggedin_user['dept_id'];
                                         ?>
                                         <option value="<?= $loggedin_user['b2b_id']; ?>"><?= $loggedin_user['name'];?></option>
@@ -406,7 +364,7 @@
 						<select class="form-control form-control-sm" id="dept_id_meet" name="dept_id">
 							<option value=""></option>
 							<?	
-								$query = db_query( "SELECT * FROM project_dept_master order by dept_order", db() );
+								$query = db_query( "SELECT * FROM project_dept_master order by dept_order", db_project_mgmt() );
 								while ($rowsel_getdata = array_shift($query)) {
 									$tmp_str = "";
 									if ($dept_id == $rowsel_getdata["id"]) {
@@ -428,7 +386,7 @@
 						<label>Priority<span class="text-danger">*</span> </label>
 						<select class="form-control form-control-sm" id="project_priority_id_meet" name="project_priority_id">
 							<?	
-								$query = db_query( "SELECT * FROM project_priority_master order by unqid", db() );
+								$query = db_query( "SELECT * FROM project_priority_master order by unqid", db_project_mgmt() );
 								while ($rowsel_getdata = array_shift($query)) {		
 								?>
 									<option value="<? echo $rowsel_getdata["unqid"];?>" ><? echo $rowsel_getdata['priority_value'];?></option>
@@ -445,7 +403,7 @@
 						<label>Status<span class="text-danger">*</span> </label>
 						<select class="form-control form-control-sm" id="pstatus_id_meet" name="pstatus_id">
                             <?	
-								$query = db_query("SELECT * FROM project_status order by id", db() );
+								$query = db_query("SELECT * FROM project_status order by id", db_project_mgmt() );
 								while ($rowsel_getdata = array_shift($query)) {
 								?>
 									<option value="<? echo $rowsel_getdata["id"];?>" ><? echo $rowsel_getdata['status'];?></option>
@@ -1108,7 +1066,7 @@
                     <div class="form-group reports_to_div search_existing_metrics w-100">
                         <?
                         if(isset($meeting_id) && $meeting_id != ''){
-                            $sql_main =db_query("SELECT meeting_name FROM meeting_master where id=$meeting_id", db());
+                            $sql_main =db_query("SELECT meeting_name FROM meeting_master where id=$meeting_id", db_project_mgmt());
                             $meeting_name_arr= array_shift($sql_main);
                             $meeting_name=$meeting_name_arr['meeting_name'];
                         }

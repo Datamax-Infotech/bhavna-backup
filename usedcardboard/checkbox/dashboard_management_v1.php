@@ -16,8 +16,6 @@
 		$meeting_filter =" and attendee_id='".$_COOKIE['b2b_id']."'";
 	}
 	*/
-	
-	
 ?>
 	<div id="wrapper">
 	<? 
@@ -79,7 +77,7 @@
                                 <table id="meetingMetricsTable" class="table table-sm text-center meetingMetricsTable" width="100%" cellspacing="0">
                                     <thead class="">
                                         <tr>
-                                            <th class="bg-white td-border-bottom">Measurable</th>
+                                            <th class="bg-white td-border-bottom text-left">Measurable</th>
                                             <th class="bg-white td-border-bottom scorestart">Goal</th>
                                             <?php
                                             if(isset($scorecardweeks_for_thead)){
@@ -95,7 +93,7 @@
                                     <tbody>
                                         <?
                                         $scorecard_data_sql = "SELECT * from `scorecard` WHERE `b2b_id` = ".$emp_b2b_id." AND `archived` = false ORDER BY id DESC";
-                                        $scorecard_data_query = db_query($scorecard_data_sql,db());
+                                        $scorecard_data_query = db_query($scorecard_data_sql,db_project_mgmt());
                                         while($scorecard_data = array_shift($scorecard_data_query)){
                                             $scorecard_weeks_id = $scorecard_data['id'];
                                             $scorecard_createdByID = $scorecard_data['b2b_id'];
@@ -120,7 +118,7 @@
                                                 foreach($scorecardweeks_for_thead as $week){
                                                     $convertedWeek = str_replace('<br>', " to " , $week);
                                                     $inner_scorecard_data_sql = "SELECT * FROM `meeting_scorecard_week_data` where scorecard_id = '".$scorecard_weeks_id."' AND `scorecard_created_by` = '".$scorecard_createdByID."' AND `weeks` = '".$convertedWeek."'";
-                                                    $inner_scorecard_data_query = db_query($inner_scorecard_data_sql,db());
+                                                    $inner_scorecard_data_query = db_query($inner_scorecard_data_sql,db_project_mgmt());
                                                     if(!empty($inner_scorecard_data_query)){
                                                         while($inner_scorecard_data = array_shift($inner_scorecard_data_query)){
                                                             $meeting_scorecard_week_id = $inner_scorecard_data['id'];
@@ -212,15 +210,15 @@
 						<div class="card-body fixed-height-card" id="project_table">
 							<?php
 								$check_for_no_data=true;
-								//$sql_main = db_query("SELECT id, meeting_name FROM meeting_master where status = 1 union SELECT 0, 'No Meeting selected' ORDER BY id DESC", db());
+								//$sql_main = db_query("SELECT id, meeting_name FROM meeting_master where status = 1 union SELECT 0, 'No Meeting selected' ORDER BY id DESC", db_project_mgmt());
 								
 								$sql_main = db_query("SELECT mm.id, mm.meeting_name FROM meeting_attendees as ma JOIN meeting_master as mm ON mm.id = ma.meeting_id 
 								where mm.status = 1 $meeting_filter GROUP By ma.meeting_id 
-								union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name ", db());
+								union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name ", db_project_mgmt());
 								
 								while($main_row = array_shift($sql_main)){
 									$meeting_id=$main_row['id'];
-									$count_sql = db_query("SELECT project_id FROM project_master where find_in_set($meeting_id,meeting_ids) AND project_owner = '".$_COOKIE["b2b_id"]."' AND archive_status=0 ORDER BY project_id DESC", db());
+									$count_sql = db_query("SELECT project_id FROM project_master where find_in_set($meeting_id,meeting_ids) AND project_owner = '".$_COOKIE["b2b_id"]."' AND archive_status=0 ORDER BY project_id DESC", db_project_mgmt());
 									$count = tep_db_num_rows($count_sql);
 									if($count>0){
 										$check_for_no_data=false;
@@ -233,7 +231,7 @@
 													</td>
 												</tr>
 												<?php 
-													$sql1 = db_query("SELECT project_id,project_name, project_description,project_status_id, project_deadline FROM project_master where find_in_set($meeting_id,meeting_ids) AND project_owner = '".$_COOKIE["b2b_id"]."' AND archive_status=0 ORDER BY project_id DESC LIMIT 10", db());
+													$sql1 = db_query("SELECT project_id,project_name, project_description,project_status_id, project_deadline FROM project_master where find_in_set($meeting_id,meeting_ids) AND project_owner = '".$_COOKIE["b2b_id"]."' AND archive_status=0 ORDER BY project_id DESC LIMIT 10", db_project_mgmt());
 													while($r = array_shift($sql1)){
 												?>
 												<tr class="project_tr" id="project_tr_<?php echo $r['project_id']; ?>">
@@ -294,16 +292,16 @@
 							<?php
 								$check_for_no_data=true;
 								
-								//$sql_main = db_query("SELECT id, meeting_name FROM meeting_master where status = 1 ORDER BY id DESC", db());
+								//$sql_main = db_query("SELECT id, meeting_name FROM meeting_master where status = 1 ORDER BY id DESC", db_project_mgmt());
 								
 								$sql_main = db_query("SELECT mm.id, mm.meeting_name FROM meeting_attendees as ma JOIN meeting_master as mm ON mm.id = ma.meeting_id 
 								where mm.status = 1 $meeting_filter GROUP By ma.meeting_id
-								union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name",db());
+								union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name",db_project_mgmt());
 								while($main_row = array_shift($sql_main)){
 									$meeting_id = $main_row['id'];
 									//echo "SELECT id FROM task_master where task_meeting=$meeting_id AND task_assignto = '" . $_COOKIE["b2b_id"]. "' and archive_status=0 ORDER BY id DESC";
-									//$count_sql = db_query("SELECT id FROM task_master where task_meeting=$meeting_id AND task_assignto = '" . $_COOKIE["b2b_id"]. "' and archive_status=0 and task_master.task_status = 0 ORDER BY id DESC", db());
-									$count_sql = db_query("SELECT id FROM task_master where task_meeting=$meeting_id AND task_assignto = '" . $_COOKIE["b2b_id"]. "' and archive_status=0 ORDER BY id DESC", db());
+									//$count_sql = db_query("SELECT id FROM task_master where task_meeting=$meeting_id AND task_assignto = '" . $_COOKIE["b2b_id"]. "' and archive_status=0 and task_master.task_status = 0 ORDER BY id DESC", db_project_mgmt());
+									$count_sql = db_query("SELECT id FROM task_master where task_meeting=$meeting_id AND task_assignto = '" . $_COOKIE["b2b_id"]. "' and archive_status=0 ORDER BY id DESC", db_project_mgmt());
 									$count = tep_db_num_rows($count_sql);
 									if($count>0){ $check_for_no_data=false;?>
 										<table class="table table-sm border-0 <? echo "task_meeting".$main_row['id'];?>" width="100%" cellspacing="0">
@@ -315,7 +313,7 @@
 												</tr>
 												<?php 
 													$sql1 = db_query("SELECT id,task_title, task_duedate, task_status FROM task_master where task_meeting=$meeting_id AND task_assignto = '" . $_COOKIE["b2b_id"]. "' 
-													and archive_status=0 ORDER BY id DESC LIMIT 10", db());
+													and archive_status=0 ORDER BY id DESC LIMIT 10", db_project_mgmt());
 													while($r = array_shift($sql1)){
 														?>
 														<tr class="task_tr" id="task_tr_<?php echo $r['id']; ?>">
@@ -354,13 +352,13 @@
 				</div>
 				<?php 
 				
-				//$sql_main = db_query("SELECT id, meeting_name FROM meeting_master where status = 1 and id!=0 ORDER BY id ASC", db());
+				//$sql_main = db_query("SELECT id, meeting_name FROM meeting_master where status = 1 and id!=0 ORDER BY id ASC", db_project_mgmt());
                $sql_main = db_query("SELECT mm.id, mm.meeting_name FROM meeting_attendees as ma JOIN meeting_master as mm ON mm.id=ma.meeting_id 
-				where mm.status = 1 $meeting_filter and mm.id != 0 GROUP By ma.meeting_id ORDER BY meeting_name ASC, attendee_id< '".$_COOKIE['b2b_id']."' ASC,attendee_id",db());
+				where mm.status = 1 $meeting_filter and mm.id != 0 GROUP By ma.meeting_id ORDER BY meeting_name ASC, attendee_id< '".$_COOKIE['b2b_id']."' ASC,attendee_id",db_project_mgmt());
 				$check_first=1;
 				 while($main_row = array_shift($sql_main)){
 					$meeting_id=$main_row['id'];
-					$count_sql=db_query("SELECT id FROM issue_master where meeting_id=$meeting_id and status=1 ORDER BY id DESC", db());
+					$count_sql=db_query("SELECT id FROM issue_master where meeting_id=$meeting_id and status=1 ORDER BY id DESC", db_project_mgmt());
 					$count=tep_db_num_rows($count_sql);				
 				?>
 				<div class="col-lg-6 issueList" <?=$check_first==1 ? "id='issue-section'" : "";?>>
@@ -392,10 +390,11 @@
 									<tbody>
 										<?php 
 											//echo "SELECT issue_master.id,issue,issue_master.created_by,Headshot, name,initials from issue_master JOIN loop_employees ON issue_master.created_by=loop_employees.b2b_id where meeting_id=$meeting_id and issue_master.status=1 ORDER BY id DESC LIMIT 10";
-											$sql1 = db_query("SELECT issue_master.id,issue,issue_master.created_by,Headshot, name,initials from issue_master JOIN loop_employees ON issue_master.created_by=loop_employees.b2b_id 
-											where meeting_id=$meeting_id and issue_master.status=1 ORDER BY id DESC LIMIT 10", db());
+											$sql1 = db_query("SELECT issue_master.id,issue,issue_master.created_by from issue_master where meeting_id=$meeting_id and issue_master.status=1 ORDER BY id DESC LIMIT 10", db_project_mgmt());
 											while($r = array_shift($sql1)){
-												$empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']); 
+												$select_emp=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['created_by']."'",db());
+												$emp_data = array_shift($select_emp);
+												$empDetails=getOwerHeadshotForMeeting($emp_data['Headshot'],$emp_data['initials']); 
 										?>
 										<tr id="issue_tr_<? echo $r['id'];?>">
 											<td><span class="attendees_img" style="background-image:url('<?php echo $empDetails['emp_img']; ?>')"><?php echo $empDetails['emp_txt']; ?></span></td>

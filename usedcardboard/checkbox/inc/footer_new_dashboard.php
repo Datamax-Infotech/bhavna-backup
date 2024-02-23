@@ -817,13 +817,13 @@
 				var emp_img="background-image:url('"+v.emp_img+"')";
 				new_table_data+='<td class="attendee_img_td td_w_5"><span class="attendees_img" style="'+emp_img+'">'+v.emp_txt+'</span></td>';
                 new_table_data+='<td class="td_w_5"><input class="change_task_status" task_id="'+v.id+'" type="checkbox"'
-                if(v.status==1){
+                if(v.task_status==1){
                     new_table_data+=" checked ";
                 }
                 new_table_data+='/></td>';
                                 
                 new_table_data+='<td class="td_task_title"><a ';
-                if(v.status==1){
+                if(v.task_status==1){
                     new_table_data+='class="task-completed"';
                 }
                 new_table_data+=' href="javascript:edit_task('+v.id+','+"'editFromWorkspace'"+')">'+v.task_title+'</a></td>';

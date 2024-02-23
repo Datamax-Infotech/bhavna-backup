@@ -5,19 +5,19 @@
 
 	
 	function getAttendeeInfo($meeting_id){
-		$sql_main =db_query("SELECT ma.id,Headshot,b2b_id, name,initials FROM meeting_attendees as ma JOIN loop_employees ON ma.attendee_id=loop_employees.b2b_id  where ma.meeting_id=$meeting_id ORDER BY id ASC", db());
+		$sql_main =db_query("SELECT ma.id, ma.attendee_id FROM meeting_attendees as ma where ma.meeting_id=$meeting_id ORDER BY id ASC", db_project_mgmt());
 		$result=array();
 		while($hrow = array_shift($sql_main)){
-			$empname=$hrow["name"];
-			$emp_b2b_id=$hrow["b2b_id"];
-			$empDetails=getOwerHeadshotForMeeting($hrow['Headshot'],$hrow['initials']);
-			$result[]=array('emp_img'=>$empDetails['emp_img'], 'emp_txt'=>$empDetails['emp_txt'], 'empname'=>$empname,'emp_b2b_id'=>$emp_b2b_id, 'attendee_id'=>$hrow['id']);
+			$empDetails_qry=db_query("SELECT Headshot, b2b_id,name,initials from loop_employees where b2b_id='".$hrow['attendee_id']."'",db());
+			$empDetails_arr=array_shift($empDetails_qry);
+			$empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']);
+			$result[]=array('emp_img'=>$empDetails['emp_img'], 'emp_txt'=>$empDetails['emp_txt'], 'empname'=>$empDetails_arr['name'],'emp_b2b_id'=>$empDetails_arr['b2b_id'], 'attendee_id'=>$hrow['id']);
 		}
 		return $result;
 	}
 
 	function getPageInfo($meeting_id){
-		$sql_main =db_query("SELECT page_id,page_type,page_title,duration,order_no FROM meeting_pages where meeting_id=$meeting_id ORDER BY order_no ASC", db());
+		$sql_main =db_query("SELECT page_id,page_type,page_title,duration,order_no FROM meeting_pages where meeting_id=$meeting_id ORDER BY order_no ASC", db_project_mgmt());
 		$result=array();
 		while($hrow = array_shift($sql_main)){
 			$result[]=$hrow;
@@ -27,7 +27,7 @@
 
 	function getStartedMeetingsForNotification(){
 			//echo "SELECT meeting_flg,meeting_id,meeting_timer_id,meeting_name FROM meeting_timer as mt JOIN meeting_start_atten_ratings as ma ON mt.id=ma.meeting_timer_id JOIN meeting_master mm on mm.id=mt.meeting_id  where meeting_flg=0  && join_status=0 && attendee_id=".$_COOKIE['b2b_id'];
-			$sql1 = db_query("SELECT meeting_flg,meeting_id,meeting_timer_id,meeting_name FROM meeting_timer as mt JOIN meeting_start_atten_ratings as ma ON mt.id=ma.meeting_timer_id JOIN meeting_master mm on mm.id=mt.meeting_id  where meeting_flg=0  && join_status=0 && attendee_id=".$_COOKIE['b2b_id']." && notification_status=0", db());
+			$sql1 = db_query("SELECT meeting_flg,meeting_id,meeting_timer_id,meeting_name FROM meeting_timer as mt JOIN meeting_start_atten_ratings as ma ON mt.id=ma.meeting_timer_id JOIN meeting_master mm on mm.id=mt.meeting_id  where meeting_flg=0  && join_status=0 && attendee_id=".$_COOKIE['b2b_id']." && notification_status=0", db_project_mgmt());
 			$result=[];
 			while($r = array_shift($sql1)){
 				$data['encoded_meeting_id']=new_dash_encrypt($r['meeting_id']);
@@ -43,7 +43,7 @@
 
 	if(isset($_GET['edit_page']) && $_GET['edit_page']==1){
 		$page_id=$_GET['page_id'];
-		$sql1 = db_query("SELECT page_id,page_type,page_title,duration,	page_subheading FROM meeting_pages where page_id = $page_id " , db());
+		$sql1 = db_query("SELECT page_id,page_type,page_title,duration,	page_subheading FROM meeting_pages where page_id = $page_id " , db_project_mgmt());
 		$data=[];
 		while($r = array_shift($sql1)){
 			$data=$r;
@@ -57,16 +57,16 @@
 		$meeting_id=$_POST['hidden_meeting_id'];
 		$res=1;
 		if($meeting_id==""){
-			$meeting_exist_count_sql=db_query("SELECT id FROM meeting_master where  meeting_name = '".$meeting_name."'", db());
+			$meeting_exist_count_sql=db_query("SELECT id FROM meeting_master where  meeting_name = '".$meeting_name."'", db_project_mgmt());
 			$meeting_count=tep_db_num_rows($meeting_exist_count_sql);
 			if($meeting_count==0){
 				$insql = "INSERT INTO `meeting_master`(`meeting_name`,`created_by`,`status`,`created_on`) 
 				VALUES ('". $meeting_name ."','".$meeting_owner."',1,'". date("Y-m-d h:i:s")."')";
-				db_query($insql, db());
+				db_query($insql, db_project_mgmt());
 				$meeting_id=tep_db_insert_id();
 				$insql_atten = "INSERT INTO `meeting_attendees`(`attendee_id`,`meeting_id`) 
 				VALUES ('". $meeting_owner ."','".$meeting_id."')";
-				db_query($insql_atten, db());
+				db_query($insql_atten, db_project_mgmt());
 				$insql_page = "INSERT INTO `meeting_pages`(`meeting_id`,`page_type`,`page_title`,`page_subheading`,`duration`,`order_no`,`created_by`) 
 				VALUES ('".$meeting_id."','Check-in','Check-in','Check-in','5',1,'".$_COOKIE["b2b_id"]."'),
 				('".$meeting_id."','Projects','Projects','Projects','10',2,'".$_COOKIE["b2b_id"]."'),
@@ -74,20 +74,20 @@
 				 ('".$meeting_id."','Task','Task','Task','5',4,'".$_COOKIE["b2b_id"]."'),
 				 ('".$meeting_id."','Issues','Issues','Issues','10',5,'".$_COOKIE["b2b_id"]."'),
 				 ('".$meeting_id."','Conclude','Wrap-up','Wrap-up','5',6,'".$_COOKIE["b2b_id"]."')";
-				db_query($insql_page, db());
+				db_query($insql_page, db_project_mgmt());
 
 				}else{
 					$res=0;
 				}
 		}else{
 			$insql = "Update `meeting_master` set meeting_name='". $meeting_name ."' where id= $meeting_id";
-			db_query($insql, db());	
+			db_query($insql, db_project_mgmt());	
 		}
 		echo json_encode(array('meeting_id'=>new_dash_encrypt($meeting_id), 'result'=>$res));
 	}
 
 	if(isset($_POST["meeting_attendees_list"]) && $_POST["meeting_attendees_list"] == 1){
-		$att_sql_main=db_query('SELECT attendee_id from meeting_attendees where meeting_id ="'.$_POST['meeting_id'].'"', db());
+		$att_sql_main=db_query('SELECT attendee_id from meeting_attendees where meeting_id ="'.$_POST['meeting_id'].'"', db_project_mgmt());
 		$already_added_attendee_array=[];
 		while($att_row = array_shift($att_sql_main)){
 			$already_added_attendee_array[]=$att_row['attendee_id'];
@@ -108,14 +108,14 @@
 	if(isset($_POST["add_meeting_attendees"]) && $_POST["add_meeting_attendees"] == 1){
 		foreach($_POST['attendees'] as $attendee_id){
 			$insql_atten = "INSERT INTO `meeting_attendees`(`attendee_id`,`meeting_id`) VALUES ('".$attendee_id."','".$_POST['meeting_id']."')";
-			db_query($insql_atten, db());
+			db_query($insql_atten, db_project_mgmt());
 		}
 		$res=getAttendeeInfo($_POST['meeting_id']);
 		echo json_encode($res);
 	}
 	if(isset($_POST["delete_meeting_attendees"]) && $_POST["delete_meeting_attendees"] == 1){
 		$sql_delete_old_milestone = "DELETE FROM meeting_attendees WHERE id = '" . $_POST['meeting_attendee_id']. "'";
-		$result = db_query($sql_delete_old_milestone,db());
+		$result = db_query($sql_delete_old_milestone,db_project_mgmt());
 		$res=getAttendeeInfo($_POST['meeting_id']);
 		echo json_encode($res);
 	}
@@ -124,34 +124,34 @@
 		$meeting_id=$_POST['meeting_id'];
 		if($_POST["page_action"] == "DELETE"){
 			$delete_page="DELETE FROM meeting_pages WHERE page_id = '" . $_POST['page_id']. "'";
-			$result = db_query($delete_page,db());
+			$result = db_query($delete_page,db_project_mgmt());
 		}else if($_POST["page_action"]=="ADD"){
 			//echo "SELECT order_no FROM `meeting_pages` WHERE meeting_id=$meeting_id order by order_no DESC limit 1";
-			$last_inserted_order=db_query("SELECT order_no FROM `meeting_pages` WHERE meeting_id=$meeting_id order by order_no DESC limit 1",db());
+			$last_inserted_order=db_query("SELECT order_no FROM `meeting_pages` WHERE meeting_id=$meeting_id order by order_no DESC limit 1",db_project_mgmt());
 			$order_no=array_shift($last_inserted_order)['order_no']+1;
 			$insql_page = "INSERT INTO `meeting_pages`(`meeting_id`,`page_type`,`page_title`,`page_subheading`,`duration`,`order_no`,`created_by`) 
 			VALUES ('".$meeting_id."','".$_POST['page_type']."','".$_POST['page_title']."','".$_POST['page_subheading']."','".$_POST['page_duration']."','".$order_no."','".$_COOKIE["b2b_id"]."')";
-			db_query($insql_page, db());	
+			db_query($insql_page, db_project_mgmt());	
 		}else if($_POST["page_action"]== "EDIT"){
 			$update_page="UPDATE meeting_pages set page_type='".$_POST['page_type']."',page_title='".$_POST['page_title']."',
 			page_subheading='".$_POST['page_subheading']."',duration='".$_POST['page_duration']."' where page_id='".$_POST['page_id']."'";
-			db_query($update_page, db());
+			db_query($update_page, db_project_mgmt());
 		}
 		$res=getPageInfo($meeting_id);
 		echo json_encode($res);
 	}
 	if(isset($_POST['fav_meeting_action']) and $_POST['fav_meeting_action']==1){
 		//echo 'UPDATE meeting_master SET fav_status="'.$_POST['fav_status'].'" WHERE id="'.$_POST['meet_id'].'" ';
-		//db_query('UPDATE meeting_master SET fav_status="'.$_POST['fav_status'].'" WHERE id="'.$_POST['meet_id'].'" ',db());
+		//db_query('UPDATE meeting_master SET fav_status="'.$_POST['fav_status'].'" WHERE id="'.$_POST['meet_id'].'" ',db_project_mgmt());
 		$meeting_id=$_POST['meeting_id'];
 		$fav_status=$_POST['fav_status'];
-		$check_already_marked = db_query("SELECT id,fav_status FROM meeting_favourite_mark where meeting_id=$meeting_id && attendee_id='".$_COOKIE['b2b_id']."'",db());
+		$check_already_marked = db_query("SELECT id,fav_status FROM meeting_favourite_mark where meeting_id=$meeting_id && attendee_id='".$_COOKIE['b2b_id']."'",db_project_mgmt());
 		if(tep_db_num_rows($check_already_marked)>0){
 			while($row = array_shift($check_already_marked)){
-				db_query("UPDATE `meeting_favourite_mark` set fav_status=$fav_status where id='".$row['id']."'",db());
+				db_query("UPDATE `meeting_favourite_mark` set fav_status=$fav_status where id='".$row['id']."'",db_project_mgmt());
 			}
 		}else{
-			db_query("INSERT INTO `meeting_favourite_mark` ( `meeting_id`, `attendee_id` ,`fav_status`) VALUES ($meeting_id,'".$_COOKIE['b2b_id']."',$fav_status)",db());
+			db_query("INSERT INTO `meeting_favourite_mark` ( `meeting_id`, `attendee_id` ,`fav_status`) VALUES ($meeting_id,'".$_COOKIE['b2b_id']."',$fav_status)",db_project_mgmt());
 		}
 		echo 1;
 	}
@@ -160,7 +160,7 @@
 		$n  =   '1';
 		foreach($newOrder as $id){
 			//echo 'UPDATE meeting_pages SET order_no="'.$n.'" WHERE page_id="'.$id.'" ';
-			db_query('UPDATE meeting_pages SET order_no="'.$n.'" WHERE page_id="'.$id.'" ',db());
+			db_query('UPDATE meeting_pages SET order_no="'.$n.'" WHERE page_id="'.$id.'" ',db_project_mgmt());
 			$n++;
 		}
 		echo 1;
@@ -175,7 +175,7 @@
 			case "meeting_conclude.php":  $updated_data_of=",rating_flg=0";
 		}
 		$attendee_id=$_COOKIE['b2b_id'];
-		db_query("UPDATE meeting_live_updates set current_page='".$current_page."' $updated_data_of where meeting_timer_id=$meeting_timer_id && attendee_id=$attendee_id",db());
+		db_query("UPDATE meeting_live_updates set current_page='".$current_page."' $updated_data_of where meeting_timer_id=$meeting_timer_id && attendee_id=$attendee_id",db_project_mgmt());
 
 	}
 	if(isset($_GET['page_change_action']) and $_GET['page_change_action']=='update_page_change'){
@@ -187,14 +187,14 @@
 		$res=0;
 		if($_COOKIE['b2b_id']==get_meeting_owner($meeting_timer_id)){
 			$res=1;
-			db_query("UPDATE meeting_live_updates set owner_page_flg=1 where meeting_timer_id='".$meeting_timer_id."' && attendee_id!=".$_COOKIE['b2b_id'],db());
+			db_query("UPDATE meeting_live_updates set owner_page_flg=1 where meeting_timer_id='".$meeting_timer_id."' && attendee_id!=".$_COOKIE['b2b_id'],db_project_mgmt());
 			} 
 		echo $res;
 	}
 
 	if(isset($_GET['update_owner_page_time_counter']) and $_GET['update_owner_page_time_counter']==1){
-		db_query("UPDATE meeting_time_spent set time_spent='".$_GET['time_spent']."' where id=".$_GET['table_page_id'],db());
-		db_query("UPDATE meeting_live_updates set owner_page_timer_flg=1 where meeting_timer_id='".$_GET['meeting_timer_id']."' && attendee_id!=".$_COOKIE['b2b_id'],db());	
+		db_query("UPDATE meeting_time_spent set time_spent='".$_GET['time_spent']."' where id=".$_GET['table_page_id'],db_project_mgmt());
+		db_query("UPDATE meeting_live_updates set owner_page_timer_flg=1 where meeting_timer_id='".$_GET['meeting_timer_id']."' && attendee_id!=".$_COOKIE['b2b_id'],db_project_mgmt());	
 		echo 1;
 	}
 
@@ -214,15 +214,15 @@
 			$archive_str=" , archive_status=1";
 		}
 		$update_task_sql = "UPDATE `task_master` SET `task_status` = 1 $archive_str WHERE task_meeting=".$meeting_id." && (task_status = 2 || `task_status` = 1)";
-		$result = db_query($update_task_sql, db());
+		$result = db_query($update_task_sql, db_project_mgmt());
 
 		$upsql = "UPDATE `meeting_timer` SET `completed_task_percentage`='".$task_percentage."',`end_time` ='". date('Y-m-d H:i:s') . "', `meeting_flg` = '1' , `meeting_end_by` = '". $_COOKIE['b2b_id'] ."' WHERE id=".$meeting_timer_id;
-		$result = db_query($upsql, db());
+		$result = db_query($upsql, db_project_mgmt());
 		
 		$send_meeting_email_to=$_REQUEST['send_meeting_email_to'];
 		if($send_meeting_email_to==1 || $send_meeting_email_to==2){
 			$conclusion_data=display_meeting_conclusion_data($meeting_id,$meeting_timer_id);
-			$meeting_name_qry=db_query("SELECT meeting_name FROM meeting_master where id = $meeting_id",db());
+			$meeting_name_qry=db_query("SELECT meeting_name FROM meeting_master where id = $meeting_id",db_project_mgmt());
 			$meeting_name=array_shift($meeting_name_qry)['meeting_name'];
 			$rating_filter="";
 			if($send_meeting_email_to==2){
@@ -244,11 +244,12 @@
 			$email_msg.='</div>';
 			$email_msg.='<section>';
 			$email_msg.='<div class="main_heading"><h4>To-dos</h4><hr></div>';
-			$task_sql=db_query("SELECT task_duedate,task_title, name FROM task_master JOIN loop_employees ON task_master.task_assignto=loop_employees.b2b_id where task_meeting=$meeting_id and archive_status=0 ORDER BY task_master.id DESC", db());
+			$task_sql=db_query("SELECT task_duedate,task_title, name FROM task_master where task_meeting=$meeting_id and archive_status=0 ORDER BY task_master.id DESC", db_project_mgmt());
 			if(tep_db_num_rows($task_sql)>0){
 				$email_msg.='<table class="table_css"><tbody>';
 				while($r = array_shift($task_sql)){
-					$email_msg.="<tr><td><b>".$r['name']."</b><br>".$r['task_title']."</td><td class='full_word ".get_status_date_color_info_task($r['task_duedate'])."'>".date("m-d-Y", strtotime($r['task_duedate']))."</td></tr>";
+					$empDetails_qry=db_query("SELECT name from loop_employees where b2b_id='".$r['task_assignto']."'",db());
+					$email_msg.="<tr><td><b>".array_shift($empDetails_qry)['name']."</b><br>".$r['task_title']."</td><td class='full_word ".get_status_date_color_info_task($r['task_duedate'])."'>".date("m-d-Y", strtotime($r['task_duedate']))."</td></tr>";
 				} 
 				$email_msg.='</tbody></table>';
 			}else{
@@ -257,12 +258,13 @@
 			$email_msg.='</section>';
 			$email_msg.='<section>';
 			$email_msg.='<div class="main_heading"><h4>Issue Solved</h4><hr></div>';
-			$qry_issue=db_query("SELECT im.issue, name from issue_master as im JOIN meeting_minutes as mm ON mm.update_on_id=im.id JOIN loop_employees ON im.created_by=loop_employees.b2b_id where mm.meeting_timer_id=$meeting_timer_id && update_msg='Issue Marked Solved'",db());
+			$qry_issue=db_query("SELECT im.issue,created_by from issue_master as im JOIN meeting_minutes as mm ON mm.update_on_id=im.id where mm.meeting_timer_id=$meeting_timer_id && update_msg='Issue Marked Solved'",db_project_mgmt());
 			if(tep_db_num_rows($qry_issue)>0){
 				$email_msg.='<table class="table_css"><tbody>';
 				$i=1;
 				while($r = array_shift($qry_issue)){
-					$email_msg.="<tr><td>".($i++).". ".$r['issue']."</td><td class='full_word'><b>".$r['name']."</b></td></tr>";
+					$empDetails_qry=db_query("SELECT name from loop_employees where b2b_id='".$r['created_by']."'",db());
+					$email_msg.="<tr><td>".($i++).". ".array_shift($empDetails_qry)['name']."</td><td class='full_word'><b>".$r['name']."</b></td></tr>";
 				}
 				$email_msg.='</tbody></table>';
 			}else{
@@ -272,11 +274,12 @@
 			$email_msg.='</div>';
 			$email_msg.='<p class="text-center"><small>This message was generated automatically<br>.If you feel you have received this message in error you can respond to this email.</small></p>';
 			$email_msg.='</div></body></html>';
-		//echo "SELECT attendee_id,email FROM meeting_start_atten_ratings as ms JOIN loop_employees ON loop_employees.b2b_id=ms.attendee_id where ms.meeting_timer_id=$meeting_timer_id $rating_filter";
-			$attendee_qry=db_query("SELECT attendee_id,email,name FROM meeting_start_atten_ratings as ms JOIN loop_employees ON loop_employees.b2b_id=ms.attendee_id where ms.meeting_timer_id=$meeting_timer_id $rating_filter",db());
+			//echo "SELECT attendee_id,email FROM meeting_start_atten_ratings as ms JOIN loop_employees ON loop_employees.b2b_id=ms.attendee_id where ms.meeting_timer_id=$meeting_timer_id $rating_filter";
+			$attendee_qry=db_query("SELECT attendee_id FROM meeting_start_atten_ratings as ms where ms.meeting_timer_id=$meeting_timer_id $rating_filter",db_project_mgmt());
 			$rec_array=[];
 			while($r=array_shift($attendee_qry)){
-				$rec_array[]=$r['email'];
+				$empDetails_qry=db_query("SELECT email, name from loop_employees where b2b_id='".$r['attendee_id']."'",db());
+				$rec_array[]=array_shift($empDetails_arr)['email'];
 			}
 			
 			//$recipient =implode(',', $rec_array);
@@ -289,16 +292,16 @@
 		}
 		
 		$data=array('tid'=>new_dash_encrypt($_REQUEST["meeting_timer_id"]),'mid'=>new_dash_encrypt($_REQUEST["meeting_id"]));
-		db_query("UPDATE meeting_live_updates set meeting_flg=1 where meeting_timer_id=".$meeting_timer_id,db());
-		db_query("UPDATE meeting_live_updates set meeting_flg=2 where meeting_timer_id=".$meeting_timer_id." && attendee_id=".$_COOKIE['b2b_id'],db());
+		db_query("UPDATE meeting_live_updates set meeting_flg=1 where meeting_timer_id=".$meeting_timer_id,db_project_mgmt());
+		db_query("UPDATE meeting_live_updates set meeting_flg=2 where meeting_timer_id=".$meeting_timer_id." && attendee_id=".$_COOKIE['b2b_id'],db_project_mgmt());
 		update_meeting_minutes($_REQUEST['meeting_id'],$meeting_timer_id,'Meeting Ended','Meeting Ended',"",$_COOKIE['b2b_id']);
 		echo json_encode($data); 
 	}
 
 	if(isset($_GET['leave_meeting_action']) and $_GET['leave_meeting_action']==1){
 		$upsql = "UPDATE `meeting_start_atten_ratings` SET `join_status` = 2 WHERE meeting_timer_id=".$_GET['meeting_timer_id']." && attendee_id=". $_COOKIE["b2b_id"] ;
-		$result = db_query($upsql, db());
-		db_query("UPDATE meeting_live_updates set attendee_flg=1 where meeting_timer_id=".$_GET['meeting_timer_id'],db());
+		$result = db_query($upsql, db_project_mgmt());
+		db_query("UPDATE meeting_live_updates set attendee_flg=1 where meeting_timer_id=".$_GET['meeting_timer_id'],db_project_mgmt());
 		update_meeting_minutes($_REQUEST['meeting_id'],$_REQUEST['meeting_timer_id'],'Left Meeting','Left Meeting',"",$_COOKIE['b2b_id']);
 		echo 1;
 	}
@@ -309,9 +312,9 @@
 
 	if(isset($_GET['update_rating']) and $_GET['update_rating']==1){
 		$meeting_timer_id=$_GET['meeting_timer_id'];
-		db_query('UPDATE meeting_start_atten_ratings set rating = "'.$_GET['rating'].'" where id="'.$_GET['rating_table_id'].'"',db());
+		db_query('UPDATE meeting_start_atten_ratings set rating = "'.$_GET['rating'].'" where id="'.$_GET['rating_table_id'].'"',db_project_mgmt());
 		update_meeting_minutes($_GET['meeting_id'], $meeting_timer_id,'Rating','Rating Done',$_GET["rating_table_id"],$_COOKIE['b2b_id']);  
-		db_query("UPDATE meeting_live_updates set rating_flg=1 where meeting_timer_id='".$meeting_timer_id."' && attendee_id!='".$_COOKIE['b2b_id']."'",db());
+		db_query("UPDATE meeting_live_updates set rating_flg=1 where meeting_timer_id='".$meeting_timer_id."' && attendee_id!='".$_COOKIE['b2b_id']."'",db_project_mgmt());
 		echo json_encode(getRatingData($meeting_timer_id));
 	}
 
@@ -321,9 +324,9 @@
 
 	if(isset($_GET['hide_notification_for_meeting_start_updates']) && $_GET['hide_notification_for_meeting_start_updates']!=""){
 		if($_GET['hide_notification_for_meeting_start_updates']==1){
-			$sql1 = db_query("UPDATE meeting_start_atten_ratings set notification_status=1 where attendee_id=".$_COOKIE['b2b_id']." && meeting_timer_id=".$_GET['meeting_timer_id'], db());		
+			$sql1 = db_query("UPDATE meeting_start_atten_ratings set notification_status=1 where attendee_id=".$_COOKIE['b2b_id']." && meeting_timer_id=".$_GET['meeting_timer_id'], db_project_mgmt());		
 		}else{
-			$sql1 = db_query("UPDATE meeting_start_atten_ratings set notification_status=2 where attendee_id=".$_COOKIE['b2b_id']." && meeting_timer_id=".$_GET['meeting_timer_id'], db());		
+			$sql1 = db_query("UPDATE meeting_start_atten_ratings set notification_status=2 where attendee_id=".$_COOKIE['b2b_id']." && meeting_timer_id=".$_GET['meeting_timer_id'], db_project_mgmt());		
 		}
 		echo json_encode(getStartedMeetingsForNotification());
 	}
@@ -339,7 +342,7 @@
 			}
 			//echo "SELECT mt.meeting_id,mt.id,mt.meeting_flg from meeting_timer as mt JOIN meeting_attendees as ma ON mt.meeting_id= ma.meeting_id where $com_str $meeting_filter GROUP By ma.meeting_id";
 			
-			$updated_meetings_qry=db_query("SELECT mt.meeting_id,mt.id,mt.meeting_flg from meeting_timer as mt JOIN meeting_attendees as ma ON mt.meeting_id= ma.meeting_id where $com_str $meeting_filter GROUP By ma.meeting_id",db());
+			$updated_meetings_qry=db_query("SELECT mt.meeting_id,mt.id,mt.meeting_flg from meeting_timer as mt JOIN meeting_attendees as ma ON mt.meeting_id= ma.meeting_id where $com_str $meeting_filter GROUP By ma.meeting_id",db_project_mgmt());
 			if(tep_db_num_rows($updated_meetings_qry)>0){
 				while($row = array_shift($updated_meetings_qry)){
 					$result['meeting_id']=$row['meeting_id'];
@@ -353,7 +356,7 @@
 		}
 		if($_GET['data_of']=='single'){
 			$meeting_id=new_dash_decrypt($_GET['meeting_id']);
-			$updated_meetings_qry=db_query("SELECT mt.meeting_id,mt.id,mt.meeting_flg from meeting_timer as mt where $com_str and meeting_id=$meeting_id ORDER BY id DESC limit 1",db());
+			$updated_meetings_qry=db_query("SELECT mt.meeting_id,mt.id,mt.meeting_flg from meeting_timer as mt where $com_str and meeting_id=$meeting_id ORDER BY id DESC limit 1",db_project_mgmt());
 			if(tep_db_num_rows($updated_meetings_qry)>0){
 				while($row = array_shift($updated_meetings_qry)){
 					$result['meeting_id']=$row['meeting_id'];
@@ -372,7 +375,7 @@
 		$meeting_timer_id=$_GET['meeting_timer_id'];
 		$attendee_id=$_COOKIE['b2b_id'];
 		$meeting_id=$_GET['meeting_id'];
-		$flg_update=db_query("SELECT * FROM meeting_live_updates where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
+		$flg_update=db_query("SELECT * FROM meeting_live_updates where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
 		$update_data_array=array_shift($flg_update);
 		$current_page=$update_data_array['current_page'];
 		$project_data_array=array();
@@ -380,7 +383,7 @@
 		if($current_page=="meeting_projects.php" && $update_data_array['project_flg']==1){
 			$project_flg=1;
 			$project_data_array=getMeetingProjectDataStartMeetingAfterAction($meeting_id);
-			db_query("UPDATE meeting_live_updates set project_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
+			db_query("UPDATE meeting_live_updates set project_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
 		}
 		$task_data_array=array('data'=>array());
 		$task_flg=0;
@@ -389,7 +392,7 @@
 			$task_flg=1;
 			$order_str=$update_data_array['task_order']==""?"ORDER BY id DESC": $update_data_array['task_order'];
 			$task_data_array=getMeetingTaskDataStartMeetingAfterAction($meeting_id,$order_str.",id DESC",$meeting_timer_id);
-			db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
+			db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
 			switch($order_str){
 				case "ORDER BY task_assignto ASC" : $sort_task=1; break; 
 				case "ORDER BY task_status ASC" : $sort_task=2; break; 
@@ -408,7 +411,7 @@
 			$issue_order=$update_data_array['issue_order'];
 			$order_str=$issue_order==""?"ORDER BY id DESC":$issue_order;
 			$issue_data_array=getMeetingIssueDataStartMeetingAfterAction($meeting_id,$order_str.",id DESC");
-			db_query("UPDATE meeting_live_updates set issue_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
+			db_query("UPDATE meeting_live_updates set issue_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
 			switch($order_str){
 				case "ORDER BY order_no<1 ASC,order_no" : $sort_issue=1; break; 
 				case "ORDER BY created_by ASC" : $sort_issue=2; break; 
@@ -422,30 +425,30 @@
         if($current_page=="meeting_metrics.php" && $update_data_array['metrics_flg']==1){
             $metrics_flg=1;
 			$metrics_data_array=getMetricsDataAfterStartMeetingAction($meeting_id);
-			db_query("UPDATE meeting_live_updates set metrics_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
+			db_query("UPDATE meeting_live_updates set metrics_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
 		}
 		$rating_data_array=array();
 		$rating_flg=0;
 		if($current_page=="meeting_conclude.php" && $update_data_array['rating_flg']==1){
 			$rating_flg=1;
 			$rating_data_array=getRatingData($meeting_timer_id);
-			db_query("UPDATE meeting_live_updates set rating_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
+			db_query("UPDATE meeting_live_updates set rating_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
 		}
 		$owner_current_page="";
 		$owner_page_flg=0;
 		if($update_data_array['owner_page_flg']==1){
 			$owner_page_flg=1;
-			$current_page_of_owner_sql=db_query("SELECT current_page from meeting_live_updates where meeting_timer_id='".$meeting_timer_id."' && attendee_id=".get_meeting_owner($meeting_timer_id), db());
+			$current_page_of_owner_sql=db_query("SELECT current_page from meeting_live_updates where meeting_timer_id='".$meeting_timer_id."' && attendee_id=".get_meeting_owner($meeting_timer_id), db_project_mgmt());
 			$owner_current_page=array_shift($current_page_of_owner_sql)['current_page'];
-			db_query("UPDATE meeting_live_updates set owner_page_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
+			db_query("UPDATE meeting_live_updates set owner_page_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
 		}
 
 		$owner_page_timer_flg=0;
 		$time_spent_by_owner_array=array();
 		if($update_data_array['owner_page_timer_flg']==1){
 			$owner_page_timer_flg=1;
-			db_query("UPDATE meeting_live_updates set owner_page_timer_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
-			$select_time=db_query("SELECT id,time_spent from meeting_time_spent where meeting_timer_id=".$meeting_timer_id,db());
+			db_query("UPDATE meeting_live_updates set owner_page_timer_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
+			$select_time=db_query("SELECT id,time_spent from meeting_time_spent where meeting_timer_id=".$meeting_timer_id,db_project_mgmt());
 			while($r = array_shift($select_time)){
 				$time_spent_by_owner_array[]=$r;
 			}
@@ -455,14 +458,14 @@
 		if($update_data_array['attendee_flg']==1){
 			$attendee_flg=1;
 			$attendee_data=getOnlineAttendee($meeting_timer_id);
-			db_query("UPDATE meeting_live_updates set attendee_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
+			db_query("UPDATE meeting_live_updates set attendee_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
 		}
 
 		$meeting_flg=0;
 		$current_meeting_data=array();
 		if($update_data_array['meeting_flg']==1){
 			$meeting_flg=2;
-			db_query("UPDATE meeting_live_updates set meeting_flg=2 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db());
+			db_query("UPDATE meeting_live_updates set meeting_flg=2 where meeting_timer_id='".$meeting_timer_id."' && attendee_id='".$attendee_id."'",db_project_mgmt());
 			$current_meeting_data=array('tid'=>new_dash_encrypt($meeting_timer_id),'mid'=>new_dash_encrypt($meeting_id));
 		}
 		echo json_encode(array(
@@ -480,12 +483,12 @@
     // Matriccs Orderig Method 
     if(isset($_REQUEST['matircs_sort_action']) && $_REQUEST['matircs_sort_action']=="matricsTableOrdering"){
         if(isset($_REQUEST['meetingTimerID'])){
-            db_query("UPDATE meeting_live_updates set metrics_flg=1 where meeting_timer_id=".new_dash_decrypt($_REQUEST['meetingTimerID'])." AND attendee_id!=".$_COOKIE['b2b_id']."",db());
+            db_query("UPDATE meeting_live_updates set metrics_flg=1 where meeting_timer_id=".new_dash_decrypt($_REQUEST['meetingTimerID'])." AND attendee_id!=".$_COOKIE['b2b_id']."",db_project_mgmt());
         }
         $newOrder =  explode(",",$_REQUEST['sortOrder']);
 		$n =  1;
 		foreach($newOrder as $id){
-            db_query('UPDATE scorecard SET meeting_create_order_no='.$n.' WHERE id='.new_dash_decrypt($id).' ',db());
+            db_query('UPDATE scorecard SET meeting_create_order_no='.$n.' WHERE id='.new_dash_decrypt($id).' ',db_project_mgmt());
 			$n++;
 		}
 		echo 1;
@@ -500,7 +503,7 @@
             $deleteID = new_dash_decrypt($encryptedDeleteID);
             $fetchDeleteSQL = "SELECT id,attach_meeting FROM `scorecard` where (attach_meeting like '%-".$meetingID."-%' OR attach_meeting like '%-".$meetingID."' OR attach_meeting like '".$meetingID."-%' OR attach_meeting = ".$meetingID.") AND (id = ".$deleteID.")";
             // $fetchDeleteSQL = "SELECT id,attach_meeting FROM `scorecard` where (attach_meeting like '%-".$meetingID."-%' OR attach_meeting like '%-".$meetingID."' OR attach_meeting like '".$meetingID."-%' OR attach_meeting = ".$meetingID.") AND (`b2b_id` = ".$_COOKIE['b2b_id']." AND id = ".$deleteID.")";
-            $fetchDelete_query = db_query($fetchDeleteSQL,db());
+            $fetchDelete_query = db_query($fetchDeleteSQL,db_project_mgmt());
 
             if(!empty($fetchDelete_query)){
 
@@ -517,7 +520,7 @@
                         if(isset($outputString) &&  $outputString != ''){
                             // $sqlUpdate = "UPDATE `scorecard` SET `attach_meeting` = '".$outputString."' WHERE `scorecard`.`id` = ".$deleteID." AND `scorecard`.`b2b_id` = ".$_COOKIE['b2b_id']."";
                             $sqlUpdate = "UPDATE `scorecard` SET `attach_meeting` = '".$outputString."' WHERE `scorecard`.`id` = ".$deleteID."";
-                            $sqlUpdate_query = db_query($sqlUpdate,db());
+                            $sqlUpdate_query = db_query($sqlUpdate,db_project_mgmt());
                             // echo "Updating";
                         }
                     }else{
@@ -525,7 +528,7 @@
                             // $singleMeetingSql = "DELETE FROM `scorecard` WHERE `scorecard`.`attach_meeting` = ".$meetingID." AND `scorecard`.`b2b_id` = ".$_COOKIE['b2b_id']." AND `scorecard`.`id` = ".$deleteID."";
                             // $singleMeetingSql = "DELETE FROM `scorecard` WHERE `scorecard`.`attach_meeting` = ".$meetingID." AND `scorecard`.`id` = ".$deleteID."";
                             $singleMeetingSql = "UPDATE `scorecard` SET `archived` = true WHERE `scorecard`.`id` = ".$deleteID."";
-                            $singleMeetingSql_query = db_query($singleMeetingSql,db());
+                            $singleMeetingSql_query = db_query($singleMeetingSql,db_project_mgmt());
                             // echo "Deleting";
                         }
                     }
@@ -537,15 +540,16 @@
             }
         }
 
+		
     }
 
 	if(isset($_GET['archive_meeting']) && $_GET['archive_meeting']==1){
-		db_query("UPDATE meeting_master set status=0 where id=".$_GET['meeting_id'],db());
+		db_query("UPDATE meeting_master set status=0 where id=".$_GET['meeting_id'],db_project_mgmt());
 		echo 1;
 	}
 
 	if(isset($_GET['edit_vto']) && $_GET['edit_vto']=='usedcarboardboxes_vto'){
-		$vto_data_sql=db_query("SELECT id,title,description FROM usedcarboardboxes_vto where id=".$_GET['id'],db());
+		$vto_data_sql=db_query("SELECT id,title,description FROM usedcarboardboxes_vto where id=".$_GET['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($vto_data_sql)){
 			$data=$r;
@@ -555,8 +559,8 @@
 	
 	if(isset($_POST['update_vto']) && $_POST['update_vto']=='usedcarboardboxes_vto'){
 		$insql = "Update `usedcarboardboxes_vto` set `title` = '". str_replace("'", "\'" , $_POST["title"]) ."', `description` = '". str_replace("'", "\'" ,$_POST["description"]) ."' where id = ".$_POST['id'];
-        db_query($insql, db());
-		$vto_data_sql=db_query("SELECT id,title,description FROM usedcarboardboxes_vto where id=".$_POST['id'],db());
+        db_query($insql, db_project_mgmt());
+		$vto_data_sql=db_query("SELECT id,title,description FROM usedcarboardboxes_vto where id=".$_POST['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($vto_data_sql)){
 			$data=$r;
@@ -565,7 +569,7 @@
 	}
 
 	if(isset($_GET['edit_vto']) && $_GET['edit_vto']=='ucbzerowaste_vto'){
-		$vto_data_sql=db_query("SELECT id,title,description FROM ucbzerowaste_vto where id=".$_GET['id'],db());
+		$vto_data_sql=db_query("SELECT id,title,description FROM ucbzerowaste_vto where id=".$_GET['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($vto_data_sql)){
 			$data=$r;
@@ -575,8 +579,8 @@
 	
 	if(isset($_POST['update_vto']) && $_POST['update_vto']=='ucbzerowaste_vto'){
 		$insql = "Update `ucbzerowaste_vto` set `title` = '". str_replace("'", "\'" , $_POST["title"]) ."', `description` = '". str_replace("'", "\'" ,$_POST["description"]) ."' where id = ".$_POST['id'];
-        db_query($insql, db());
-		$vto_data_sql=db_query("SELECT id,title,description FROM ucbzerowaste_vto where id=".$_POST['id'],db());
+        db_query($insql, db_project_mgmt());
+		$vto_data_sql=db_query("SELECT id,title,description FROM ucbzerowaste_vto where id=".$_POST['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($vto_data_sql)){
 			$data=$r;
@@ -585,7 +589,7 @@
 	}
 	
 	if(isset($_GET['edit_vto']) && $_GET['edit_vto']=='2ndkid_vto'){
-		$vto_data_sql=db_query("SELECT id,title,description FROM 2ndkid_vto where id=".$_GET['id'],db());
+		$vto_data_sql=db_query("SELECT id,title,description FROM 2ndkid_vto where id=".$_GET['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($vto_data_sql)){
 			$data=$r;
@@ -595,8 +599,8 @@
 	
 	if(isset($_POST['update_vto']) && $_POST['update_vto']=='2ndkid_vto'){
 		$insql = "Update `2ndkid_vto` set `title` = '". str_replace("'", "\'" , $_POST["title"]) ."', `description` = '". str_replace("'", "\'" ,$_POST["description"]) ."' where id = ".$_POST['id'];
-        db_query($insql, db());
-		$vto_data_sql=db_query("SELECT id,title,description FROM 2ndkid_vto where id=".$_POST['id'],db());
+        db_query($insql, db_project_mgmt());
+		$vto_data_sql=db_query("SELECT id,title,description FROM 2ndkid_vto where id=".$_POST['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($vto_data_sql)){
 			$data=$r;
@@ -612,7 +616,7 @@
 		}else if($_GET['edit_type']=="edit_issue"){
 			$select_str= ",vto_issue_title as title,vto_issue as description";
 		}
-		$vto_data_sql=db_query("SELECT id $select_str FROM meeting_vto where id=".$_GET['id'],db());
+		$vto_data_sql=db_query("SELECT id $select_str FROM meeting_vto where id=".$_GET['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($vto_data_sql)){
 			$data=$r;
@@ -631,8 +635,8 @@
 		}
 
 		//echo "Update `meeting_vto` set $update_str where id = ".$_POST['id'];
-		db_query("Update `meeting_vto` set $update_str where id = ".$_POST['id'],db());
-		$vto_data_sql=db_query("SELECT * FROM meeting_vto where id=".$_POST['id'],db());
+		db_query("Update `meeting_vto` set $update_str where id = ".$_POST['id'],db_project_mgmt());
+		$vto_data_sql=db_query("SELECT * FROM meeting_vto where id=".$_POST['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($vto_data_sql)){
 			$data=$r;
@@ -642,7 +646,7 @@
 	
 
 	if(isset($_GET['edit_core_value']) && $_GET['edit_core_value']==1){
-		$core_values_data_sql = db_query("SELECT id,title,description FROM core_values where id=".$_GET['id'],db());
+		$core_values_data_sql = db_query("SELECT id,title,description FROM core_values where id=".$_GET['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($core_values_data_sql)){
 			$data=$r;
@@ -652,8 +656,8 @@
 	
 	if(isset($_POST['update_core_value']) && $_POST['update_core_value']==1){
 		$insql = "Update `core_values` set `title` = '". str_replace("'", "\'" , $_POST["title"]) ."', `description` = '". str_replace("'", "\'" ,$_POST["description"]) ."' where id = ".$_POST['id'];
-        db_query($insql, db());
-		$vto_data_sql=db_query("SELECT id,title,description FROM core_values where id=".$_POST['id'],db());
+        db_query($insql, db_project_mgmt());
+		$vto_data_sql=db_query("SELECT id,title,description FROM core_values where id=".$_POST['id'],db_project_mgmt());
 		$data=[];
 		while($r = array_shift($vto_data_sql)){
 			$data=$r;

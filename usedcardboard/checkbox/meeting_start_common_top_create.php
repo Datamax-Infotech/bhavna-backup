@@ -127,8 +127,8 @@
                              $meeting_filter = " and attendee_id='".$_COOKIE['b2b_id']."'";
                              $sql_main = db_query("SELECT mm.id, mm.meeting_name FROM meeting_attendees as ma JOIN meeting_master as mm ON mm.id = ma.meeting_id 
                              where mm.status = 1 $meeting_filter GROUP By ma.meeting_id 
-                             union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name ", db());
-                               //$sql_main =db_query("SELECT * FROM meeting_master where status = 1 && id!=0 && id!=".$meeting_id." ORDER BY id DESC", db());
+                             union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name ", db_project_mgmt());
+                               //$sql_main =db_query("SELECT * FROM meeting_master where status = 1 && id!=0 && id!=".$meeting_id." ORDER BY id DESC", db_project_mgmt());
                                 while($main_row = array_shift($sql_main)){
                                     echo '<option value="'.$main_row['id'].'">'.$main_row['meeting_name'].'</option>';
                                 }

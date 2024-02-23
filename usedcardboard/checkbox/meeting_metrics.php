@@ -78,16 +78,17 @@
                                     </thead>
                                     <tbody>
                                         <?
-                                        $scorecard_data_sql = "SELECT scorecard.id,scorecard.b2b_id,scorecard.name,scorecard.units,scorecard.goal,scorecard.goal_matric,Headshot,initials FROM scorecard JOIN loop_employees ON scorecard.b2b_id=loop_employees.b2b_id WHERE (scorecard.attach_meeting like '%-".$meeting_id."-%' OR scorecard.attach_meeting like '%-".$meeting_id."' OR scorecard.attach_meeting like '".$meeting_id."-%' OR scorecard.attach_meeting = ".$meeting_id.") AND (scorecard.archived = false) ORDER BY scorecard.meeting_create_order_no ASC";
-                                        $scorecard_data_query = db_query($scorecard_data_sql,db());
+                                        $scorecard_data_sql = "SELECT scorecard.id,scorecard.b2b_id,scorecard.name,scorecard.units,scorecard.goal,scorecard.goal_matric FROM scorecard WHERE (scorecard.attach_meeting like '%-".$meeting_id."-%' OR scorecard.attach_meeting like '%-".$meeting_id."' OR scorecard.attach_meeting like '".$meeting_id."-%' OR scorecard.attach_meeting = ".$meeting_id.") AND (scorecard.archived = false) ORDER BY scorecard.meeting_create_order_no ASC";
+                                        $scorecard_data_query = db_query($scorecard_data_sql,db_project_mgmt());
                                         while($scorecard_data = array_shift($scorecard_data_query)){
 
                                         $scorecard_weeks_id = $scorecard_data['id'];
                                         $scorecard_createdByID = $scorecard_data['b2b_id'];
-
-                                        $scorecard_data_ImageFunc = getOwerHeadshotForMeeting($scorecard_data['Headshot'],$scorecard_data['initials']);
-                                        $scorecardUserImage = $scorecard_data_ImageFunc['emp_img'];
-                                        $scorecardUserText = $scorecard_data_ImageFunc['emp_txt'];
+                                        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$scorecard_data['b2b_id']."'",db());
+                                        $empDetails_arr=array_shift($empDetails_qry);
+                                        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
+                                        $scorecardUserImage = $empDetails['emp_img'];
+                                        $scorecardUserText = $empDetails['emp_txt'];
                                         ?>
                                             <tr data-sort-id="<?=new_dash_encrypt($scorecard_weeks_id)?>">
                                                 <td><i class="fa fa-arrows"></i></td>
@@ -112,7 +113,7 @@
                                                     foreach($scorecardweeks_for_thead as $week){
                                                         $convertedWeek = str_replace('<br>', " to " , $week);
                                                         $inner_scorecard_data_sql = "SELECT * FROM `meeting_scorecard_week_data` where scorecard_id = '".$scorecard_weeks_id."' AND `scorecard_created_by` = '".$scorecard_createdByID."' AND `weeks` = '".$convertedWeek."'";
-                                                        $inner_scorecard_data_query = db_query($inner_scorecard_data_sql,db());
+                                                        $inner_scorecard_data_query = db_query($inner_scorecard_data_sql,db_project_mgmt());
                                                         if(!empty($inner_scorecard_data_query)){
                                                             while($inner_scorecard_data = array_shift($inner_scorecard_data_query)){
                                                                 $meeting_scorecard_week_id = $inner_scorecard_data['id'];

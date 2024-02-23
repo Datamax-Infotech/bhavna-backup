@@ -31,7 +31,7 @@ function getAllEmployeeWithImgForMeetingForms($select_id,$name_attr){
     return $dp_string;
 }
 function get_status_date_color_info($id, $actual_date=""){
-    $sql = db_query( "SELECT `status` FROM `project_status` WHERE `id` = $id", db());
+    $sql = db_query( "SELECT `status` FROM `project_status` WHERE `id` = $id", db_project_mgmt());
     $res = array_shift($sql);
     $status_class=""; 
     $status_icon_cls="";
@@ -84,7 +84,7 @@ function display_meeting_task_percentage($meeting_id,$meeting_timer_id=""){
     /*$qry_task=db_query("SELECT task_count from meeting_timer where id=$meeting_timer_id");
     $count_total_task=array_shift($qry_task)['task_count'];
     //$qry_completed=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && task_status=1");
-    $qry_completed=db_query("SELECT id from meeting_minutes where meeting_timer_id=$meeting_timer_id && update_msg='Marked Complete'",db());
+    $qry_completed=db_query("SELECT id from meeting_minutes where meeting_timer_id=$meeting_timer_id && update_msg='Marked Complete'",db_project_mgmt());
     $count_completed_task = tep_db_num_rows($qry_completed);
 	$todo_per = "";
 	if ($count_completed_task > 0){
@@ -92,10 +92,10 @@ function display_meeting_task_percentage($meeting_id,$meeting_timer_id=""){
 	}
     */
     //$qry_task=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && (task_status=0 or task_status=2)");
-    $qry_task=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && archive_status=0",db());
+    $qry_task=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && archive_status=0",db_project_mgmt());
     
     $count_total_task=tep_db_num_rows($qry_task);
-    $qry_completed=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && (task_status=2 OR task_status=1) && archive_status=0",db());
+    $qry_completed=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && (task_status=2 OR task_status=1) && archive_status=0",db_project_mgmt());
     $count_completed_task = tep_db_num_rows($qry_completed);
     $todo_per = "";
 	if ($count_completed_task > 0){
@@ -106,11 +106,11 @@ function display_meeting_task_percentage($meeting_id,$meeting_timer_id=""){
 function update_meeting_minutes($meeting_id,$meeting_timer_id,$action,$notes,$update_on_id,$updated_by,$update_msg=""){
 	$sql="INSERT INTO `meeting_minutes` (`meeting_id`,`meeting_timer_id`,`action`,`notes`,`update_on_id`,`updated_by`,`update_msg`) 
 	values('".$meeting_id."','".$meeting_timer_id."','".$action."','".$notes."','".$update_on_id."',$updated_by,'".$update_msg."')";
-	db_query($sql,db());
+	db_query($sql,db_project_mgmt());
 }
 
 function getMeetingStartLink($meeting_id){
-    $sql=db_query("SELECT page_type,page_title from meeting_pages where meeting_id=$meeting_id ORDER BY order_no ASC limit 1", db());
+    $sql=db_query("SELECT page_type,page_title from meeting_pages where meeting_id=$meeting_id ORDER BY order_no ASC limit 1", db_project_mgmt());
     $page_data=array_shift($sql);
     $page_title=$page_data['page_title'];
     switch($page_data['page_type']){
@@ -139,7 +139,7 @@ function getMeetingStartLink($meeting_id){
 }
 
 function getMeetingOwnerPage($meeting_timer_id, $meeting_owner){
-    $sql=db_query("SELECT current_page from meeting_live_updates where meeting_timer_id=$meeting_timer_id and attendee_id=$meeting_owner limit 1", db());
+    $sql=db_query("SELECT current_page from meeting_live_updates where meeting_timer_id=$meeting_timer_id and attendee_id=$meeting_owner limit 1", db_project_mgmt());
     $current_page=array_shift($sql)['current_page'];
     return $current_page;
 }
@@ -157,10 +157,10 @@ function removeCookieDataAfterMeetingEnded(){
     unset($_COOKIE['meeting_join_status']);
 }
 function getMeetingProjectDataStartMeetingAfterAction($meeting_id){
-	$project_sql=db_query("SELECT project_id,project_name,project_description,project_status_id,project_deadline,project_owner,Headshot, name,initials FROM project_master JOIN loop_employees ON project_master.project_owner=loop_employees.b2b_id where find_in_set($meeting_id,meeting_ids) and archive_status=0 ORDER BY project_id DESC", db());
+	$project_sql=db_query("SELECT project_id,project_name,project_description,project_status_id,project_deadline,project_owner FROM project_master where find_in_set($meeting_id,meeting_ids) and archive_status=0 ORDER BY project_id DESC", db_project_mgmt());
 	$result=array();
 	while($r = array_shift($project_sql)){
-        $milestone_qry=db_query("SELECT checked,milestone,milestone_date from project_milestones where project_id='".$r['project_id']."'", db());
+        $milestone_qry=db_query("SELECT checked,milestone,milestone_date from project_milestones where project_id='".$r['project_id']."'", db_project_mgmt());
         $milestone_array=array();
         while($milestones = array_shift($milestone_qry)){
             $milestone_array[]=array(
@@ -169,7 +169,9 @@ function getMeetingProjectDataStartMeetingAfterAction($meeting_id){
                 'milestone_date' => $milestones["milestone_date"],
             );
         }
-		$empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']);
+        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['project_owner']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
 		$status_data=get_status_date_color_info($r['project_status_id'],$r['project_deadline']);
 		$status_name=$status_data['status_name'];
 		$status_class=$status_data['status_class'];
@@ -184,7 +186,7 @@ function getMeetingProjectDataStartMeetingAfterAction($meeting_id){
         'project_owner' => $r["project_owner"],
         'project_description' => $r["project_description"],
         'project_id'=>$r['project_id'],
-        'name'=>$r['name'],
+        'name'=>$empDetails_arr['name'],
         'emp_img'=>$empDetails['emp_img'], 
         'emp_txt'=>$empDetails['emp_txt'],
         'milestones'=>$milestone_array,
@@ -193,9 +195,11 @@ function getMeetingProjectDataStartMeetingAfterAction($meeting_id){
 	return $result;
 }
 function getMeetingTaskDataStartMeetingAfterAction($meeting_id,$order,$meeting_timer_id){
-    $task_sql=db_query("SELECT task_assignto,task_details,task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on,Headshot, name,initials FROM task_master JOIN loop_employees ON task_master.task_assignto=loop_employees.b2b_id where task_meeting=$meeting_id and archive_status=0 $order", db());
+    $task_sql=db_query("SELECT task_assignto,task_details,task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on FROM task_master  where task_meeting=$meeting_id and archive_status=0 $order", db_project_mgmt());
     while($r = array_shift($task_sql)){
-        $empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']); 
+        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
         $late_str="";
         if(strtotime(date("Y-m-d", strtotime($r['task_entered_on']))) == strtotime(date("Y-m-d"))){
             $late_str="<span class='todo-new'>New</span>";
@@ -218,33 +222,37 @@ function getMeetingTaskDataStartMeetingAfterAction($meeting_id,$order,$meeting_t
     return array('data'=>$data,'task_percentage'=>$task_percentage);
 }
 function getMeetingIssueDataStartMeetingAfterAction($meeting_id,$order){
-    $issue_sql=db_query("SELECT issue_details,issue_master.created_on,issue_master.id,issue,order_no,issue_master.status,created_by,Headshot, name,initials FROM issue_master JOIN loop_employees ON issue_master.created_by=loop_employees.b2b_id where meeting_id=$meeting_id && issue_master.status=1 $order", db());
+    $issue_sql=db_query("SELECT issue_details,issue_master.created_on,issue_master.id,issue,order_no,issue_master.status,created_by FROM issue_master where meeting_id=$meeting_id && issue_master.status=1 $order", db_project_mgmt());
     $data=[];
     while($r = array_shift($issue_sql)){
-            $empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']);
-            $data[]=array(
-                'issue_id'=>$r['id'],
-                'issue'=>$r['issue'],
-                'emp_img'=>$empDetails['emp_img'],
-                'emp_txt'=>$empDetails['emp_txt'],
-                'status'=>$r['status'],
-                'order_no'=>$r['order_no'],
-                'created_by'=>$r['created_by'],
-                'issue_details'=>$r['issue_details'],
-                'created_on'=>$r['created_on'],
-            );
-        }
+        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['created_by']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
+        $data[]=array(
+            'issue_id'=>$r['id'],
+            'issue'=>$r['issue'],
+            'emp_img'=>$empDetails['emp_img'],
+            'emp_txt'=>$empDetails['emp_txt'],
+            'status'=>$r['status'],
+            'order_no'=>$r['order_no'],
+            'created_by'=>$r['created_by'],
+            'issue_details'=>$r['issue_details'],
+            'created_on'=>$r['created_on'],
+        );
+    }
     return $data;
 }
 function getRatingData($meeting_timer_id){
-    $qry=db_query("SELECT meeting_start_atten_ratings.id,attendee_id,rating,Headshot, name,initials from meeting_start_atten_ratings JOIN loop_employees ON meeting_start_atten_ratings.attendee_id=loop_employees.b2b_id  where meeting_timer_id=".$meeting_timer_id,db());
+    $qry=db_query("SELECT meeting_start_atten_ratings.id,attendee_id,rating from meeting_start_atten_ratings where meeting_timer_id=".$meeting_timer_id,db_project_mgmt());
     $data=[];
     while($r = array_shift($qry)){
-        $empDetails=getOwerHeadshotForMeeting($r["Headshot"],$r["initials"]);
+        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['attendee_id']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
         $data[]=array(
             'emp_img'=>$empDetails['emp_img'],
             'emp_txt'=>$empDetails['emp_txt'],
-            'name'=>$r['name'],
+            'name'=>$empDetails_arr['name'],
             'id'=>$r['id'],
             'rating'=>$r['rating'],
         );
@@ -253,10 +261,12 @@ function getRatingData($meeting_timer_id){
 } 
 
 function getOnlineAttendee($meeting_timer_id){
-    $online_attendee=db_query("SELECT attendee_id,Headshot, name,initials from meeting_start_atten_ratings  JOIN loop_employees ON meeting_start_atten_ratings.attendee_id=loop_employees.b2b_id  where join_status=1 && meeting_timer_id=".$meeting_timer_id,db());     
+    $online_attendee=db_query("SELECT attendee_id from meeting_start_atten_ratings where join_status=1 && meeting_timer_id=".$meeting_timer_id,db_project_mgmt());     
     $data=[];
     while($r = array_shift($online_attendee)){
-        $empDetails=getOwerHeadshotForMeeting($r["Headshot"],$r["initials"]);
+        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['attendee_id']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
         $data[]=array(
             'emp_img'=>$empDetails['emp_img'],
             'emp_txt'=>$empDetails['emp_txt'],
@@ -265,7 +275,7 @@ function getOnlineAttendee($meeting_timer_id){
     return $data;
 }
 function get_meeting_owner($meeting_timer_id){
-    $meeting_timer_qry=db_query('SELECT meeting_start_by from meeting_timer where id='.$meeting_timer_id,db());
+    $meeting_timer_qry=db_query('SELECT meeting_start_by from meeting_timer where id='.$meeting_timer_id,db_project_mgmt());
     return array_shift($meeting_timer_qry)['meeting_start_by'];
 }
 
@@ -287,15 +297,16 @@ function getMetricsDataAfterStartMeetingAction($metricsMeetingID){
     }
 
 
-    $scorecard_data_sql = "SELECT scorecard.id,scorecard.b2b_id,scorecard.name,scorecard.units,scorecard.goal,scorecard.goal_matric,Headshot,initials FROM scorecard JOIN loop_employees ON scorecard.b2b_id=loop_employees.b2b_id WHERE (scorecard.attach_meeting like '%-".$metricsMeetingID."-%' OR scorecard.attach_meeting like '%-".$metricsMeetingID."' OR scorecard.attach_meeting like '".$metricsMeetingID."-%' OR scorecard.attach_meeting = ".$metricsMeetingID.") AND (scorecard.archived = false) ORDER BY scorecard.meeting_create_order_no ASC";
-    $scorecard_data_query = db_query($scorecard_data_sql,db());
+    $scorecard_data_sql = "SELECT scorecard.id,scorecard.b2b_id,scorecard.name,scorecard.units,scorecard.goal,scorecard.goal_matric FROM scorecard WHERE (scorecard.attach_meeting like '%-".$metricsMeetingID."-%' OR scorecard.attach_meeting like '%-".$metricsMeetingID."' OR scorecard.attach_meeting like '".$metricsMeetingID."-%' OR scorecard.attach_meeting = ".$metricsMeetingID.") AND (scorecard.archived = false) ORDER BY scorecard.meeting_create_order_no ASC";
+    $scorecard_data_query = db_query($scorecard_data_sql,db_project_mgmt());
     $concatedValue = '';
     while($scorecard_data = array_shift($scorecard_data_query)){
 
     $scorecard_weeks_id = $scorecard_data['id'];
     $scorecard_createdByID = $scorecard_data['b2b_id'];
-
-    $scorecard_data_ImageFunc = getOwerHeadshotForMeeting($scorecard_data['Headshot'],$scorecard_data['initials']);
+    $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$scorecard_data['b2b_id']."'",db());
+    $empDetails_arr=array_shift($empDetails_qry);
+    $scorecard_data_ImageFunc=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
     $scorecardUserImage = $scorecard_data_ImageFunc['emp_img'];
     $scorecardUserText = $scorecard_data_ImageFunc['emp_txt'];
 
@@ -323,7 +334,7 @@ function getMetricsDataAfterStartMeetingAction($metricsMeetingID){
                 foreach($scorecardweeks_for_thead as $week){
                     $convertedWeek = str_replace('<br>', " to " , $week);
                     $inner_scorecard_data_sql = "SELECT * FROM `meeting_scorecard_week_data` where scorecard_id = '".$scorecard_weeks_id."' AND `scorecard_created_by` = '".$scorecard_createdByID."' AND `weeks` = '".$convertedWeek."'";
-                    $inner_scorecard_data_query = db_query($inner_scorecard_data_sql,db());
+                    $inner_scorecard_data_query = db_query($inner_scorecard_data_sql,db_project_mgmt());
                     if(!empty($inner_scorecard_data_query)){
                         while($inner_scorecard_data = array_shift($inner_scorecard_data_query)){
                             $meeting_scorecard_week_id = $inner_scorecard_data['id'];
@@ -395,9 +406,9 @@ function getMetricsDataAfterStartMeetingAction($metricsMeetingID){
 }
 
 function display_meeting_conclusion_data($meeting_id,$meeting_timer_id){
-    $qry_issue=db_query("SELECT id from meeting_minutes where meeting_timer_id=$meeting_timer_id && update_msg='Issue Marked Solved'",db());
+    $qry_issue=db_query("SELECT id from meeting_minutes where meeting_timer_id=$meeting_timer_id && update_msg='Issue Marked Solved'",db_project_mgmt());
     $solved_issue=tep_db_num_rows($qry_issue);    
-    $qry_rating=db_query("SELECT rating from meeting_start_atten_ratings where rating!='' AND rating!=0 AND meeting_timer_id=".$meeting_timer_id,db());
+    $qry_rating=db_query("SELECT rating from meeting_start_atten_ratings where rating!='' AND rating!=0 AND meeting_timer_id=".$meeting_timer_id,db_project_mgmt());
     $count_rating=tep_db_num_rows($qry_rating);
     $total_rate=0;
     $avarage_rating="NA";
@@ -408,7 +419,7 @@ function display_meeting_conclusion_data($meeting_id,$meeting_timer_id){
         $a_rating=$total_rate/$count_rating;
        $avarage_rating=number_format((float)$a_rating, 2, '.', '');
     }
-    $qry_time=db_query("SELECT start_time,end_time,completed_task_percentage from meeting_timer where id =$meeting_timer_id",db());
+    $qry_time=db_query("SELECT start_time,end_time,completed_task_percentage from meeting_timer where id =$meeting_timer_id",db_project_mgmt());
     $res=array_shift($qry_time);
     $start_time = date("h:i", strtotime($res['start_time']));
     $end_time= date("h:i", strtotime($res['end_time']));

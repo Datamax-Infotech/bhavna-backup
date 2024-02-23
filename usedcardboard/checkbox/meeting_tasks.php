@@ -28,8 +28,8 @@
                     require("meeting_start_common_links.php");?>
                 <div class="col-md-10">
                 <?php 
-                db_query("UPDATE meeting_live_updates set task_flg=0 where meeting_timer_id='".$_COOKIE['meeting_timer_id']."' && attendee_id=".$_COOKIE['b2b_id'],db());
-                $task_order_str_qry=db_query("SELECT task_order from meeting_live_updates where meeting_timer_id='".$_COOKIE['meeting_timer_id']."' && attendee_id=".$_COOKIE['b2b_id'],db());
+                db_query("UPDATE meeting_live_updates set task_flg=0 where meeting_timer_id='".$_COOKIE['meeting_timer_id']."' && attendee_id=".$_COOKIE['b2b_id'],db_project_mgmt());
+                $task_order_str_qry=db_query("SELECT task_order from meeting_live_updates where meeting_timer_id='".$_COOKIE['meeting_timer_id']."' && attendee_id=".$_COOKIE['b2b_id'],db_project_mgmt());
                 $task_order=array_shift($task_order_str_qry)['task_order'];
                 $order_str=$task_order=="" ? "ORDER BY id DESC": $task_order;
                 $sort_task=0;
@@ -41,8 +41,8 @@
                     case "ORDER BY task_entered_on ASC" : $sort_task=5;break;  
                     case "ORDER BY task_entered_on DESC" : $sort_task=6; 
                 }
-                $task_sql=db_query("SELECT task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on,Headshot, name,initials 
-				FROM task_master JOIN loop_employees ON task_master.task_assignto=loop_employees.b2b_id where  archive_status=0 and task_meeting=$meeting_id $order_str, id DESC", db());
+                $task_sql=db_query("SELECT task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on,task_assignto
+				FROM task_master  where  archive_status=0 and task_meeting=$meeting_id $order_str, id DESC", db_project_mgmt());
                 $no_data_div="d-none";
                 $present_data_div="d-flex";
                 if(tep_db_num_rows($task_sql)==0){
@@ -86,7 +86,10 @@
                                                 }else if(strtotime(date("Y-m-d", strtotime($r['task_duedate']))) < strtotime(date("Y-m-d")) && $r['task_status'] == 0){
                                                     $late_str="<span class='todo-late'>Late</span>";
                                                 }
-                                            $empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']); ?>        
+                                                $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
+                                                $empDetails_arr=array_shift($empDetails_qry);
+                                                $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
+                                            ?>        
                                             <tr id="meeting_task_div_<?php echo $r['id'];?>">
                                                 <td class="td_w_5"><input type="checkbox" task_id="<?php echo $r['id'];?>" class="checkbox_lg d-flex task_status " <?php echo $r['task_status']==1 || $r['task_status']==2 ?  'checked ' : "";?>/></td>
                                                 <td class="td_w_5"><span class="attendees_img" style="background-image:url('<?php echo $empDetails['emp_img']; ?>')"><?php echo $empDetails['emp_txt']; ?></span><span class="sr-only"><?php echo $r['name']; ?></span></td>
@@ -131,7 +134,6 @@
                                             <!--<select id="meeting_task_assigned_to_id" class="search_existing_user_sel form-control form-control-sm select2" name="assignto"  data-placeholder="Search To assign Task ..." >
                                                 <option></option>
                                             <?
-                                            //echo "SELECT Headshot,b2b_id, name,initials FROM loop_employees where status='Active' order by id";
                                             $result = db_query("SELECT Headshot,b2b_id, name,initials FROM loop_employees where status='Active' order by id" , db());
                                             while ($hrow = array_shift($result)) {
                                                 $empDetails=getOwerHeadshotForMeeting($hrow["Headshot"],$hrow["initials"]);

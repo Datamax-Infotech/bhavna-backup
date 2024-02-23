@@ -4,10 +4,12 @@ require ("mainfunctions/general-functions.php");
 require('meeting_common_function.php');
 
 function getMeetingTaskDataAfterAction($meeting_id){
-	$task_sql=db_query("SELECT task_master.id,task_master.task_status,task_title,task_assignto,task_entered_by,Headshot, name,initials FROM task_master JOIN loop_employees ON task_master.task_assignto=loop_employees.b2b_id where task_meeting=$meeting_id and archive_status=0  ORDER BY id DESC", db());
+	$task_sql=db_query("SELECT task_master.id,task_master.task_status,task_title,task_assignto,task_entered_by FROM task_master where task_meeting=$meeting_id and archive_status=0  ORDER BY id DESC", db_project_mgmt());
 	$result=array();
 	while($r = array_shift($task_sql)){
-		$empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']);
+		$empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']);
 		$result[]=array('task_title' => $r["task_title"],'task_status'=>$r['task_status'],'task_id'=>$r['id'],'name'=>$r['name'],'emp_img'=>$empDetails['emp_img'], 'emp_txt'=>$empDetails['emp_txt']);
 	}
 	return $result;
@@ -25,18 +27,15 @@ function getAllTaskDataAfterAction(){
 	
 	$sql_main = db_query("SELECT mm.id, mm.meeting_name FROM meeting_attendees as ma JOIN meeting_master as mm ON mm.id = ma.meeting_id 
 	where mm.status = 1 $meeting_filter GROUP By ma.meeting_id
-	union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name",db());
-	
-    //$sql_main = db_query("SELECT id, meeting_name FROM meeting_master where status = 1 ORDER BY id DESC", db());
+	union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name",db_project_mgmt());
 	
     $result = array();
     while($main_row = array_shift($sql_main)){
         $meeting_id=$main_row['id'];
-        //echo "SELECT id FROM task_master where task_meeting=$meeting_id AND task_assignto = '".$_COOKIE["b2b_id"]."' AND archive_status=0 ORDER BY id DESC";
-        $count_sql=db_query("SELECT id FROM task_master where task_meeting=$meeting_id AND task_assignto = '".$_COOKIE["b2b_id"]."' AND archive_status=0 ORDER BY id DESC", db());
+        $count_sql=db_query("SELECT id FROM task_master where task_meeting=$meeting_id AND task_assignto = '".$_COOKIE["b2b_id"]."' AND archive_status=0 ORDER BY id DESC", db_project_mgmt());
         $count=tep_db_num_rows($count_sql);
         if($count>0){
-            $sql1 = db_query("SELECT id,task_title,	task_assignto, task_duedate, task_status FROM task_master where task_meeting=$meeting_id AND task_assignto = '".$_COOKIE["b2b_id"]."' and archive_status=0 ORDER BY id DESC LIMIT 10", db());
+            $sql1 = db_query("SELECT id,task_title,	task_assignto, task_duedate, task_status FROM task_master where task_meeting=$meeting_id AND task_assignto = '".$_COOKIE["b2b_id"]."' and archive_status=0 ORDER BY id DESC LIMIT 10", db_project_mgmt());
             $data=array();
             while($r = array_shift($sql1)){
                 $due_date_class=get_status_date_color_info_task($r['task_duedate']);
@@ -56,12 +55,13 @@ function getAllTaskDataAfterAction(){
 }
 
 function getAllTaskDataAfterWorkspaceAction($meeting_id,$show_filter_str=""){
-    //echo "SELECT task_master.id,task_title,	task_assignto, task_duedate, task_status ,task_entered_by, Headshot, name,initials FROM task_master JOIN loop_employees ON task_master.task_assignto=loop_employees.b2b_id where task_meeting=$meeting_id and task_master.task_status = 0 AND archive_status=0 $show_filter_str ORDER BY id DESC ";
-    $sql1 = db_query("SELECT task_master.id,task_title,	task_assignto, task_duedate, task_status ,task_entered_by, Headshot, name,initials FROM task_master JOIN loop_employees ON task_master.task_assignto=loop_employees.b2b_id where task_meeting=$meeting_id AND archive_status=0 $show_filter_str ORDER BY id DESC ", db());
+    $sql1 = db_query("SELECT task_master.id,task_title,	task_assignto, task_duedate, task_status ,task_entered_by FROM task_master where task_meeting=$meeting_id AND archive_status=0 $show_filter_str ORDER BY id DESC ", db_project_mgmt());
     $data=array();
     while($r = array_shift($sql1)){
         $due_date_class=get_status_date_color_info_task($r['task_duedate']);
-        $empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']);
+        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']);
         $data[]=array(
                 'task_title'=>$r['task_title'],
                 'id'=>$r['id'],
@@ -77,7 +77,7 @@ function getAllTaskDataAfterWorkspaceAction($meeting_id,$show_filter_str=""){
 }
 
 function getCountOfTaskForSidebarMenu(){
-    $task_count_sql=db_query("SELECT id FROM task_master where archive_status=0 and task_assignto = '".$_COOKIE["b2b_id"]."' ", db());
+    $task_count_sql=db_query("SELECT id FROM task_master where archive_status=0 and task_assignto = '".$_COOKIE["b2b_id"]."' ", db_project_mgmt());
     $task_count=tep_db_num_rows($task_count_sql);
     return $task_count;
 }
@@ -92,14 +92,14 @@ if(isset($_POST["task_action"]) && $_POST["task_action"] != ""){
             `task_duedate`,`task_priority`, `task_status`,`task_meeting`, `task_entered_by`) VALUES (
             '". $title ."', '". $desc ."', '". $_POST["assignto"] ."', 
             '". $_POST["task_duedate"] ."','". $_POST["task_priority"] ."',  0 , '".$meeting_id."','". $_COOKIE["b2b_id"] ."')";
-        db_query($insql, db());
+        db_query($insql, db_project_mgmt());
         $insert_record_id = tep_db_insert_id();
     }
     else if($_POST["task_action"] == "EDIT" || $_POST['task_action']=="EDIT_TASK_MEETING" || $_POST['task_action']=="editFromWorkspace"){
         $insql = "Update `task_master` set `task_title` = '".$title."', `task_details` = '".$desc."',
         `task_assignto` = '". $_POST["assignto"] ."', `task_duedate` = '". $_POST["task_duedate"] ."', `task_priority`='".$_POST['task_priority']."',
          `task_meeting`='".$meeting_id."' where id = ".$_POST["task_id_edit"];
-        db_query($insql, db());
+        db_query($insql, db_project_mgmt());
         $insert_record_id = $_POST['task_id_edit'];
     }
 
@@ -129,7 +129,7 @@ if(isset($_REQUEST['load_type']) && $_REQUEST['load_type']=="task"){
     }
     $task_meeting_id=$_REQUEST['task_meeting_id'];
     $owner_id=$_COOKIE['b2b_id'];
-    $sql1 = db_query("SELECT id,task_title,	task_assignto, task_duedate, task_status FROM task_master where task_meeting = $task_meeting_id AND task_assignto = '".$owner_id."' and archive_status=0 ORDER BY id DESC LIMIT 10 OFFSET $loaded_data", db());
+    $sql1 = db_query("SELECT id,task_title,	task_assignto, task_duedate, task_status FROM task_master where task_meeting = $task_meeting_id AND task_assignto = '".$owner_id."' and archive_status=0 ORDER BY id DESC LIMIT 10 OFFSET $loaded_data", db_project_mgmt());
     while($r = array_shift($sql1)){
         $due_date_class=get_status_date_color_info_task($r['task_duedate']);
         $data=array(
@@ -157,12 +157,12 @@ if(isset($_GET['update_task_status']) && $_GET['update_task_status']==1){
     }
     $insql = "Update `task_master` set `task_status` = '". $_GET["task_status"] ."', `task_completed_by`='".$task_completed_by."', `task_completed_on`='".$task_completed_on."' where id = '". $_GET["task_id"] ."'";
    
-    db_query($insql, db());
+    db_query($insql, db_project_mgmt());
     echo true;
 }
 if(isset($_GET['edit_task']) && $_GET['edit_task']==1){
     $task_id=$_GET['task_id'];
-    $sql1 = db_query("SELECT * FROM task_master where id = $task_id " , db());
+    $sql1 = db_query("SELECT * FROM task_master where id = $task_id " , db_project_mgmt());
     $data=[];
     while($r = array_shift($sql1)){
         $data=$r;
@@ -172,9 +172,9 @@ if(isset($_GET['edit_task']) && $_GET['edit_task']==1){
 if(isset($_GET['delete_task']) && $_GET['delete_task']==1){
     $task_id=$_GET['task_id'];
     $sql_delete_task = "UPDATE task_master set archive_status=1 WHERE id = '" . $task_id . "'";
-    db_query($sql_delete_task,db());
+    db_query($sql_delete_task,db_project_mgmt());
   /*  $sql_delete_dependency = "DELETE FROM dependency_master WHERE task_id = '" . $task_id . "'";
-    db_query($sql_delete_dependency,db());*/
+    db_query($sql_delete_dependency,db_project_mgmt());*/
     
     if(isset($_GET['delete_from_meeting']) && $_GET['delete_from_meeting'] ==1){
         $meeting_id=$_GET['meeting_id'];
@@ -198,7 +198,7 @@ if(isset($_POST["meeting_task_action"]) && $_POST["meeting_task_action"] == "mee
     $task_id=$_POST["meeting_task_id_edit"];
     $title = str_replace("'", "\'", $_POST["task_title"]);
     $desc  = str_replace("'", "\'", $_POST["task_desc"]);
-    $task_old_data_sql=db_query("SELECT task_status,task_assignto,task_duedate,	task_title,task_details FROM task_master where task_master.id=$task_id", db());
+    $task_old_data_sql=db_query("SELECT task_status,task_assignto,task_duedate,	task_title,task_details FROM task_master where task_master.id=$task_id", db_project_mgmt());
     $task_old_data=array_shift($task_old_data_sql);
     
     if($title!=$task_old_data['task_title'] || $desc!=$task_old_data['task_details']){
@@ -225,11 +225,11 @@ if(isset($_POST["meeting_task_action"]) && $_POST["meeting_task_action"] == "mee
 
     
     $update_sql = "Update `task_master` set `task_title` = '".$title."', `task_details` = '".$desc."',`task_assignto` = '". $_POST["assignto"] ."', `task_duedate` = '". $_POST["task_duedate"] ."', `task_status` = '".$task_status."' where id = $task_id";
-    db_query($update_sql, db());
+    db_query($update_sql, db_project_mgmt());
     $meeting_id=$_POST['meeting_id'];
-    db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$_POST['meeting_timer_id']."' && attendee_id!='".$_COOKIE['b2b_id']."'",db());
+    db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$_POST['meeting_timer_id']."' && attendee_id!='".$_COOKIE['b2b_id']."'",db_project_mgmt());
    
-    $task_sql=db_query("SELECT task_details,task_assignto,task_status,task_master.id,task_title,task_entered_by,task_duedate,Headshot, name,initials FROM task_master JOIN loop_employees ON task_master.task_assignto=loop_employees.b2b_id where task_master.id=$task_id", db());
+    $task_sql=db_query("SELECT task_details,task_assignto,task_status,task_master.id,task_title,task_entered_by,task_duedate FROM task_master where task_master.id=$task_id", db_project_mgmt());
     $data=array();
     while($r = array_shift($task_sql)){
         $late_str="";
@@ -238,7 +238,9 @@ if(isset($_POST["meeting_task_action"]) && $_POST["meeting_task_action"] == "mee
         }else if(strtotime(date("Y-m-d", strtotime($r['task_duedate']))) < strtotime(date("Y-m-d"))  && $r['task_status'] == 0){
             $late_str="<span class='todo-late'>Late</span>";
         }
-        $empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']); 
+        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']);
         $data=array(
             'task_id'=>$r['id'],
             'task_title'=>$r['task_title'],
@@ -266,11 +268,11 @@ if(isset($_GET['update_meeting_task_status']) && $_GET['update_meeting_task_stat
         $update_msg="Marked Incomplete";
     }
     $insql = "Update `task_master` set `task_status` = '". $_GET["task_status"] ."', `task_completed_by`='".$task_completed_by."', `task_completed_on`='".$task_completed_on."' where id = '". $_GET["task_id"] ."'";
-    db_query($insql, db());
+    db_query($insql, db_project_mgmt());
     update_meeting_minutes($_GET['meeting_id'],$_GET['meeting_timer_id'],'Update Task','Task',$_GET["task_id"],$_COOKIE['b2b_id'], $update_msg);  
-    db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$_GET['meeting_timer_id']."' && attendee_id!='".$_COOKIE['b2b_id']."'",db());
+    db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$_GET['meeting_timer_id']."' && attendee_id!='".$_COOKIE['b2b_id']."'",db_project_mgmt());
 	
-    /*$task_sql=db_query("SELECT task_status,task_duedate  FROM task_master where task_master.id=".$_GET["task_id"], db());          
+    /*$task_sql=db_query("SELECT task_status,task_duedate  FROM task_master where task_master.id=".$_GET["task_id"], db_project_mgmt());          
     $data=[];
     $meeting_percentage=display_meeting_task_percentage($_GET['meeting_id'],$_GET['meeting_timer_id']);
     while($r = array_shift($task_sql)){
@@ -280,9 +282,11 @@ if(isset($_GET['update_meeting_task_status']) && $_GET['update_meeting_task_stat
     }
     echo json_encode($data);*/
     $data=array();
-	$task_sql = db_query("SELECT task_status,task_master.id,task_title,task_entered_by,task_entered_on,task_duedate,Headshot, name,initials FROM task_master JOIN loop_employees ON task_master.task_assignto=loop_employees.b2b_id where task_master.archive_status=0 and task_meeting=".$_GET['meeting_id']." and archive_status=0 ORDER BY id DESC", db());
+	$task_sql = db_query("SELECT task_status,task_master.id,task_title,task_entered_by,task_entered_on,task_duedate  FROM task_master where task_master.archive_status=0 and task_meeting=".$_GET['meeting_id']." and archive_status=0 ORDER BY id DESC", db_project_mgmt());
     while($r = array_shift($task_sql)){
-        $empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']); 
+        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']);
         $late_str="";
         if(strtotime(date("Y-m-d", strtotime($r['task_entered_on']))) == strtotime(date("Y-m-d"))){
             $late_str="<span class='todo-new'>New</span>";
@@ -326,7 +330,7 @@ if(isset($_GET['sort_meeting_task']) && $_GET['sort_meeting_task']==1){
     }
     $meeting_id=$_GET['meeting_id'];
     //update_meeting_minutes($meeting_id,$_GET['meeting_timer_id'],'Task','Update Task',"",$_COOKIE['b2b_id'], 'Order Changed to '.$order_msg);  
-    db_query("UPDATE meeting_live_updates set task_flg=1, task_order='".$order_str."' where meeting_timer_id=".$_GET['meeting_timer_id'],db());
+    db_query("UPDATE meeting_live_updates set task_flg=1, task_order='".$order_str."' where meeting_timer_id=".$_GET['meeting_timer_id'],db_project_mgmt());
     echo json_encode(getMeetingTaskDataStartMeetingAfterAction($meeting_id,$order_str.",id DESC"));
 }
 
@@ -338,16 +342,18 @@ if(isset($_POST["task_action_start_meet"]) && $_POST['task_action_start_meet']==
     `task_duedate`,`task_status`,`task_meeting`, `task_entered_by`) VALUES (
     '". $title ."', '". $desc ."', '". $_POST["assignto"] ."', 
     '". $_POST["task_duedate"] ."', 0 , '".$meeting_id."','". $_COOKIE["b2b_id"] ."')";
-        db_query($insql, db());
+        db_query($insql, db_project_mgmt());
     $task_id = tep_db_insert_id();	
     update_meeting_minutes($_POST['meeting_id'],$_POST['meeting_timer_id'],'Create Task','Task',$task_id,$_COOKIE['b2b_id'], ""); 
-	db_query("UPDATE meeting_timer set task_count=task_count+1 where id=".$_POST['meeting_timer_id'], db());
-    db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$_POST['meeting_timer_id']."' && attendee_id!='".$_COOKIE['b2b_id']."'",db());
+	db_query("UPDATE meeting_timer set task_count=task_count+1 where id=".$_POST['meeting_timer_id'], db_project_mgmt());
+    db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$_POST['meeting_timer_id']."' && attendee_id!='".$_COOKIE['b2b_id']."'",db_project_mgmt());
 	
     $data=array();
-	$task_sql = db_query("SELECT task_status,task_master.id,task_title,task_entered_by,task_entered_on,task_duedate,Headshot, name,initials FROM task_master JOIN loop_employees ON task_master.task_assignto=loop_employees.b2b_id where task_master.archive_status=0 and task_meeting=$meeting_id and archive_status=0 ORDER BY id DESC", db());
+	$task_sql = db_query("SELECT task_status,task_master.id,task_title,task_entered_by,task_entered_on,task_duedate FROM task_master where task_master.archive_status=0 and task_meeting=$meeting_id and archive_status=0 ORDER BY id DESC", db_project_mgmt());
     while($r = array_shift($task_sql)){
-        $empDetails=getOwerHeadshotForMeeting($r['Headshot'],$r['initials']); 
+        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
+        $empDetails_arr=array_shift($empDetails_qry);
+        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
         $late_str="";
         if(strtotime(date("Y-m-d", strtotime($r['task_entered_on']))) == strtotime(date("Y-m-d"))){
             $late_str="<span class='todo-new'>New</span>";
@@ -368,7 +374,7 @@ if(isset($_POST["task_action_start_meet"]) && $_POST['task_action_start_meet']==
 }
 if(isset($_GET['task_detail_to_add_issue']) && $_GET['task_detail_to_add_issue']==1){
     $task_id=$_GET['task_id'];
-    $sql1 = db_query("SELECT task_details,id,task_title,task_assignto FROM task_master where id = $task_id " , db());
+    $sql1 = db_query("SELECT task_details,id,task_title,task_assignto FROM task_master where id = $task_id " , db_project_mgmt());
     $r=array_shift($sql1);
     echo json_encode($r);
 }

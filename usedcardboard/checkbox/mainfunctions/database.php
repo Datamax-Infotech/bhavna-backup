@@ -82,4 +82,22 @@ function db_b2c_email_new()
 	global $$con_db;
 	$$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
 }
+
+function db_project_mgmt()
+{
+	$dbuser		= "ucbdata_ucbuser"; 
+	$dbserver	= "localhost"; 
+	$dbpass		= "g#WTUeu-B8Pt"; 
+	$dbname		= "ucbdata_project_mgmt";
+
+	//CONNECTION STRING
+	$con_db = 'db_link';
+	global $$con_db;
+	$$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
+	if ($$con_db ->connect_error) {
+	  die("Connection failed: " . $conn->connect_error);
+	}
+	//echo "Connected successfully";
+
+}
 ?>
