@@ -1,5 +1,4 @@
 <?php session_start();
-
 function getAllEmployeeWithImgForMeetingForms($select_id,$name_attr){
     $dp_string="";
     $user_check_sql = db_query("SELECT id,name,	initials,Headshot,level,is_supervisor,b2b_id FROM loop_employees where b2b_id='".$_COOKIE['b2b_id']."'",db());
@@ -30,6 +29,22 @@ function getAllEmployeeWithImgForMeetingForms($select_id,$name_attr){
     
     return $dp_string;
 }
+
+function getMeetingEmployeeWithImgForMeetingForms($select_id,$name_attr,$meeting_id){
+    $select_meeting_attendee = db_query("SELECT attendee_id from meeting_attendees where meeting_id=$meeting_id",db_project_mgmt()); 
+    $dp_string = "<select class='search_existing_user_sel addOwnerStartMeet form-control form-control-sm select2' id='$select_id' name='$name_attr'>";
+    while($attendees_arr = array_shift($select_meeting_attendee)){
+        $attendee_id = $attendees_arr['attendee_id'];
+        $user_sql = db_query("SELECT id,Headshot,initials,name,b2b_id from loop_employees where b2b_id = $attendee_id",db()); 
+        $user_data=array_shift($user_sql);
+        $empDetails=getOwerHeadshotForMeeting($user_data['Headshot'],$user_data['initials']);  
+        $selected_str=$user_data['b2b_id'] == $_COOKIE['b2b_id'] ? " selected " : ""; 
+        $dp_string.= "<option $selected_str data-kt-rich-content-icon='".$empDetails['emp_img']."' data-kt-rich-content-emp-txt='".$empDetails['emp_txt']."' value='".$user_data['b2b_id']."'>".$user_data['name']."</option>";     
+    }
+    $dp_string.='</select>';
+    return $dp_string;
+}
+
 function get_status_date_color_info($id, $actual_date=""){
     $sql = db_query( "SELECT `status` FROM `project_status` WHERE `id` = $id", db_project_mgmt());
     $res = array_shift($sql);

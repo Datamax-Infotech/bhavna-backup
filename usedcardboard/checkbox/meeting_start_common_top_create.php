@@ -1,4 +1,3 @@
-
 <div class="modal fade" id="newIssueStartMeet" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
 			<form action="" name="form_issue_start_meet" id="form_issue_start_meet" onsubmit="return false;" >
@@ -63,10 +62,10 @@
 						  <p class="text-danger d-none form_error" id="task_title_error_start_meet">Please enter Task title </p>
 					 </div>
                      <div class="col-md-12 form-group owner_div_start_meeting">
-						<label>Select Owner<span class="text-danger">*</span> </label>
+						<label>Select Owner<span class="text-danger">*</span></label>
                         <!--<select class="search_existing_user_sel addOwnerStartMeet form-control form-control-sm select2" id="assignto_start_meet" name="assignto">
 						</select>-->
-                        <?= getAllEmployeeWithImgForMeetingForms("assignto_start_meet","assignto");?>
+                        <?php echo getMeetingEmployeeWithImgForMeetingForms("assignto_start_meet","assignto",$meeting_id);?>
 					 </div>
 					 <div class="col-md-12 form-group">
 						<label>Description </label>

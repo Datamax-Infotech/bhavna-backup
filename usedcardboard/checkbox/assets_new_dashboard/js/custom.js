@@ -93,6 +93,7 @@ $(document).ready(function() {
 			['view', [/*'fullscreen', 'codeview' */]],   // remove codeview button 
 			['help', [/*'help'*/]],
 			],
+	  /*maximumImageFileSize: null, */
       callbacks: {
          /* onBlur: function (e) {
               var p = e.target.parentNode.parentNode

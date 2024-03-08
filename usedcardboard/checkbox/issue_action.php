@@ -174,6 +174,8 @@
 		echo json_encode($result);
 	}
 	if(isset($_POST["meeting_issue_action"]) && $_POST["meeting_issue_action"] == "meeting_issue_edit"){
+		
+		
 		$issue_id=$_POST["meeting_issue_id_edit"];
 		$issue = str_replace("'", "\'", $_POST["issue"]);
 		$desc  = str_replace("'", "\'", $_POST["issue_details"]);
@@ -209,6 +211,7 @@
 				);
 			}
 		echo json_encode($data);
+		
 	}
 	if(isset($_POST["issue_status_update"]) && $_POST["issue_status_update"] != ""){
 		$meeting_id=$_POST['meeting_id'];

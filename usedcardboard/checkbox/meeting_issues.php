@@ -1,4 +1,5 @@
-<?php session_start();
+<?php 
+    session_start();
 	if ($_REQUEST["no_sess"]=="yes"){
 
 	}else{
@@ -7,6 +8,7 @@
 	require ("mainfunctions/database.php");
 	require ("mainfunctions/general-functions.php");
 	require_once("inc/header_new_dashboard.php"); 
+
     ?>
      <style>		
   @import url("//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
@@ -48,7 +50,7 @@
                         $no_data_div="d-block";
                         $present_data_div="d-none";    
                     }
-                    db_query("UPDATE meeting_live_updates set issue_flg=0 where meeting_timer_id='".$_COOKIE['meeting_timer_id']."' && attendee_id=".$_COOKIE['b2b_id'],db_project_mgmt());
+                    db_query("UPDATE meeting_live_updates set issue_flg=0 where meeting_timer_id='".$meeting_timer_id."' && attendee_id=".$_COOKIE['b2b_id'],db_project_mgmt());
                    ?>
                     <div class="card shadow mb-4  <?php echo $no_data_div;?>" id="no_issue_available_start_meet">
                         <div class="card-body min_height_500 d-flex justify-content-center align-items-center text-center">
@@ -139,7 +141,9 @@
                                     </div>
                                     <div class="form-row align-items-center justify-content-between col-md-12">
                                         <div class="reports_to_div search_existing_user meeting_assigned_todo w-50">
-                                            <?= getAllEmployeeWithImgForMeetingForms("IssueCreatedBy","created_by");?>
+                                            <?php // echo getAllEmployeeWithImgForMeetingForms("IssueCreatedBy","created_by");
+                                                echo getMeetingEmployeeWithImgForMeetingForms("IssueCreatedBy","created_by",$meeting_id);
+                                            ?>
                                         </div>
                                         <div class="d-flex align-items-center">
                                             <span class="mx-2"><i class="fa fa-share copy_issue_to_another_meeting" id="id_copy_issue_to_another_meeting" data-placement="bottom" title="Move issue to another meeting"></i></span>
