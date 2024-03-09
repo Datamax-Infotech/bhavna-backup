@@ -69,29 +69,24 @@
                                     </div>
                                 </div>
                             </div>
-                           <!-- <div class="mt-4 card shadow p-4">
+                            <div class="col-md-12 mt-4">
                                 <div class="row">
-                                    <div class="col-md-10">
-                                        <h2><b>Cascading Messages</b></h2>
-                                        <p>Did we make a decision that will affect others? Take a To-do to let them know.</p>
-                                        <button class="btn btn-white btn-sm border-0" data-toggle="modal" data-target="#newTaskStartMeet"><i class="fa fa-check-square-o fa-lg mr-1"></i> Create To-do</button>
+                                    <? 
+                                        $conclusion_data = display_meeting_conclusion_data($meeting_id,$meeting_timer_id);
+                                    ?>
+                                    <div class="col-md-6 pl-0">
+                                        <div class="card shadow p-3 d-flex justify-content-center align-items-center border-top-primary">
+                                            <img src="assets_new_dashboard/img/issues-solved.svg" class="img-fluid"/>   
+                                            <p>ISSUES SOLVED</p>
+                                            <h3><b><?php echo $conclusion_data['issue_solved']; ?></b></h3>    
+                                        </div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <img src="assets_new_dashboard/img/message.svg" class="img-fluid"/>
-                                    </div>
-                                </div>
-                            </div>-->
-                            <div class="mt-4 card shadow p-4">
-                                <div class="row">
-                                    <div class="col-md-10">
-                                        <h2><b>Recap Our To-do</b></h2>
-                                    </div>
-                                    <div class="col-md-2 text-right">
-                                        <?php
-                                            
-                                        ?>
-                                    </div>
-                                    <div class="py-2 col-md-12">
+                                    <div class="col-md-6 pr-0">
+                                        <div class="card shadow p-3 d-flex justify-content-center align-items-center border-top-primary">
+                                            <img src="assets_new_dashboard/img/todo-completion.svg" class="img-fluid"/>  
+                                            <p>TO-DO COMPLETION</p>
+                                            <h3><b><?= $conclusion_data['todo'];?></b></h3>    
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -99,10 +94,6 @@
                                 <div class="row">
                                     <div class="col-md-10">
                                         <h2><b>Ratings</b></h2>
-                                        <? 
-                                            $conclusion_data = display_meeting_conclusion_data($meeting_id,$meeting_timer_id);
-                                        ?>
-                                        <h6 class="mb-0 text-success"> <b>ISSUES SOLVED <?php echo  $conclusion_data['issue_solved']; ?> &nbsp; & &nbsp; TO-DO COMPLETION <?php echo  $conclusion_data['todo']; ?></b> </h6>
                                         <p>Rate the meeting from 1-10 Ratings less than an 8? Drop it down to the Issues list.</p>
                                         <div class="row" id="rating_main_div">
                                             <?php 
