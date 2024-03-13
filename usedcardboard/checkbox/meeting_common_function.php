@@ -96,21 +96,10 @@ function get_status_date_color_info_task($actual_date){
     return $class_name;
 }
 function display_meeting_task_percentage($meeting_id,$meeting_timer_id=""){
-    /*$qry_task=db_query("SELECT task_count from meeting_timer where id=$meeting_timer_id");
-    $count_total_task=array_shift($qry_task)['task_count'];
-    //$qry_completed=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && task_status=1");
-    $qry_completed=db_query("SELECT id from meeting_minutes where meeting_timer_id=$meeting_timer_id && update_msg='Marked Complete'",db_project_mgmt());
-    $count_completed_task = tep_db_num_rows($qry_completed);
-	$todo_per = "";
-	if ($count_completed_task > 0){
-		$todo_per=$count_completed_task*100/($count_total_task);
-	}
-    */
-    //$qry_task=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && (task_status=0 or task_status=2)");
-    $qry_task=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && archive_status=0",db_project_mgmt());
-    
+    //echo "SELECT task_status from task_master where task_meeting=$meeting_id && archive_status=0 && added_during_meeting !=1 ";
+    $qry_task=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && archive_status=0 && added_during_meeting !=1 ",db_project_mgmt());
     $count_total_task=tep_db_num_rows($qry_task);
-    $qry_completed=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && (task_status=2 OR task_status=1) && archive_status=0",db_project_mgmt());
+    $qry_completed=db_query("SELECT task_status from task_master where task_meeting=$meeting_id && (task_status=2 OR task_status=1) && archive_status=0 && added_during_meeting !=1",db_project_mgmt());
     $count_completed_task = tep_db_num_rows($qry_completed);
     $todo_per = "";
 	if ($count_completed_task > 0){
@@ -210,13 +199,13 @@ function getMeetingProjectDataStartMeetingAfterAction($meeting_id){
 	return $result;
 }
 function getMeetingTaskDataStartMeetingAfterAction($meeting_id,$order,$meeting_timer_id){
-    $task_sql=db_query("SELECT task_assignto,task_details,task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on FROM task_master  where task_meeting=$meeting_id and archive_status=0 $order", db_project_mgmt());
+    $task_sql=db_query("SELECT task_assignto,task_details,task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on,added_during_meeting FROM task_master  where task_meeting=$meeting_id and archive_status=0 $order", db_project_mgmt());
     while($r = array_shift($task_sql)){
         $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
         $empDetails_arr=array_shift($empDetails_qry);
         $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
         $late_str="";
-        if(strtotime(date("Y-m-d", strtotime($r['task_entered_on']))) == strtotime(date("Y-m-d"))){
+        if($r['added_during_meeting']==1){
             $late_str="<span class='todo-new'>New</span>";
         }else if((strtotime(date("Y-m-d", strtotime($r['task_duedate']))) < strtotime(date("Y-m-d"))) && $r['task_status'] == 0){
             $late_str="<span class='todo-late'>Late</span>";
@@ -420,9 +409,16 @@ function getMetricsDataAfterStartMeetingAction($metricsMeetingID){
     return $concatedValue;
 }
 
-function display_meeting_conclusion_data($meeting_id,$meeting_timer_id){
-    $qry_issue=db_query("SELECT id from meeting_minutes where meeting_timer_id=$meeting_timer_id && update_msg='Issue Marked Solved'",db_project_mgmt());
-    $solved_issue=tep_db_num_rows($qry_issue);    
+function display_meeting_conclusion_data($meeting_id,$meeting_timer_id, $from_conclusion_finish=0){
+    $qry_issue=db_query("SELECT im.issue,created_by,status  from issue_master as im JOIN meeting_minutes as mm ON mm.update_on_id=im.id where mm.meeting_timer_id=$meeting_timer_id && update_msg='Issue Marked Solved'",db_project_mgmt());
+    $issue_count = 0;
+    if(tep_db_num_rows($qry_issue)>0){
+        while($r = array_shift($qry_issue)){
+            if($r['status'] == 0){
+                $issue_count++;
+            }
+        }
+    }
     $qry_rating=db_query("SELECT rating from meeting_start_atten_ratings where rating!='' AND rating!=0 AND meeting_timer_id=".$meeting_timer_id,db_project_mgmt());
     $count_rating=tep_db_num_rows($qry_rating);
     $total_rate=0;
@@ -438,11 +434,15 @@ function display_meeting_conclusion_data($meeting_id,$meeting_timer_id){
     $res=array_shift($qry_time);
     $start_time = date("h:i", strtotime($res['start_time']));
     $end_time= date("h:i", strtotime($res['end_time']));
-    $todo_per=$res['completed_task_percentage']."%";
+    if($from_conclusion_finish==1){
+        $todo_per = $res['completed_task_percentage']."%";
+    }else{
+        $todo_per=display_meeting_task_percentage($meeting_id,$meeting_timer_id)."%";
+    }
     $time=$start_time. " CT - ". $end_time. " CT";
     $diff_minutes = round(abs(strtotime($res['start_time']) -  strtotime($res['end_time'])) / 60,2). " minutes";
     
-    return array('issue_solved'=>$solved_issue,'todo'=>$todo_per,'rating'=>$avarage_rating,'time'=>$time,'minutes'=>$diff_minutes);
+    return array('issue_solved'=>$issue_count,'todo'=>$todo_per,'rating'=>$avarage_rating,'time'=>$time,'minutes'=>$diff_minutes);
 }
 
 ?>

@@ -229,11 +229,11 @@ if(isset($_POST["meeting_task_action"]) && $_POST["meeting_task_action"] == "mee
     $meeting_id=$_POST['meeting_id'];
     db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$_POST['meeting_timer_id']."' && attendee_id!='".$_COOKIE['b2b_id']."'",db_project_mgmt());
    
-    $task_sql=db_query("SELECT task_details,task_assignto,task_status,task_master.id,task_title,task_entered_by,task_duedate FROM task_master where task_master.id=$task_id", db_project_mgmt());
+    $task_sql=db_query("SELECT added_during_meeting,task_details,task_assignto,task_status,task_master.id,task_title,task_entered_by,task_duedate FROM task_master where task_master.id=$task_id", db_project_mgmt());
     $data=array();
     while($r = array_shift($task_sql)){
         $late_str="";
-        if(strtotime(date("Y-m-d", strtotime($r['task_entered_on']))) == strtotime(date("Y-m-d"))){
+        if($r['added_during_meeting']==1){
             $late_str="<span class='todo-new'>New</span>";
         }else if(strtotime(date("Y-m-d", strtotime($r['task_duedate']))) < strtotime(date("Y-m-d"))  && $r['task_status'] == 0){
             $late_str="<span class='todo-late'>Late</span>";
@@ -282,13 +282,13 @@ if(isset($_GET['update_meeting_task_status']) && $_GET['update_meeting_task_stat
     }
     echo json_encode($data);*/
     $data=array();
-	$task_sql = db_query("SELECT task_status,task_master.id,task_title,task_entered_by,task_entered_on,task_duedate  FROM task_master where task_master.archive_status=0 and task_meeting=".$_GET['meeting_id']." and archive_status=0 ORDER BY id DESC", db_project_mgmt());
+	$task_sql = db_query("SELECT task_status,task_master.id,task_title,task_assignto,task_entered_by,task_entered_on,task_duedate,added_during_meeting  FROM task_master where task_master.archive_status=0 and task_meeting=".$_GET['meeting_id']." and archive_status=0 ORDER BY id DESC", db_project_mgmt());
     while($r = array_shift($task_sql)){
-        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
-        $empDetails_arr=array_shift($empDetails_qry);
-        $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']);
+        $empDetails_qry = db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
+        $empDetails_arr = array_shift($empDetails_qry);
+        $empDetails = getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']);
         $late_str="";
-        if(strtotime(date("Y-m-d", strtotime($r['task_entered_on']))) == strtotime(date("Y-m-d"))){
+        if($r['added_during_meeting'] == 1){
             $late_str="<span class='todo-new'>New</span>";
         }else if(strtotime(date("Y-m-d", strtotime($r['task_duedate']))) < strtotime(date("Y-m-d")) && $r['task_status'] == 0){
             $late_str="<span class='todo-late'>Late</span>";
@@ -339,9 +339,9 @@ if(isset($_POST["task_action_start_meet"]) && $_POST['task_action_start_meet']==
     $desc  = str_replace("'", "\'", $_POST["task_desc"]);
     $meeting_id = $_POST['meeting_id'];
     $insql = "INSERT INTO `task_master`(`task_title`, `task_details`, `task_assignto`,
-    `task_duedate`,`task_status`,`task_meeting`, `task_entered_by`) VALUES (
+    `task_duedate`,`task_status`,`task_meeting`, `task_entered_by`,`added_during_meeting`) VALUES (
     '". $title ."', '". $desc ."', '". $_POST["assignto"] ."', 
-    '". $_POST["task_duedate"] ."', 0 , '".$meeting_id."','". $_COOKIE["b2b_id"] ."')";
+    '". $_POST["task_duedate"] ."', 0 , '".$meeting_id."','". $_COOKIE["b2b_id"] ."',1)";
         db_query($insql, db_project_mgmt());
     $task_id = tep_db_insert_id();	
     update_meeting_minutes($_POST['meeting_id'],$_POST['meeting_timer_id'],'Create Task','Task',$task_id,$_COOKIE['b2b_id'], ""); 
@@ -349,24 +349,24 @@ if(isset($_POST["task_action_start_meet"]) && $_POST['task_action_start_meet']==
     db_query("UPDATE meeting_live_updates set task_flg=1 where meeting_timer_id='".$_POST['meeting_timer_id']."' && attendee_id!='".$_COOKIE['b2b_id']."'",db_project_mgmt());
 	
     $data=array();
-	$task_sql = db_query("SELECT task_status,task_master.id,task_title,task_entered_by,task_entered_on,task_duedate FROM task_master where task_master.archive_status=0 and task_meeting=$meeting_id and archive_status=0 ORDER BY id DESC", db_project_mgmt());
+	$task_sql = db_query("SELECT task_assignto,task_status,task_master.id,task_title,task_entered_by,task_entered_on,task_duedate,added_during_meeting FROM task_master where task_master.archive_status=0 and task_meeting=$meeting_id and archive_status=0 ORDER BY id DESC", db_project_mgmt());
     while($r = array_shift($task_sql)){
         $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$r['task_assignto']."'",db());
         $empDetails_arr=array_shift($empDetails_qry);
         $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
-        $late_str="";
-        if(strtotime(date("Y-m-d", strtotime($r['task_entered_on']))) == strtotime(date("Y-m-d"))){
-            $late_str="<span class='todo-new'>New</span>";
+        $late_str = "";
+        if($r['added_during_meeting']==1){
+            $late_str = "<span class='todo-new'>New</span>";
         }else if(strtotime(date("Y-m-d", strtotime($r['task_duedate']))) < strtotime(date("Y-m-d")) && $r['task_status'] == 0){
-            $late_str="<span class='todo-late'>Late</span>";
+            $late_str = "<span class='todo-late'>Late</span>";
         }
         $data[]=array(
-            'task_id'=>$r['id'],
-            'task_title'=>$r['task_title'],
-            'emp_img'=>$empDetails['emp_img'],
-            'emp_txt'=>$empDetails['emp_txt'],
-            'task_status'=>$r['task_status'],
-            'late_str'=>$late_str,
+            'task_id' => $r['id'],
+            'task_title' => $r['task_title'],
+            'emp_img' => $empDetails['emp_img'],
+            'emp_txt' => $empDetails['emp_txt'],
+            'task_status' => $r['task_status'],
+            'late_str' => $late_str,
         );       
     }
     $task_percentage=display_meeting_task_percentage($meeting_id,$_POST['meeting_timer_id']); 

@@ -39,7 +39,7 @@
                                     </div>
                                     <div class="py-2 col-md-12">
                                         <?php
-                                        $task_sql=db_query("SELECT task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on,task_assignto FROM task_master where (task_master.task_status = 0) and task_meeting=$meeting_id and archive_status=0 ORDER BY id DESC", db_project_mgmt());
+                                        $task_sql=db_query("SELECT task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on,task_assignto,added_during_meeting FROM task_master where (task_master.task_status = 0) and task_meeting=$meeting_id and archive_status=0 ORDER BY id DESC", db_project_mgmt());
                                         if(tep_db_num_rows($task_sql)>0){?>
                                             <table id="meetingTODO" class="meetingTODOIssue table table_vetical_align_middle table-sm border-0 mb-0">
                                             <tbody>
@@ -49,7 +49,7 @@
                                                 $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
 
                                                 $late_str="";
-                                                if(strtotime(date("Y-m-d", strtotime($r['task_entered_on']))) == strtotime(date("Y-m-d"))){
+                                                if($r['added_during_meeting']==1){
                                                     $late_str="<span class='todo-new'>New</span>";
                                                 }else if(strtotime(date("Y-m-d", strtotime($r['task_duedate']))) < strtotime(date("Y-m-d"))){
                                                     $late_str="<span class='todo-late'>Late</span>";
@@ -214,8 +214,23 @@
             }
        });
     }
-
     function finish_meeting(meeting_timer_id){
+        var send_meeting_email_to=$('#send_meeting_email_to').val();
+        var archive_completed_meeting_todo=$("#archive_completed_meeting_todo").val();
+        var ajax_data_str="?finish_meeting_action=1 &meeting_id=<?= $meeting_id; ?>  &meeting_timer_id=<?= $meeting_timer_id; ?> &send_meeting_email_to="+send_meeting_email_to+"&archive_completed_meeting_todo="+archive_completed_meeting_todo;        
+        $.ajax({
+            url:'dashboard_meeting_action.php'+ajax_data_str,
+            type:'get',
+            async:false,
+            success:function(response){
+                var res=JSON.parse(response);
+                var para_str='tid='+res.tid+'&&mid='+res.mid;
+                window.location.href = 'meeting_conclusion_finish.php?'+para_str;	
+            }					
+        });
+    }
+
+    function finish_meeting1(meeting_timer_id){
         var send_meeting_email_to=$('#send_meeting_email_to').val();
         var archive_completed_meeting_todo=$("#archive_completed_meeting_todo").val();
         var ajax_data_str="?finish_meeting_action=1 &meeting_id=<?= $meeting_id; ?>  &meeting_timer_id=<?= $meeting_timer_id; ?> &send_meeting_email_to="+send_meeting_email_to+"&archive_completed_meeting_todo="+archive_completed_meeting_todo;        
@@ -226,12 +241,12 @@
         }
         xhr.onreadystatechange=function(res){
             if (xhr.readyState==4 && xhr.status==200){
-                //alert("Meeting Finish.Good Buy");
+                alert("Meeting Finish.Good Buy");
                 $('#conclude-meeting-btn').attr('disabled',false);
 		        $('#conclude-meeting-btn').prev('.spinner').addClass('d-none');
                 var res=JSON.parse(xhr.responseText);
                 var para_str='tid='+res.tid+'&&mid='+res.mid;
-                window.location.href = 'meeting_conclusion_finish.php?'+para_str;						
+                //window.location.href = 'meeting_conclusion_finish.php?'+para_str;						
             }
         }
         $('#conclude-meeting-btn').attr('disabled',true);

@@ -21,7 +21,8 @@
                 $sql_main =db_query("SELECT meeting_name FROM meeting_master where id=$meeting_id", db_project_mgmt());
                 $meeting_name= array_shift($sql_main)['meeting_name'];
                 $meeting_timer_id=isset($_GET['tid']) && $_GET['tid']!="" ? new_dash_decrypt($_GET['tid']) :"";
-                $conclusion_data=display_meeting_conclusion_data($meeting_id,$meeting_timer_id);
+                $conclusion_data=display_meeting_conclusion_data($meeting_id,$meeting_timer_id,1);
+
                 ?> 
                 <div class="container-fluid p-0 mt-0" >
                     <div class="card py-3 px-4 d-flex flex-row align-items-center justify-content-between">

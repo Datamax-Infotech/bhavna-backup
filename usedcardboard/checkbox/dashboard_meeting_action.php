@@ -25,19 +25,23 @@
 		return $result;
 	}
 
-	function getStartedMeetingsForNotification(){
-			//echo "SELECT meeting_flg,meeting_id,meeting_timer_id,meeting_name FROM meeting_timer as mt JOIN meeting_start_atten_ratings as ma ON mt.id=ma.meeting_timer_id JOIN meeting_master mm on mm.id=mt.meeting_id  where meeting_flg=0  && join_status=0 && attendee_id=".$_COOKIE['b2b_id'];
-			$sql1 = db_query("SELECT meeting_flg,meeting_id,meeting_timer_id,meeting_name FROM meeting_timer as mt JOIN meeting_start_atten_ratings as ma ON mt.id=ma.meeting_timer_id JOIN meeting_master mm on mm.id=mt.meeting_id  where meeting_flg=0  && join_status=0 && attendee_id=".$_COOKIE['b2b_id']." && notification_status=0", db_project_mgmt());
-			$result=[];
-			while($r = array_shift($sql1)){
-				$data['encoded_meeting_id']=new_dash_encrypt($r['meeting_id']);
-				$data['encoded_meeting_timer_id']=new_dash_encrypt($r['meeting_timer_id']);
-				$data['meeting_id']=$r['meeting_id'];
-				$data['meeting_timer_id']=$r['meeting_timer_id'];
-				$data['meeting_name']=$r['meeting_name'];
-				$data['meeting_flg']=$r['meeting_flg'];
-				$result[]=$data;
-			}
+	function getStartedMeetingsForNotification($emp_level = 0){
+		$meeting_filter = "";
+		if($emp_level != 2){
+			$meeting_filter=" and ma.attendee_id='".$_COOKIE['b2b_id']."'";
+		}
+		//echo "SELECT DISTINCT mt.id,meeting_flg,meeting_id,meeting_timer_id,meeting_name FROM meeting_timer as mt JOIN meeting_start_atten_ratings as ma ON mt.id=ma.meeting_timer_id JOIN meeting_master mm on mm.id=mt.meeting_id  where meeting_flg=0  && join_status=0 && notification_status=0 $meeting_filter";
+		$sql1 = db_query("SELECT DISTINCT mt.id,meeting_flg,meeting_id,meeting_timer_id,meeting_name FROM meeting_timer as mt JOIN meeting_start_atten_ratings as ma ON mt.id=ma.meeting_timer_id JOIN meeting_master mm on mm.id=mt.meeting_id  where meeting_flg=0  && join_status=0 && notification_status=0 $meeting_filter order by mt.id DESC", db_project_mgmt());
+		$result=[];
+		while($r = array_shift($sql1)){
+			$data['encoded_meeting_id']=new_dash_encrypt($r['meeting_id']);
+			$data['encoded_meeting_timer_id']=new_dash_encrypt($r['meeting_timer_id']);
+			$data['meeting_id']=$r['meeting_id'];
+			$data['meeting_timer_id']=$r['meeting_timer_id'];
+			$data['meeting_name']=$r['meeting_name'];
+			$data['meeting_flg']=$r['meeting_flg'];
+			$result[]=$data;
+		}
 		return $result;
 	}
 
@@ -216,6 +220,9 @@
 		$update_task_sql = "UPDATE `task_master` SET `task_status` = 1 $archive_str WHERE task_meeting=".$meeting_id." && (task_status = 2 || `task_status` = 1)";
 		$result = db_query($update_task_sql, db_project_mgmt());
 
+		$update_task_flag_during_meeting_sql = "UPDATE `task_master` SET `added_during_meeting` = 0 WHERE task_meeting=".$meeting_id." && added_during_meeting = 1";
+		db_query($update_task_flag_during_meeting_sql, db_project_mgmt());
+
 		$upsql = "UPDATE `meeting_timer` SET `completed_task_percentage`='".$task_percentage."',`end_time` ='". date('Y-m-d H:i:s') . "', `meeting_flg` = '1' , `meeting_end_by` = '". $_COOKIE['b2b_id'] ."' WHERE id=".$meeting_timer_id;
 		$result = db_query($upsql, db_project_mgmt());
 		
@@ -258,13 +265,20 @@
 			$email_msg.='</section>';
 			$email_msg.='<section>';
 			$email_msg.='<div class="main_heading"><h4>Issue Solved</h4><hr></div>';
-			$qry_issue=db_query("SELECT im.issue,created_by from issue_master as im JOIN meeting_minutes as mm ON mm.update_on_id=im.id where mm.meeting_timer_id=$meeting_timer_id && update_msg='Issue Marked Solved'",db_project_mgmt());
+			$qry_issue=db_query("SELECT im.issue,created_by,status  from issue_master as im JOIN meeting_minutes as mm ON mm.update_on_id=im.id where mm.meeting_timer_id=$meeting_timer_id && update_msg='Issue Marked Solved'",db_project_mgmt());
 			if(tep_db_num_rows($qry_issue)>0){
+				$issue_count = 0;
 				$email_msg.='<table class="table_css"><tbody>';
 				$i=1;
 				while($r = array_shift($qry_issue)){
-					$empDetails_qry=db_query("SELECT name from loop_employees where b2b_id='".$r['created_by']."'",db());
-					$email_msg.="<tr><td>".($i++).". ".array_shift($empDetails_qry)['name']."</td><td class='full_word'><b>".$r['name']."</b></td></tr>";
+					if($r['status'] == 0){
+						$empDetails_qry=db_query("SELECT name from loop_employees where b2b_id='".$r['created_by']."'",db());
+						$email_msg.="<tr><td>".($i++).". ".array_shift($empDetails_qry)['name']."</td><td class='full_word'><b>".$r['name']."</b></td></tr>";
+						$issue_count++;
+					}
+				}
+				if($issue_count == 0){
+					$email_msg = "<tr><td colspan='2' class='text-danger text-center'>No Issue</td></tr>";
 				}
 				$email_msg.='</tbody></table>';
 			}else{
@@ -319,7 +333,7 @@
 	}
 
 	if(isset($_GET['check_for_meeting_start_updates']) && $_GET['check_for_meeting_start_updates']==1){
-		echo json_encode(getStartedMeetingsForNotification());
+		echo json_encode(getStartedMeetingsForNotification($_GET['emp_level']));
 	}
 
 	if(isset($_GET['hide_notification_for_meeting_start_updates']) && $_GET['hide_notification_for_meeting_start_updates']!=""){
@@ -333,15 +347,13 @@
 
 	if(isset($_GET['get_live_meeting_status_updates']) && $_GET['get_live_meeting_status_updates']==1){
 		$res=[];
-		$com_str= "(mt.start_time > '".date('Y-m-d H:i:s', strtotime('-60 sec'))."' || mt.end_time > '".date('Y-m-d H:i:s', strtotime(' -60 sec'))."' )";	
 
+		$com_str= "(mt.start_time > '".date('Y-m-d H:i:s', strtotime('-60 sec'))."' || mt.end_time > '".date('Y-m-d H:i:s', strtotime(' -60 sec'))."' )";	
 		if($_GET['data_of']=='all'){
 			$meeting_filter="";
-			if($_GET['emp_level']!=2){
-				$meeting_filter=" and ma.attendee_id='".$_COOKIE['b2b_id']."'";
+			if($_GET['emp_level'] != 2){
+				$meeting_filter = " and ma.attendee_id='".$_COOKIE['b2b_id']."'";
 			}
-			//echo "SELECT mt.meeting_id,mt.id,mt.meeting_flg from meeting_timer as mt JOIN meeting_attendees as ma ON mt.meeting_id= ma.meeting_id where $com_str $meeting_filter GROUP By ma.meeting_id";
-			
 			$updated_meetings_qry=db_query("SELECT mt.meeting_id,mt.id,mt.meeting_flg from meeting_timer as mt JOIN meeting_attendees as ma ON mt.meeting_id= ma.meeting_id where $com_str $meeting_filter GROUP By ma.meeting_id",db_project_mgmt());
 			if(tep_db_num_rows($updated_meetings_qry)>0){
 				while($row = array_shift($updated_meetings_qry)){

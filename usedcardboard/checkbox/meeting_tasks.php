@@ -41,7 +41,7 @@
                     case "ORDER BY task_entered_on ASC" : $sort_task=5;break;  
                     case "ORDER BY task_entered_on DESC" : $sort_task=6; 
                 }
-                $task_sql=db_query("SELECT task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on,task_assignto
+                $task_sql=db_query("SELECT added_during_meeting,task_status,task_master.id,task_duedate,task_title,task_entered_by,task_entered_on,task_assignto
 				FROM task_master  where  archive_status=0 and task_meeting=$meeting_id $order_str, id DESC", db_project_mgmt());
                 $no_data_div="d-none";
                 $present_data_div="d-flex";
@@ -81,7 +81,7 @@
                                         <tbody>
                                         <?php while($r = array_shift($task_sql)){
                                                 $late_str="";
-                                                if(strtotime(date("Y-m-d", strtotime($r['task_entered_on']))) == strtotime(date("Y-m-d"))){
+                                                if($r['added_during_meeting']==1){
                                                     $late_str="<span class='todo-new'>New</span>";
                                                 }else if(strtotime(date("Y-m-d", strtotime($r['task_duedate']))) < strtotime(date("Y-m-d")) && $r['task_status'] == 0){
                                                     $late_str="<span class='todo-late'>Late</span>";

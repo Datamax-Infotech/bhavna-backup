@@ -2123,7 +2123,7 @@ function displayMeetingNotificationPopup(response){
             $.ajax({
                 url:'dashboard_meeting_action.php',
                 type:'get',
-                data:{'check_for_meeting_start_updates':1},
+                data:{'check_for_meeting_start_updates':1,'emp_level':'<?=$emp_level;?>'},
                 datatype:'json',
                 async: false, 
                 success:function(response){
@@ -2132,7 +2132,8 @@ function displayMeetingNotificationPopup(response){
 					var data_str="get_live_meeting_status_updates=1";
 					var meeting_chk=true;
                     if(cur_page=="dashboard_meetings"){
-                        data_str+="&data_of=all&emp_level='<?=$emp_level;?>'";
+						var emp_level= '<?=$emp_level;?>';
+                        data_str+="&data_of=all&emp_level="+emp_level;
                     }else if(cur_page == "dashboard_meeting_create" || cur_page == "launch_meeting"){
 						var meeting_id="<?= isset($_GET['meeting_id']) && $_GET['meeting_id']!="" ? $_GET['meeting_id']:"";?>";
 						meeting_chk=meeting_id=="" ? false : true; 
