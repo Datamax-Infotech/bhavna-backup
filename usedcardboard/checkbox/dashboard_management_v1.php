@@ -105,8 +105,9 @@
                                                     data-whatever="<?=new_dash_encrypt($scorecard_data['id'])?>" data-todo='{"EditingFrom":"MeasurablePage"}'><?=$scorecard_data['name']?></a>
                                             </td>
                                             <td class="td-border-bottom ">
+											
                                                 <?=$scorecard_data['goal'] == '==' ? '=' : $scorecard_data['goal']?>
-                                                <?=$scorecard_data['units'] . $scorecard_data['goal_matric']?>
+                                                <?=$scorecard_data['units'] === '%' ? $scorecard_data['goal_matric'].$scorecard_data['units'] : $scorecard_data['units'] . $scorecard_data['goal_matric']; ?>
                                             </td>
                                             <?
                                             if(isset($scorecardweeks_for_thead)){
@@ -194,6 +195,7 @@
 						<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 							<h6 class="collapse-heading">Projects <small><i>(including rocks)</i></small></h6>
 							<div class="dropdown no-arrow">
+								<!--
 								<a class="dropdown-toggle mx-1" href="#" role="button" id="dropdownMenuLink"
 									data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									<i class="fa fa-ellipsis-h"></i>
@@ -203,6 +205,7 @@
 									<a class="dropdown-item" href="manage_project.php" target="_blank">View All</a>
 									<a class="dropdown-item" href="javascript:delete_tile(project)">Delete Tile</a>
 								</div>
+								-->
 								 <a href="javascript:void(0)" id="new_project_tile" class="mx-1"><i class="fa fa-l fa-plus"></i></a>
 							</div>
 						</div>
@@ -275,7 +278,7 @@
 						<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 							<h6 class="collapse-heading">Tasks <small><i>(Things you need to remember to do)</i></small></h6>
 							<div class="dropdown no-arrow">
-								<a class="dropdown-toggle mx-1" href="#" role="button" id="dropdownMenuLink"
+								<!--<a class="dropdown-toggle mx-1" href="#" role="button" id="dropdownMenuLink"
 									data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									<i class="fa fa-ellipsis-h "></i>
 								</a>
@@ -284,6 +287,7 @@
 									<a class="dropdown-item" target="_blank" href="manage_task.php">View All</a>
 									<a class="dropdown-item disabled" href="#" style="cursor:no-drop">Delete Tile</a>
 								</div>
+								-->
 								 <a href="javascript:void()" id="new_task_tile" class="mx-1"><i class="fa fa-plus"></i></a>
 							</div>
 						</div>
@@ -370,7 +374,7 @@
 								<span class="show-mine dropdown-toggle mx-1">
 									<input type="checkbox" class="form-control-check only-mine-check" id="show_only_<?php echo $meeting_id; ?>" meeting_id="<? echo $meeting_id;?>" name="only_mine" value="yes"/> Show Only Mine
 								</span>
-								<a class="dropdown-toggle mx-2" href="#" role="button" id="dropdownMenuLink"
+								<!--<a class="dropdown-toggle mx-2" href="#" role="button" id="dropdownMenuLink"
 									data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									<i class="fa fa-ellipsis-h "></i>
 								</a>
@@ -379,6 +383,7 @@
 									<a class="dropdown-item" href="#">View All</a>
 									<a class="dropdown-item disabled" href="#" style="cursor:no-drop">Delete Tile</a>
 								</div>
+				 				-->
 								 <a id="new_issue_tile" href="javascript:add_issue(<? echo $meeting_id;?>)" class="mx-1"><i class="fa fa-plus"></i></a>
 							</div>
 						</div>

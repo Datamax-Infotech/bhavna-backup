@@ -45,7 +45,7 @@ switch($status) {
         $score_modal_data_query = db_query($score_modal_data_sql,db_project_mgmt());
 
         if(empty($score_modal_data_query)){
-            $getInsertedDataIDSQL = 'SELECT scorecard.id,scorecard.b2b_id FROM scorecard ORDER by id DESC LIMIT 1';
+            $getInsertedDataIDSQL = 'SELECT scorecard.id,scorecard.b2b_id, accountable FROM scorecard ORDER by id DESC LIMIT 1';
             $getInsertedDataIDQuery = db_query($getInsertedDataIDSQL,db_project_mgmt());
             $getInsertedDataID = array_shift($getInsertedDataIDQuery);
             if(isset($getInsertedDataID['id']) && $getInsertedDataID['id'] != ''){
@@ -54,7 +54,7 @@ switch($status) {
                 $insertedDataName = $_REQUEST['name'];
                 $insertedGoal = $_REQUEST['goals'] == '==' ? '=' : $_REQUEST['goals'];
 
-                $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$getInsertedDataID['b2b_id']."'",db());
+                $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$getInsertedDataID['accountable']."'",db());
                 $empDetails_arr=array_shift($empDetails_qry);
                 $insertGetImageFunc=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
                 $insertUserImage = $insertGetImageFunc['emp_img'];
@@ -129,7 +129,13 @@ switch($status) {
 
             $measurable_name = $_REQUEST['name'];
             $measurable_goal = $_REQUEST['goals'] == '==' ? '=' : $_REQUEST['goals'];
-            $measurable_goal_and_matric_and_units = $measurable_goal." ".$between_goal_matric.$_REQUEST['units'];
+            $measurable_goal_and_matric_and_units = $_REQUEST['units'] == '%' ? $measurable_goal." ".$between_goal_matric.$_REQUEST['units'] : $measurable_goal." ".$_REQUEST['units'].$between_goal_matric ;
+            
+            $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$_REQUEST['accountable']."'",db());
+            $empDetails_arr=array_shift($empDetails_qry);
+            $insertGetImageFunc=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
+            $insertUserImage = $insertGetImageFunc['emp_img'];
+            $insertUserText = $insertGetImageFunc['emp_txt'];
 
             echo json_encode([
                 'status' => 'Updated',
@@ -138,7 +144,9 @@ switch($status) {
                 'measurable_matrix' => $between_goal_matric,
                 'changeTileWithNewGaolMatrics' => $changeTileWithNewGaolMatrics,
                 'measurable_units' => $_REQUEST['units'],
-                'measurable_goal_and_matric_and_units' => $measurable_goal_and_matric_and_units
+                'measurable_goal_and_matric_and_units' => $measurable_goal_and_matric_and_units,
+                'insertUserImage' => $insertUserImage,
+                'insertUserText' => $insertUserText,
             ]);
 
             if(isset($_REQUEST['editingfrom']) && $_REQUEST['editingfrom'] != ''){
@@ -248,8 +256,7 @@ switch($status) {
             $currentMeetinID = $_REQUEST['currentmeetingID'];
             if(isset($existMeasurementID) && !empty($existMeasurementID)){
                 foreach($existMeasurementID as $value){
-                    $getExistingSelectedSQL = db_query("SELECT scorecard.id,scorecard.name,scorecard.units,scorecard.goal,scorecard.goal_matric,scorecard.attach_meeting FROM scorecard WHERE scorecard.id = ".$value."" , db_project_mgmt());
-
+                    $getExistingSelectedSQL = db_query("SELECT scorecard.id,scorecard.name,scorecard.units,scorecard.goal,scorecard.goal_matric,scorecard.attach_meeting, accountable FROM scorecard WHERE scorecard.id = ".$value."" , db_project_mgmt());
                     if(!empty($getExistingSelectedSQL)){
                         $existingSelectedData = array_shift($getExistingSelectedSQL);
                         $existingSelectedID[] = new_dash_encrypt($existingSelectedData['id']);
@@ -257,7 +264,7 @@ switch($status) {
                         $existingSelectedUnits[] = $existingSelectedData['units'];
                         $existingSelectedGoal[] = $existingSelectedData['goal'] === '==' ? '=' : $existingSelectedData['goal'];
                         $existingSelectedGoalMatrix[] = $existingSelectedData['goal_matric'];
-                        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$existingSelectedData['b2b_id']."'",db());
+                        $empDetails_qry=db_query("SELECT Headshot, name,initials from loop_employees where b2b_id='".$existingSelectedData['accountable']."'",db());
                         $empDetails_arr=array_shift($empDetails_qry);
                         $existingSelectedGetImageFunc=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_arr['initials']); 
                         $existingSelectedImage = $existingSelectedGetImageFunc['emp_img'];

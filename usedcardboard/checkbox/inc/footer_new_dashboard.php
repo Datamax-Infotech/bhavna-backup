@@ -2028,15 +2028,16 @@ $(document).ready(function() {
 						}
                     }
                     if (measurementResponse['status'] === 'Updated') {
-
-                        if($('#scorecardAddMatrixModalPopop input[name="editingFrom"]').val() === 'editMeetingMatrix'){
+						 if($('#scorecardAddMatrixModalPopop input[name="editingFrom"]').val() === 'editMeetingMatrix'){
                             $('#metricsTable tbody tr.Editing td.matrix_name a').text(measurementResponse['measurable_name']);
+							const scoreDataUserImage = measurementResponse['insertUserImage'];
+							const scoreDataUserText = measurementResponse['insertUserText'];
+							$('#metricsTable tbody tr.Editing td.matrix_image').html(`<span class="attendees_img" style="background-image:url('${scoreDataUserImage}')">${scoreDataUserText}</span>`);
 							if(measurementResponse['measurable_goal']){
 								$('#metricsTable tbody tr.Editing td.matrix_goal a').text(convertGoalMatrixToString(measurementResponse['measurable_goal']));
 							}
                             $('#metricsTable tbody tr.Editing td.matrix_goal_matrix a').text(measurementResponse['measurable_matrix']);
                         }else{
-
                             if(measurementResponse['changeTileWithNewGaolMatrics'] === 'changeTile'){
                                 let updatedGoalMatrics = measurementResponse['measurable_matrix'];
                                 let updatedGoalSign = measurementResponse['measurable_goal'] === '=' ? '==' : measurementResponse['measurable_goal'];
@@ -2059,7 +2060,7 @@ $(document).ready(function() {
 										}
                                     }
                                 });
-                            }
+                            }		
 
                             if($('#scorecardAddMatrixModalPopop input[name="editingFrom"]').val() === 'meetingStartMatrix' || $('#scorecardAddMatrixModalPopop input[name="editingFrom"]').val() === 'meetingWorkspaceMatrix'){
                                 // $('#meetingMetricsTable tbody tr.Editing td.matrics_attandees_img').html(`<span class="attendees_img" style="background-image:url('assets_new_dashboard/img/att1.png')"></span>`);
@@ -2067,10 +2068,10 @@ $(document).ready(function() {
                                 // $('#meetingMetricsTable tbody tr.Editing td.nth-child(4)').text(measurementResponse['measurable_goal_and_matric_and_units']);
                                 $('#meetingMetricsTable tbody tr.Editing td.matrics_mesurable_name a').text(measurementResponse['measurable_name']);
                                 $('#meetingMetricsTable tbody tr.Editing td.matrics_mesurable_goal').text(measurementResponse['measurable_goal_and_matric_and_units']);
-                            }else{
+							}else{
                                 $('#meetingMetricsTable tbody tr.Editing td:nth-child(1) a').text(measurementResponse['measurable_name']);
                                 $('#meetingMetricsTable tbody tr.Editing td:nth-child(2)').text(measurementResponse['measurable_goal_and_matric_and_units']);
-                            }
+							}
                         }
 						$('#metricsTable tbody tr.Editing').removeClass('Editing');
                         formSubmitMessage("Measurement Updated!");
