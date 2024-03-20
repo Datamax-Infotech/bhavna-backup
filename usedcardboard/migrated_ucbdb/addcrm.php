@@ -40,19 +40,19 @@ $today = date("Ymd");
 
 $sql = "INSERT INTO ucbdb_crm (orders_id, comm_type, message, message_date, employee, file_name) VALUES ( '" . $_POST['orders_id'] . "','" . $_POST['comm_type'] . "','" . preg_replace("/'/", "\'", $_POST['message']) . "','" . $today . "','" . $_COOKIE['userinitials'] . "','" . $_FILES["file"]["name"] . "')";
 //echo "<BR>SQL: $sql<BR>";
-$result = db_query($sql, db());
+db();
+$result = db_query($sql);
 echo "<DIV CLASS='SQL_RESULTS'>Record Inserted<br><br>Please wait - the database is being updated and this page will automatically refresh.</DIV>";
 if (!headers_sent()) {    //If headers not sent yet... then do php redirect
-	header('Location: orders.php?id=' . $_POST['orders_id'] . '&proc=View');
+	header('Location: orders.php?id=' . encrypt_url($_POST['orders_id']) . '&proc=View');
 	exit;
 } else {
 	echo "<script type=\"text/javascript\">";
-	echo "window.location.href=\"orders.php?id=" . $_POST['orders_id'] . "&proc=View\";";
+	echo "window.location.href=\"orders.php?id=" . encrypt_url($_POST['orders_id']) . "&proc=View\";";
 	echo "</script>";
 	echo "<noscript>";
-	echo "<meta http-equiv=\"refresh\" content=\"0;url=orders.php?id=" . $_POST['orders_id'] . "&proc=View\" />";
+	echo "<meta http-equiv=\"refresh\" content=\"0;url=orders.php?id=" . encrypt_url($_POST['orders_id']) . "&proc=View\" />";
 	echo "</noscript>";
 	exit;
 } //==== End -- Redirect
 //header('Location: orders.php?id=' . $_POST['orders_id'] . '&proc=View');
-?>

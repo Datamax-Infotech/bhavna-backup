@@ -38,22 +38,6 @@ require("inc/header_session.php");
 	}
 
 	echo "<LINK rel='stylesheet' type='text/css' href='one_style.css' >";
-	/*------------------------------------------------
-	   THE FOLLOWING ALLOWS GLOBALS = OFF SUPPORT
-	   ------------------------------------------------*/
-	// $_GET VARIABLES
-	foreach ($_GET as $a => $b) {
-		$$a = $b;
-	}
-
-	// $_POST VARIABLES
-	foreach ($_POST as $a => $b) {
-		$$a = $b;
-	}
-	/*------------------------------------------------
-	   END GLOBALS OFF SUPPORT
-	   ------------------------------------------------*/
-
 	echo "<Font Face='arial' size='2'>";
 	$sql_debug_mode = 0;
 	error_reporting(E_WARNING | E_PARSE);

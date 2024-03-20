@@ -1,6 +1,5 @@
-<html>
+<html>d
 	<head>
-
 	</head>
 	<body>
 
@@ -10,10 +9,48 @@
 <div class="main_data_css">
 	
 <?php 
+db();
+function tep_round(float $number, int $precision): float {
+  if (strpos((string)$number, '.') && (strlen(substr((string)$number, strpos((string)$number, '.') + 1)) > $precision)) {    
+      $number = substr((string)$number, 0, strpos((string)$number, '.') + 1 + $precision + 1);
+      if (substr($number, -1) >= 5) {
+          if ($precision > 1) {
+              $number = floatval(substr($number, 0, -1)) + floatval('0.' . str_repeat('0', $precision-1) . '1');
+          } elseif ($precision == 1) {
+              $number = floatval(substr($number, 0, -1)) + 0.1;
+          } else {
+              $number = floatval(substr($number, 0, -1)) + 1;
+          }
+      } else {
+          $number = floatval(substr($number, 0, -1));
+      }
+  }
+
+  return $number;
+}
+function tep_draw_input_field(string $name , string $value = '', string $parameters = ''): string
+{
+    return '<input type="text" name="' . $name . '" value="' . $value . '" ' . $parameters . '>';
+}
+function tep_calculate_tax(float $price, float $tax): float
+{
+  global $currencies;
+
+  return tep_round($price * $tax / 100, 2);
+}
+
+function tep_add_tax(float $price, float $tax): float {
+  global $currencies;
+
+  if ( ($tax > 0) ) {
+    return tep_round($price, 2) + tep_calculate_tax($price, $tax);
+  } else {
+    return tep_round($price, 2);
+  }
+}
+
 ini_set("display_errors", "1");
 error_reporting(E_ALL);
-	require ("inc/header_session.php");
-  //require_once "../recaptchalib.php";
 	define("DEBUG", 1);
 
 	// Set to 0 once you're ready to go live
@@ -166,7 +203,7 @@ define('DATE_FORMAT_LONG', '%A %d %B, %Y'); // this is used for strftime()
 define('DATE_FORMAT', 'm/d/Y'); // this is used for date()
 define('DATE_TIME_FORMAT', DATE_FORMAT_SHORT . ' %H:%M:%S');
 	
-require('../includes/functions/general.php');
+/*require('../includes/functions/general.php');
 require('../includes/functions/html_output.php');
 
 require('../includes/classes/mime.php');
@@ -174,8 +211,13 @@ require('../includes/classes/email.php');
 require('../includes/classes/currencies.php');
 require('../includes/classes/order_papal.php');
 require("../../securedata/config_main.php");  
+*/
 
-	function send_phpemil_new($from_email, $to_email, $subject, $eml_body)
+require("inc/header_session.php");
+require("mainfunctions/database.php");
+require("mainfunctions/general-functions.php");
+
+	function send_phpemil_new (string $from_email, string $to_email, string $subject, string $eml_body): void 
 	{
 		global $phpmailer; // define the global variable
 		if ( !is_object( $phpmailer ) || !is_a( $phpmailer, 'PHPMailer' ) ) { // check if $phpmailer object of class PHPMailer exists
@@ -221,7 +263,7 @@ require("../../securedata/config_main.php");
 		
 	}
 
-  function tep_mail_new($to_name, $to_email_address, $email_subject, $email_text, $from_email_name, $from_email_address) {
+  function tep_mail_new(string $to_name, string $to_email_address, string $email_subject, string $email_text, string $from_email_name, string $from_email_address): void  {
     // Instantiate a new mail object
     $message = new email(array('X-Mailer: osCommerce Mailer'));
 
@@ -235,109 +277,10 @@ require("../../securedata/config_main.php");
     $message->send($to_name, $to_email_address, $from_email_name, $from_email_address, $email_subject);
   }
   
-  //tep_db_connect("localhost", "usedcard_prod", "WowNoIts@Attac#45421", "usedcard_production");
-  tep_db_connect("localhost", DB_SERVER_USERNAME, DB_SERVER_PASSWORD, "usedcard_production");
-function tep_db_connect($server = DB_SERVER, $username = DB_SERVER_USERNAME, $password = DB_SERVER_PASSWORD, $database = DB_DATABASE, $link = 'db_link') {
-    global $$link;
 
-    // $server = "ucbprodtest.db.10286395.hostedresource.com";
-    $server = "localhost";
-
-    if (USE_PCONNECT == 'true') {
-        $$link = mysqli_connect("p:".$server, $username, $password, $database);
-    } else {
-        $$link = new mysqli($server, $username, $password, $database);
-    }
-
-    if ($$link === false) {
-        die("ERROR: Could not connect. " . mysqli_connect_error());
-    }
-
-    return $$link;
-}
-
-  function get_result_new( $Statement ) {
-	$RESULT = array();
-	$Statement->store_result();
-	for ( $i = 0; $i < $Statement->num_rows; $i++ ) {
-		$Metadata = $Statement->result_metadata();
-		$PARAMS = array();
-		while ( $Field = $Metadata->fetch_field() ) {
-			$PARAMS[] = &$RESULT[ $i ][ $Field->name ];
-		}
-		call_user_func_array( array( $Statement, 'bind_result' ), $PARAMS );
-		$Statement->fetch();
-	}
-	return $RESULT;
- }
  
-  function tep_db_close($link = 'db_link') {
-    global $$link;
-
-    return mysqli_close($$link);
-  }
-
-  function tep_db_error($query, $errno, $error) { 
-    die('<font color="#000000"><b>' . $errno . ' - ' . $error . '<br><br>' . $query . '<br><br><small><font color="#ff0000">[TEP STOP]</font></small><br><br></b></font>');
-  }
-
-  function tep_db_query($query, $param_type = array(), $param_data = array()) {
-	$link = 'db_link';
-    global $$link;
-
-    if (defined('STORE_DB_TRANSACTIONS') && (STORE_DB_TRANSACTIONS == 'true')) {
-      error_log('QUERY ' . $query . "\n", 3, STORE_PAGE_PARSE_TIME_LOG);
-    }
-
-	//$tmppos = strpos($query, "where");
-	//if ($tmppos != false)
-	//{ 	
-		/* Bind parameters. Types: s = string, i = integer, d = double,  b = blob */
-		$a_param_type = $param_type; $a_bind_params = $param_data;
-		$a_params = array();
-		 
-		$param_type = '';
-		$n = count($a_param_type);
-		for($i = 0; $i < $n; $i++) {
-		  $param_type .= $a_param_type[$i];
-		}
-		 
-		/* with call_user_func_array, array params must be passed by reference */
-		$a_params[] = & $param_type;
-		for($i = 0; $i < $n; $i++) {
-		  /* with call_user_func_array, array params must be passed by reference */
-		  $a_params[] = & $a_bind_params[$i];
-		}
-
-		$resultnew = $$link->prepare($query) or tep_db_error($query, mysqli_errno($$link), mysqli_error($$link));
-		//$resultnew->bind_param('i',$page_id);
-		if ($param_type){
-		
-			call_user_func_array(array($resultnew, 'bind_param'), $a_params);
-		}
-		$resultnew->execute();
-		$result = get_result_new($resultnew);
-
-	//}else {
-	//	$resultnew = $$link->prepare($query) or tep_db_error($query, mysqli_errno(), mysqli_error());
-	//	$resultnew->execute();
-	//	$result = $resultnew->get_result();
-	//}
-
-    //$result = tep_db_query($query, $$link) or tep_db_error($query, mysql_errno(), mysql_error());
-    if (defined('STORE_DB_TRANSACTIONS') && (STORE_DB_TRANSACTIONS == 'true')) {
-       $result_error = mysqli_error($$link);
-       error_log('RESULT ' . $result . ' ' . $result_error . "\n", 3, STORE_PAGE_PARSE_TIME_LOG);
-    }
-
-    return $result;
-  }
-
-  function tep_db_fetch_array($db_query) {
-	//return array_shift($db_query);
-    //return mysqli_fetch_array($db_query, MYSQLI_ASSOC);
-  }
-function tep_db_perform($table, $data, $action = 'insert', $parameters = '', $link = 'db_link') {
+  function tep_db_perform(string $table, array $data, string $action = 'insert', string $parameters = '', string $link = 'db_link'): bool|array {
+    $query = "";
     if ($action == 'insert') {
         $query = 'insert into ' . $table . ' (';
         foreach ($data as $columns => $value) {
@@ -376,37 +319,15 @@ function tep_db_perform($table, $data, $action = 'insert', $parameters = '', $li
         $query = substr($query, 0, -2) . ' where ' . $parameters;
     }
 
-    return tep_db_query($query, $link);
+    return db_query($query);
 }
 
 
-  function tep_db_num_rows($db_query) {
-    return sizeof($db_query);
-  }
-
-  function tep_db_data_seek($db_query, $row_number) {
-    return mysqli_data_seek($db_query, $row_number);
-  }
-
-  function tep_db_insert_id() {
-	$link = 'db_link';
-    global $$link;
-    return mysqli_insert_id($$link);
-  }
-
-  function tep_db_free_result($db_query) {
-    return mysqli_free_result($db_query);
-  }
-
-  function tep_db_fetch_fields($db_query) {
-    return mysqli_fetch_field($db_query);
-  }
-
-  function tep_db_output($string) {
+  function tep_db_output(string $string): string {
     return htmlspecialchars($string);
   }
 
-  function tep_db_input($string, $link = 'db_link') {
+  function tep_db_input(string $string, string $link = 'db_link'):string {
     global $$link;
 
     if ($$link instanceof mysqli) {
@@ -415,21 +336,7 @@ function tep_db_perform($table, $data, $action = 'insert', $parameters = '', $li
 
     return addslashes($string);
 }
-
-function tep_db_prepare_input($string) {
-  if (is_string($string)) {
-      return trim(htmlspecialchars($string, ENT_QUOTES, 'UTF-8'));
-  } elseif (is_array($string)) {
-      foreach ($string as $key => $value) {
-          $string[$key] = tep_db_prepare_input($value);
-      }
-      return $string;
-  } else {
-      return $string;
-  }
-}
-
-function url_get_contents ($Url) {
+function url_get_contents (string $Url): string {
     if (!function_exists('curl_init')){ 
         die('CURL is not installed!');
     }
@@ -438,7 +345,8 @@ function url_get_contents ($Url) {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $output = curl_exec($ch);
     curl_close($ch);
-    return $output;
+    //return $output;
+    return $output === false ? '' : $output;
 }
 
 
@@ -462,17 +370,6 @@ if ($_POST["btnsubmit"] == "Submit") {
 		$responseData = json_decode($verifyResponse);
 		
 		if($responseData->success){
-                $dbuser		= DB_SERVER_USERNAME; 
-                $dbserver	= "localhost"; 
-                $dbpass		= DB_SERVER_PASSWORD; 
-                $dbname		= "usedcard_production";
-
-               /* $db_conn = mysql_connect($dbserver, $dbuser, $dbpass)
-                or die ("UNABLE TO CONNECT TO DATABASE");
-
-                mysql_select_db($dbname)
-                or die ("UNABLE TO SELECT DATABASE");*/
-
                 $flg_recfound = "no";
                 $passv_coupon_id = 0;
                 $passv_is_pickup_call = ""; $passv_ups_signature = ""; $sess_site_referrer = ""; $sess_site_ref_keyword = ""; $sess_site_hits_id = "";
@@ -481,33 +378,33 @@ if ($_POST["btnsubmit"] == "Submit") {
                 $f_site_hits_ins_id = "";
 
                 $STORE_OWNER = ""; $STORE_OWNER_EMAIL_ADDRESS = ""; $DOWNLOAD_ENABLED = ""; $STOCK_LIMITED = ""; $SEND_EXTRA_ORDER_EMAILS_TO = "";
-                $result = tep_db_query("SELECT configuration_value FROM configuration where configuration_key = 'SEND_EXTRA_ORDER_EMAILS_TO'");
+                $result = db_query("SELECT configuration_value FROM configuration where configuration_key = 'SEND_EXTRA_ORDER_EMAILS_TO'");
                 while ($myrowsel = array_shift($result)) {
                     $SEND_EXTRA_ORDER_EMAILS_TO = $myrowsel["configuration_value"];
                 }
 
-                $result = tep_db_query("SELECT configuration_value FROM configuration where configuration_key = 'STORE_OWNER'");
+                $result = db_query("SELECT configuration_value FROM configuration where configuration_key = 'STORE_OWNER'");
                 while ($myrowsel = array_shift($result)) {
                     $STORE_OWNER = $myrowsel["configuration_value"];
                 }
 
-                $result = tep_db_query("SELECT configuration_value FROM configuration where configuration_key = 'STORE_OWNER_EMAIL_ADDRESS'");
+                $result = db_query("SELECT configuration_value FROM configuration where configuration_key = 'STORE_OWNER_EMAIL_ADDRESS'");
                 while ($myrowsel = array_shift($result)) {
                     $STORE_OWNER_EMAIL_ADDRESS = $myrowsel["configuration_value"];
                 }
 
-                $result = tep_db_query("SELECT configuration_value FROM configuration where configuration_key = 'DOWNLOAD_ENABLED'");
+                $result = db_query("SELECT configuration_value FROM configuration where configuration_key = 'DOWNLOAD_ENABLED'");
                 while ($myrowsel = array_shift($result)) {
                     $DOWNLOAD_ENABLED = $myrowsel["configuration_value"];
                 }
 
-                $result = tep_db_query("SELECT configuration_value FROM configuration where configuration_key = 'STOCK_LIMITED'");
+                $result = db_query("SELECT configuration_value FROM configuration where configuration_key = 'STOCK_LIMITED'");
                 while ($myrowsel = array_shift($result)) {
                     $STOCK_LIMITED = $myrowsel["configuration_value"];
                 }
 
                 $products_model = ""; $products_name = ""; $products_price = 0; $final_price = ""; $products_tax = ""; $products_weight = "";
-                $orders_products_query = tep_db_query("SELECT * FROM products inner join products_description on products_description.products_id = products.products_id where products.products_id = 28 and language_id = 1");
+                $orders_products_query = db_query("SELECT * FROM products inner join products_description on products_description.products_id = products.products_id where products.products_id = 28 and language_id = 1");
                 while ($orders_products = array_shift($orders_products_query)) {
                     $products_model = $orders_products['products_model']; 
                     $products_name = $orders_products['products_name']; 
@@ -594,7 +491,7 @@ if ($_POST["btnsubmit"] == "Submit") {
                   $insert_id = tep_db_insert_id();
 
                 //if($total_amount > 0)	{
-                    //tep_db_query("insert into auth_net (orders_id, trans_id ) values (?, ?)", array("i","s") , array($insert_id,$_POST['txn_id']));
+                    //db_query("insert into auth_net (orders_id, trans_id ) values (?, ?)", array("i","s") , array($insert_id,$_POST['txn_id']));
                 //}
 
                 //  ADD BILL TO THIRD PARTY - Confirmed working with David
@@ -602,7 +499,8 @@ if ($_POST["btnsubmit"] == "Submit") {
                 $shipzipcode = $cust_postcode;
                 //$query = "SELECT W.warehouse_id, name FROM warehouse W INNER JOIN zipcodes Z ON W.warehouse_id=Z.warehouse_id WHERE Z.zip='".substr($shipzipcode, 0, 3)."'";
                 $query = "SELECT W.warehouse_id, W.kit_warehouseid, name FROM warehouse W INNER JOIN zipcodes Z ON W.warehouse_id=Z.warehouse_id WHERE Z.zip=?";
-                $row = array_shift(tep_db_query($query, array("s") , array(substr($shipzipcode, 0, 3))));
+                $result = db_query($query, array("s") , array(substr($shipzipcode, 0, 3)));
+                $row = array_shift($result);
                 $warehouse_id = $row["warehouse_id"];
                 $kit_warehouseid = $row["kit_warehouseid"];
 
@@ -655,14 +553,15 @@ if ($_POST["btnsubmit"] == "Submit") {
                   tep_db_perform("gift_certificate_to_orders", $sql_data_array );
 
                   //Update the Available Balance
-                  //tep_db_query("UPDATE ". "gift_certificate" ." SET coupons_discount_percent=(coupons_discount_percent-".$order_papal->info['gc_discount_value'].") WHERE coupons_id='".$order_papal->info['gift_cert_code']."'");
-                  tep_db_query("UPDATE ". "gift_certificate" ." SET coupons_discount_percent=(coupons_discount_percent-?) WHERE coupons_id=?", array("d","s") , array($_POST['order_coupon_amt'], $coupon));
+                  //db_query("UPDATE ". "gift_certificate" ." SET coupons_discount_percent=(coupons_discount_percent-".$order_papal->info['gc_discount_value'].") WHERE coupons_id='".$order_papal->info['gift_cert_code']."'");
+                  db_query("UPDATE ". "gift_certificate" ." SET coupons_discount_percent=(coupons_discount_percent-?) WHERE coupons_id=?", array("d","s") , array($_POST['order_coupon_amt'], $coupon));
                   //-----------------------------------
                 }
                 //Devi - Gift Voucher Discount
 
                 $query = "SELECT GROUP_CONCAT(p.products_id) as grp_prod_id FROM products p LEFT JOIN products_to_categories p2c ON p.products_id=p2c.products_id WHERE categories_id IN (46, 43, 44, 45, 49, 47, 48, 42, 50, 51, 52, 53, 54, 55, 62, 63, 64, 65, 66, 67, 68, 69, 70)";
-                $rgp = array_shift(tep_db_query($query));
+                $result1 = db_query($query);
+                $rgp = array_shift($result1);
                 $arr_rgp = explode(',', $rgp["grp_prod_id"]);
                 $thirdparty_prod = "";
 
@@ -673,7 +572,7 @@ if ($_POST["btnsubmit"] == "Submit") {
 
 
                 if ($STOCK_LIMITED == 'true') {
-                  $stock_query = tep_db_query("select products_quantity from " . TABLE_PRODUCTS . " where products_id = 28");
+                  $stock_query = db_query("select products_quantity from " . TABLE_PRODUCTS . " where products_id = 28");
                   if (tep_db_num_rows($stock_query) > 0) {
                     $stock_values = array_shift($stock_query);
 
@@ -683,26 +582,26 @@ if ($_POST["btnsubmit"] == "Submit") {
                       $stock_left = $stock_values['products_quantity'];
                     }
 
-                    tep_db_query("update " . TABLE_PRODUCTS . " set products_quantity = ? where products_id = ?", array("i") , array($stock_left));
+                    db_query("update " . TABLE_PRODUCTS . " set products_quantity = ? where products_id = ?", array("i") , array($stock_left));
 
                     if ( ($stock_left < 1) && (STOCK_ALLOW_CHECKOUT == 'false') ) {
-                        tep_db_query("update " . TABLE_PRODUCTS . " set products_status = '0' where products_id = 28");
+                        db_query("update " . TABLE_PRODUCTS . " set products_status = '0' where products_id = 28");
                     }
                   }
                 }
 
             // Update products_ordered (for bestsellers list)
-                tep_db_query("update " . TABLE_PRODUCTS . " set products_ordered = products_ordered + 1 where products_id = 28");
+                db_query("update " . TABLE_PRODUCTS . " set products_ordered = products_ordered + 1 where products_id = 28");
 
                 $tmpprod_qty = 1;
                 if ($tmpprod_qty > 0) {
                     $query_main1 = "select products_id, products_kit_item_id, how_many from products_kit_item_website_prod_rel where products_id = 28 order by unqid";
 
-                    $result_main1 = tep_db_query($query_main1);
+                    $result_main1 = db_query($query_main1);
                     while($row_main1 = array_shift($result_main1))
                     {
                         $query_main2 = "insert into products_kit_item_inventory (qty, products_kit_item_id, warehouse_id, last_updated_on, updated_by, in_out_flg) values(-" . $tmpprod_qty * $row_main1["how_many"] . ", " . $row_main1["products_kit_item_id"] . ", " . $kit_warehouseid . ", '" . date("Y-m-d H:i:s") . "', 'B2C', 1)";
-                        tep_db_query($query_main2);
+                        db_query($query_main2);
                     }	
 
                 }		
@@ -721,8 +620,10 @@ if ($_POST["btnsubmit"] == "Submit") {
                 $products_ordered_attributes = '';
 
             //------insert customer choosen option eof ----
-                $total_weight += (1 * $products_weight);
+                //$total_weight += (1 * $products_weight); // commented as not used
+                $total_products_price = isset($total_products_price) ? $total_products_price : 0;
                 $total_tax += tep_calculate_tax($total_products_price, $products_tax) * 1;
+                $total_cost = isset($total_cost) ? $total_cost : 0;
                 $total_cost += $total_products_price;
                 $tmptax = $products_tax;
                 $tmptax = round($tmptax,2);
@@ -735,8 +636,9 @@ if ($_POST["btnsubmit"] == "Submit") {
                     $item_price = $currencies->get_price($final_price, $tmptax, 1);
                     $thirdparty_prod.= ',"BEGIN_ITEM","'.$products_model.'","'.$final_price.'",1,"'.$products_name.'","END_ITEM"';
                     $qrystatefull = "SELECT zone_code FROM zones WHERE zone_name = ?";		
-                    //$row = array_shift(tep_db_query($qrystatefull));	
-                    $row = array_shift(tep_db_query($qrystatefull, array("s") , array($cust_state)));	
+                    //$row = array_shift(db_query($qrystatefull));
+                    $result2 = db_query($qrystatefull, array("s") , array($cust_state));	
+                    $row = array_shift($result2);	
 
                     $statecode = $row["zone_code"];		
                     //$tmpName = format_name($cust_firstname);				
@@ -748,8 +650,8 @@ if ($_POST["btnsubmit"] == "Submit") {
 
                     //$ttpp_query = "INSERT INTO orders_sps SET orders_id = '" . $insert_id . "', order_string = '" . $new_thirdparty_mnsd . "'";
                     $ttpp_query = "INSERT INTO orders_sps SET orders_id = ?, order_string = ?";
-                    //tep_db_query($ttpp_query);
-                    tep_db_query($ttpp_query , array("i","s") , array($insert_id, $new_thirdparty_mnsd));
+                    //db_query($ttpp_query);
+                    db_query($ttpp_query , array("i","s") , array($insert_id, $new_thirdparty_mnsd));
 
                 }
 
@@ -757,8 +659,9 @@ if ($_POST["btnsubmit"] == "Submit") {
                 {
                     //$qrystatefull = "SELECT zone_code FROM zones WHERE zone_name = '" . $cust_state . "'";
                     $qrystatefull = "SELECT zone_code FROM zones WHERE zone_name = ?";
-                    //$row = array_shift(tep_db_query($qrystatefull));
-                    $row = array_shift(tep_db_query($qrystatefull, array("s"), array($cust_state)));
+                    //$row = array_shift(db_query($qrystatefull));
+                    $result3 = db_query($qrystatefull, array("s") , array($cust_state));
+                    $row = array_shift($result3);
                     $statecode = $row["zone_code"];
 
                     //$tmpName = format_name($cust_firstname);
@@ -767,7 +670,7 @@ if ($_POST["btnsubmit"] == "Submit") {
                     $thirdparty_email.= $thirdparty_prod;
 
                     $mid_thirdparty_email = str_replace("<br>", "", "$thirdparty_email"); 
-
+                    $boundary = md5(uniqid((string)time()));
                     $mailheadersadmin = "MIME-Version: 1.0\r\n";
                     $mailheadersadmin .= "From: UsedCardboardBoxes.com <spsorders@usedcardboardboxes.com>\n";
                     $mailheadersadmin .= "Content-Type: multipart/alternative; boundary = $boundary\r\n";
@@ -834,7 +737,8 @@ if ($_POST["btnsubmit"] == "Submit") {
                     $email_order .= "Click here to complete our survey:  http://www.usedcardboardboxes.com/survey.php?orderid=" . $insert_id . "\n\n";
 
                     $query = "SELECT * FROM page_text WHERE page_id=26";
-                    $row= array_shift(tep_db_query($query));
+                    $result = db_query($query);
+                    $row= array_shift($result);
                     $email_order.= "\n==================================================================\n\n";
                     $email_order.= str_replace("\n", "\n\n", strip_tags($row["page_text"]))."\n\n";
 
@@ -856,15 +760,16 @@ if ($_POST["btnsubmit"] == "Submit") {
                     }
 
                 // Update kits 
-                tep_db_query("UPDATE orders_products p INNER JOIN products pp ON p.products_id = pp.products_id SET p.kit_id = pp.kit_id where orders_id = ?" , array("i") , array($insert_id));
+                db_query("UPDATE orders_products p INNER JOIN products pp ON p.products_id = pp.products_id SET p.kit_id = pp.kit_id where orders_id = ?" , array("i") , array($insert_id));
 
                 // Pull State Abbreviation
                 // This is done becasue osCommerce uses full state and WorldShip needs abbreviation
-
+ 
                 //$statefull = $order_papal->delivery['state'];
                 $statefull = $cust_state;
                 $querystatefull = "SELECT zone_code FROM zones WHERE zone_name = ?";
-                $row = array_shift(tep_db_query($querystatefull, array("s") , array($statefull)));
+                $result = db_query($querystatefull, array("s") , array($statefull));
+                $row = array_shift($result);
                 $statesmall = ($row["zone_code"]);
                 $pord_order_id = "";
                 //  ADD BILL TO THIRD PARTY - Confirmed with David
@@ -874,23 +779,25 @@ if ($_POST["btnsubmit"] == "Submit") {
                     $pr_id = 28;
                     if(!in_array($pr_id, $arr_rgp))
                     {
-                        $pord_order_id = ($pord_order_id == "")?$pr_id:$pord_order_id.','.$pr_id;
+                        $pord_order_id = ($pord_order_id == "") ? $pr_id : $pord_order_id.','.$pr_id;
 
                         $pr_qty = "SELECT products_quantity FROM orders_products WHERE orders_id=? AND products_id=?";
-                        $row_qty = array_shift(tep_db_query($pr_qty, array("i","i"), array($insert_id,$pr_id)));
+                        $result5 = db_query($pr_qty, array("i","i"), array($insert_id,$pr_id));
+                        $row_qty = array_shift($result5);
                         $y=$row_qty["products_quantity"];
                         for ($x=1; $x<=$y; $x++) 
                         {
 
                             //$query = "SELECT kit_id FROM orders_products WHERE orders_id=$insert_id AND products_id=$pr_id";
                             $query = "SELECT kit_id FROM orders_products WHERE orders_id=? AND products_id=?";
-                            $row_kits = array_shift(tep_db_query($query, array("i","i"), array($insert_id,$pr_id)));
+                            $result6 = db_query($query, array("i","i"), array($insert_id,$pr_id));
+                            $row_kits = array_shift($result6);
 
                             $query = "SELECT M.module_id, M.name, M.description, M.weight, M.length1, M.width, M.height, M.reference, M.tree_value, K.kit_id as kits_id, K.name as kits_name";
                             $query.= " FROM module M INNER JOIN moduletokits MK ON M.module_id=MK.module_id";
                             $query.= " INNER JOIN kits K ON MK.kit_id=K.kit_id WHERE MK.kit_id=?";
 
-                            $res_mk_info = tep_db_query($query, array("i"), array($row_kits["kit_id"]));
+                            $res_mk_info = db_query($query, array("i"), array($row_kits["kit_id"]));
                             while($row_mk_info = array_shift($res_mk_info))
                             {
                                 $trees_saved += $row_mk_info['tree_value'];// Line Added by devi for Tree Counter Update
@@ -900,7 +807,7 @@ if ($_POST["btnsubmit"] == "Submit") {
                                 $dest_warehouse_id = "";
                                 //$query = "SELECT * FROM wh_rule WHERE module_id='".$row_mk_info["module_id"]."' AND warehouse_id='$warehouse_id'";
                                 $query = "SELECT * FROM wh_rule WHERE module_id= ? AND warehouse_id=?";
-                                $rswc = tep_db_query($query, array("i","s") , array($row_mk_info["module_id"], $warehouse_id));
+                                $rswc = db_query($query, array("i","s") , array($row_mk_info["module_id"], $warehouse_id));
                                 $num_rswc = tep_db_num_rows($rswc);
                                 if($num_rswc > 0)
                                 {
@@ -908,7 +815,8 @@ if ($_POST["btnsubmit"] == "Submit") {
                                     $dest_warehouse_id = $rwwc["warehouse_d_id"];
                                     //$query = "SELECT * FROM warehouse WHERE warehouse_id='$dest_warehouse_id'";
                                     $query = "SELECT * FROM warehouse WHERE warehouse_id=?";
-                                    $rw = array_shift(tep_db_query($query, array("s") , array($dest_warehouse_id)));
+                                    $result7 = db_query($query, array("s") , array($dest_warehouse_id));
+                                    $rw = array_shift($result7);
                                     $dest_tbl_name = "orders_active_".str_replace(' ', '_', strtolower($rw["name"]));
 
                                 }
@@ -924,7 +832,7 @@ if ($_POST["btnsubmit"] == "Submit") {
                                     $query.= ", shipping_name='".addslashes($cust_firstname)."', shipping_attention='".addslashes($cust_company)."', shipping_street1='".addslashes($cust_address)."', shipping_street2='".addslashes($cust_address2)."'";
                                     $query.= ", shipping_city='".addslashes($cust_city)."', shipping_state='".$statesmall."', shipping_zip='".$cust_postcode."', ups_shipping_release=''";
                                     $query.= ", phone='".$cust_telephone."', email='".$cust_email."', qvnemail1='".$cust_email."', comments='".addslashes($ord_comment)."'";
-                                    tep_db_query($query);
+                                    db_query($query);
 
                                 //}
                             }
@@ -933,7 +841,7 @@ if ($_POST["btnsubmit"] == "Submit") {
 
                     //Update Treee Counter // Line Added by devi for Tree Counter Update
                     $query = "UPDATE tree_counter  SET trees_saved=trees_saved +". $trees_saved ." WHERE tree_index=0";
-                    tep_db_query($query);
+                    db_query($query);
                   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -1079,7 +987,9 @@ if ($_POST["btnsubmit"] == "Submit") {
 		</tr>				
         <tr>
 		  <td width="86%" colspan="2"><div class="g-recaptcha" data-sitekey="6LfGFkIUAAAAAFIOE5mwLR1-Sma0a8vEwcbYoQt3"></div>
-            <?php  echo "<font color=red>" . $recaptch_err . "</font>";?>
+            <?php
+              $recaptch_err = isset($recaptch_err) ? $recaptch_err : "";  
+              echo "<font color=red>" . $recaptch_err . "</font>";?>
             </td>
 		</tr>
 		<tr>

@@ -2,22 +2,23 @@
 require ("inc/header_session.php");
 require ("mainfunctions/database.php");
 require ("mainfunctions/general-functions.php");
-
+db();
 	$order_id = $_REQUEST["order_id"];
-	
 	$order_comments = "";
 	$sql="select * from orders WHERE orders_id = " . $order_id;
-	$result = db_query($sql, db() );
+
+	$result = db_query($sql);
 	$pwa_array_address = array_shift($result); 
 	$order_comments = $pwa_array_address["comment"];
 
-	function tep_calculate_tax($price, $tax) {
+	function tep_calculate_tax(float $price, float $tax): float
+	{
 		global $currencies;
 
 		return tep_round($price * $tax / 100, 2);
 	}
 	
-	function tep_add_tax($price, $tax) {
+	function tep_add_tax(float $price, float $tax): float  {
 		global $currencies;
 
 		if ( ($tax > 0) ) {
@@ -27,13 +28,15 @@ require ("mainfunctions/general-functions.php");
 		}
 	}
 	
-	function tep_round($number, $precision) {
-		if (strpos($number, '.') && (strlen(substr($number, strpos($number, '.')+1)) > $precision)) {
-		  $number = substr($number, 0, strpos($number, '.') + 1 + $precision + 1);
-
+	/*function tep_round(float $number, int $precision): float {
+		//if (strpos($number, '.') && (strlen(substr($number, strpos($number, '.')+1)) > $precision)) {
+			if (strpos((string)$number, '.') && (strlen(substr((string)$number, strpos((string)$number, '.') + 1)) > $precision)) {	
+		  //$number = substr($number, 0, strpos($number, '.') + 1 + $precision + 1);
+		  $number = substr((string)$number, 0, strpos((string)$number, '.') + 1 + $precision + 1);
 		  if (substr($number, -1) >= 5) {
 			if ($precision > 1) {
-			  $number = substr($number, 0, -1) + ('0.' . str_repeat(0, $precision-1) . '1');
+			  //$number = substr($number, 0, -1) + ('0.' . str_repeat(0, $precision-1) . '1');
+			  $number = substr($number, 0, -1) . ('0.' . str_repeat('0', $precision-1) . '1');
 			} elseif ($precision == 1) {
 			  $number = substr($number, 0, -1) + 0.1;
 			} else {
@@ -46,8 +49,27 @@ require ("mainfunctions/general-functions.php");
 
 		return $number;
 	}
+	*/
+	function tep_round(float $number, int $precision): float {
+		if (strpos((string)$number, '.') && (strlen(substr((string)$number, strpos((string)$number, '.') + 1)) > $precision)) {    
+			$number = substr((string)$number, 0, strpos((string)$number, '.') + 1 + $precision + 1);
+			if (substr($number, -1) >= 5) {
+				if ($precision > 1) {
+					$number = floatval(substr($number, 0, -1)) + floatval('0.' . str_repeat('0', $precision-1) . '1');
+				} elseif ($precision == 1) {
+					$number = floatval(substr($number, 0, -1)) + 0.1;
+				} else {
+					$number = floatval(substr($number, 0, -1)) + 1;
+				}
+			} else {
+				$number = floatval(substr($number, 0, -1));
+			}
+		}
 	
-    function display_price($products_price, $products_tax, $quantity = 1) {
+		return $number;
+	}
+	
+    function display_price(float $products_price, float $products_tax, int $quantity = 1): string {
       return "$" . round(tep_add_tax($products_price, $products_tax) * $quantity, 2);
     }
 	
@@ -98,7 +120,7 @@ require ("mainfunctions/general-functions.php");
 
 	$products_ordered = "";
 	$sql="select * from orders_products WHERE orders_id = " . $order_id;
-	$result = db_query($sql, db() );
+	$result = db_query($sql);
 	while ($myrowsel = array_shift($result)) 
 	{
 		$products_ordered .= $myrowsel['products_quantity'] . ' x ' . str_replace("<br>", " " , $myrowsel['products_name']) . ' (' . $myrowsel['products_model'] . ') = ' . display_price($myrowsel['final_price'], $myrowsel['products_tax'], $myrowsel['products_quantity']) . "<br>";
@@ -110,7 +132,7 @@ require ("mainfunctions/general-functions.php");
 				  EMAIL_SEPARATOR . "<br>";
 
 	$sql="select * from orders_total WHERE orders_id = " . $order_id . " order by sort_order";
-	$result = db_query($sql, db() );
+	$result = db_query($sql);
 	while ($myrowsel = array_shift($result)) 
 	{
 		if(substr_count($myrowsel['title'], "Gift Voucher") > 0 )
@@ -165,7 +187,8 @@ require ("mainfunctions/general-functions.php");
 	$email_order .= "Click here to complete our survey: <a href='https://www.usedcardboardboxes.com/survey.php'>https://www.usedcardboardboxes.com/survey.php</a><br><br>";
 
 	$query = "SELECT * FROM page_text WHERE page_id=26";
-	$row= array_shift(db_query($query));
+	$result = db_query($query);
+	$row= array_shift($result);
 	$email_order.= "<br>==================================================================<br><br>";
 	$email_order.= str_replace("\n", "<br>", strip_tags($row["page_text"]))."<br><br>";
 
@@ -210,7 +233,6 @@ require ("mainfunctions/general-functions.php");
 		<td width="250px" id="bodytxt">
             <?php 
                 require_once('fckeditor_new/fckeditor.php');
-
                 $FCKeditor = new FCKeditor('txtemailbody');
 
                 $FCKeditor->BasePath = 'fckeditor_new/';
@@ -224,7 +246,6 @@ require ("mainfunctions/general-functions.php");
                 $FCKeditor->Create();
 
 			?>
-
 
 
 			<div style="heighr:15px;" >&nbsp;</div>
@@ -241,10 +262,3 @@ require ("mainfunctions/general-functions.php");
 </table>	
 
 </form>
-
-<?php 
-
-    
-
-?>
-

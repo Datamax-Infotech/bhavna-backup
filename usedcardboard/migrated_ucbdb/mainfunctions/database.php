@@ -1,5 +1,5 @@
 <?php
-function db(): void{
+function db(): mysqli{
 	$dbuser		= "usedcard_prod"; 
 	$dbserver	= "92.204.132.4"; 
 	$dbpass		= "WowNoIts@Attac#45421"; 
@@ -8,7 +8,7 @@ function db(): void{
 	//CONNECTION STRING
 	$con_db = 'db_link';
 	global $$con_db;
-	$$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
+	return $$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
 }
 	
 function db_b2b(): void

@@ -6,7 +6,6 @@ header("location:login.php");
 require ("inc/header_session.php");
 require ("mainfunctions/database.php"); 
 require ("mainfunctions/general-functions.php");
-
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
@@ -44,7 +43,8 @@ require ("mainfunctions/general-functions.php");
 		
 	</head>
 	
-	<body><?php echo "<LINK rel='stylesheet' type='text/css' href='one_style.css' >";?>
+	<body>
+	<?php echo "<LINK rel='stylesheet' type='text/css' href='one_style.css' >";?>
 	
 		<form method="get" name="rpt_customer" action="customer_asking_report.php">
 			<table>
@@ -84,7 +84,8 @@ require ("mainfunctions/general-functions.php");
 				<?php 
 				$qry = "select *, count(*) as cnt from ucbdb_customer_asking_trans inner join ucbdb_customer_asking_txtmaster on ucbdb_customer_asking_txtmaster.uid = ucbdb_customer_asking_trans.reason_id where (reason_dt >='".$_REQUEST["date_from"]."') AND (reason_dt <='".$_REQUEST["date_to"]." 23:59:59') group by reason_id order by reason_id"; 
 				//echo $qry;
-				$res = db_query($qry,db());
+				db();
+				$res = db_query($qry);
 				while ($myrowsel = array_shift($res))
 				{?>
 				<tr>
@@ -99,20 +100,23 @@ require ("mainfunctions/general-functions.php");
 									<tr vAlign="center">
 										<!--<td bgColor="#e4e4e4" width="15" align="center"><font size=1>
 										<strong>ID</strong></font></td>-->
-										<td bgColor="#e4e4e4" align="center"><font size=1>
-										<strong>Customer asking for</strong></font></td>
+										<td bgColor="#e4e4e4" align="center">
+											<font size=1><strong>Customer asking for</strong></font>
+										</td>
 										<?php if($myrowsel['reason']=='Other'){?>
-										<td bgColor="#e4e4e4" align="center"><font size=1>
-										<strong>Other text</strong></font></td>	
+										<td bgColor="#e4e4e4" align="center">
+											<font size=1><strong>Other text</strong></font>
+										</td>	
 										<?php }else{}?>										
-										<td bgColor="#e4e4e4" align="center"><font size=1>
-										<strong>User Name</strong></font></td>
-										<td bgColor="#e4e4e4" align="center"><font size=1>
-										<strong>Date</strong></font></td>
+										<td bgColor="#e4e4e4" align="center">
+											<font size=1><strong>User Name</strong></font>
+										</td>
+										<td bgColor="#e4e4e4" align="center">
+											<font size=1><strong>Date</strong></font>
+										</td>
 									</tr>
 									<?php 
 										$get_sales_order = db_query("select * from ucbdb_customer_asking_trans inner join ucbdb_customer_asking_txtmaster on ucbdb_customer_asking_txtmaster.uid = ucbdb_customer_asking_trans.reason_id where reason_id=".$myrowsel['reason_id']); // reason_id=".$myrowsel['reason_id']);
-
 										while ($boxes = array_shift($get_sales_order)) {
 											$cus_reason = $boxes["reason"];
 											$cus_user = $boxes["user_intitial"];
@@ -120,16 +124,20 @@ require ("mainfunctions/general-functions.php");
 											$reason_txt = $boxes["reason_text"];
 										?>	
 										<tr bgColor="#e4e4e4">
-											<td height="13" class="style1" align="left"><Font Face='arial' size='1'><?php  echo $cus_reason; ?>
+											<td height="13" class="style1" align="left"><Font Face='arial' size='1'>
+												<?php  echo $cus_reason; ?>
 											</td>
 											<?php if($myrowsel['reason']=='Other'){?>
-											<td height="13" class="style1" align="left"><Font Face='arial' size='1'><?php  echo $reason_txt; ?>
+											<td height="13" class="style1" align="left"><Font Face='arial' size='1'>
+												<?php  echo $reason_txt; ?>
 											</td>
 											<?php }else{}?>
 										
-											<td height="13" class="style1" align="left"><Font Face='arial' size='1'><?php  echo $cus_user; ?>
+											<td height="13" class="style1" align="left"><Font Face='arial' size='1'>
+												<?php  echo $cus_user; ?>
 											</td>
-											<td height="13" class="style1" align="left"><Font Face='arial' size='1'><?php  echo $cus_dt; ?>
+											<td height="13" class="style1" align="left"><Font Face='arial' size='1'>
+												<?php  echo $cus_dt; ?>
 											</td>								
 										</tr>
 										<?php }?>

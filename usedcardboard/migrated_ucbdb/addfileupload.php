@@ -1,42 +1,37 @@
-<?php 
-require ("inc/header_session.php");
-
-require ("mainfunctions/database.php"); 
-require ("mainfunctions/general-functions.php");
-
+<?php
+require("inc/header_session.php");
+require("mainfunctions/database.php");
+require("mainfunctions/general-functions.php");
 $company_id = $_REQUEST["company_id"];
-if ($_REQUEST["company_id"] == -1)
-{
-$cquery = "INSERT INTO files_companies (name) VALUES ( '" . $_REQUEST["newcompany"] . "')";
-$cresult = db_query($cquery,db() );
-$company_id = tep_db_insert_id();
-echo "here" . $company_id;
-
+db();
+if ($_REQUEST["company_id"] == -1) {
+  $cquery = "INSERT INTO files_companies (name) VALUES ( '" . $_REQUEST["newcompany"] . "')";
+  $cresult = db_query($cquery);
+  $company_id = tep_db_insert_id();
+  echo "here" . $company_id;
 }
 
 $type_id = $_REQUEST["type_id"];
-if ($_REQUEST["type_id"] == -1)
-{
-$tquery = "INSERT INTO files_types (name) VALUES ( '" . $_REQUEST["newtype"] . "')";
-$tresult = db_query($tquery,db() );
-$type_id = tep_db_insert_id();
-echo "here" . $type_id;
-
+if ($_REQUEST["type_id"] == -1) {
+  $tquery = "INSERT INTO files_types (name) VALUES ( '" . $_REQUEST["newtype"] . "')";
+  $tresult = db_query($tquery);
+  $type_id = tep_db_insert_id();
+  echo "here" . $type_id;
 }
 
-srand ((double) microtime( )*1000000);
-$random_number = rand( );
+srand((int)((float) microtime() * 1000000));
+$random_number = rand();
 // Start Processing Function
 
 $query = "SELECT * FROM files_companies WHERE id = " . $company_id;
-$res = db_query($query,db() );
+$res = db_query($query);
 $row = array_shift($res);
 
 $query2 = "SELECT * FROM files_types WHERE id = " . $type_id;
-$res2 = db_query($query2,db() );
+$res2 = db_query($query2);
 $row2 = array_shift($res2);
 
-$newdate = str_replace('/','-',$_REQUEST["start_date"]);
+$newdate = str_replace('/', '-', $_REQUEST["start_date"]);
 
 /*
 if ($_FILES["file"]["size"] < 10000000)
@@ -89,11 +84,10 @@ $fileresult = db_query($filequery);
 
 
 echo "<DIV CLASS='SQL_RESULTS'>Record Inserted<br><br>Please wait - the database is being updated and this page will automatically refresh.</DIV>";
-        echo "<script type=\"text/javascript\">";
-        echo "window.location.href=\"upload_files.php?fileid=".$row2["id"]."\";";
-        echo "</script>";
-        echo "<noscript>";
-        echo "<meta http-equiv=\"refresh\" content=\"0;url=upload_files.php?fileid=".$row2["id"]." />";
-        echo "</noscript>"; exit;
-
-?>
+echo "<script type=\"text/javascript\">";
+echo "window.location.href=\"upload_files.php?fileid=" . encrypt_url($row2["id"]) . "\";";
+echo "</script>";
+echo "<noscript>";
+echo "<meta http-equiv=\"refresh\" content=\"0;url=upload_files.php?fileid=" . encrypt_url($row2["id"]) . " />";
+echo "</noscript>";
+exit;

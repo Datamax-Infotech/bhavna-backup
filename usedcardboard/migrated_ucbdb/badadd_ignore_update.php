@@ -2,12 +2,12 @@
 	require ("inc/header_session.php");
 	require ("mainfunctions/database.php"); 
 	require ("mainfunctions/general-functions.php");
-	
+	db();
 	$shipzipcode = ""; $customer_firstname = ""; $customer_company = ""; $customer_address = "";
 	$customer_address2 = ""; $customer_city = ""; $statesmall = ""; $customer_postcode = ""; $cancel_order ="No";
 	$customer_telephone = ""; $customer_email = ""; $order_comment = ""; $fedex_bad_add = 0; 
 	$dt_view_qry = "Select * from orders where orders_id = '" . $_REQUEST["bad_add_orders_id"] . "'";
-	$data_res = db_query($dt_view_qry, db() );
+	$data_res = db_query($dt_view_qry);
 	while ($product_details_tmp = array_shift($data_res)) {
 		$cancel_order = $product_details_tmp["cancel"];
 		$fedex_bad_add = $product_details_tmp["fedex_validate_bad_add"];
@@ -25,7 +25,7 @@
 	}	
 
 	$query_ins = "Update orders set fedex_validate_bad_add = 0, bad_add_ignore_by = '" . $_COOKIE['userinitials'] . "', bad_add_ignore_on = '" . date("Y-m-d H:i:s") . "' WHERE orders_id = '" . $_REQUEST["bad_add_orders_id"] . "'";
-	$result_ins = db_query($query_ins, db());
+	$result_ins = db_query($query_ins);
 
 	if ($cancel_order == "No") {		
 	
@@ -34,7 +34,7 @@
 		$customer_telephone = ""; $customer_email = ""; $order_comment = ""; 
 		
 		$dt_view_qry = "Select * from orders where orders_id = '" . $_REQUEST["bad_add_orders_id"] . "'";
-		$data_res = db_query($dt_view_qry, db() );
+		$data_res = db_query($dt_view_qry);
 		while ($product_details_tmp = array_shift($data_res)) {
 			$shipzipcode = $product_details_tmp["delivery_postcode"];
 			$customer_firstname = $product_details_tmp["customers_name"];
@@ -51,11 +51,13 @@
 
 	
 		$query = "SELECT GROUP_CONCAT(p.products_id) as grp_prod_id FROM products p LEFT JOIN products_to_categories p2c ON p.products_id=p2c.products_id WHERE categories_id IN (46, 43, 44, 45, 49, 47, 48, 42, 50, 51, 52, 53, 54, 55, 62, 63, 64, 65, 66, 67, 68, 69, 70)";
-		$rgp = array_shift(db_query($query));
+		$result_query = db_query($query);
+		$rgp = array_shift($result_query);
 		$arr_rgp = explode(',', $rgp["grp_prod_id"]);
 		
 		$query = "SELECT W.warehouse_id, W.kit_warehouseid, name FROM warehouse W INNER JOIN zipcodes Z ON W.warehouse_id=Z.warehouse_id WHERE Z.zip=?";
-		$row = array_shift(db_query($query, array("s") , array(substr($shipzipcode, 0, 3))));
+		$result_warehouse = db_query($query, array("s") , array(substr($shipzipcode, 0, 3)));
+		$row = array_shift($result_warehouse);
 		$warehouse_id = $row["warehouse_id"];
 		$kit_warehouseid = $row["kit_warehouseid"];
 		$tbl_name = "orders_active_".str_replace(' ', '_', strtolower($row["name"]));
@@ -66,17 +68,24 @@
 		foreach($arr_warehouse as $tbl_warehouse)
 		{
 			$dt_view_qry1 = "Delete from ".$tbl_warehouse." where orders_id = '" . $_REQUEST["bad_add_orders_id"] . "'";
-			$data_res1 = db_query($dt_view_qry1, db() );
+			$data_res1 = db_query($dt_view_qry1);
 		}
 				
 		
 		$dt_view_qry = "Select * from orders_products where orders_id = '" . $_REQUEST["bad_add_orders_id"] . "'";
-		$data_res = db_query($dt_view_qry, db() );
+		$data_res = db_query($dt_view_qry);
 		while ($product_details_tmp = array_shift($data_res)) {
 
 			if ($product_details_tmp["products_id"] != ""){
 				$ucb_prod_id = $product_details_tmp["products_id"];
-			
+				$products_model = $product_details_tmp['products_model'];
+				$products_name = $product_details_tmp['products_name'];
+				$bill_to_city = "";
+				$bill_to_country = "";
+				$bill_to_name = "";
+				$bill_to_state = "";
+				$bill_to_street = "";
+				$bill_to_zip = "";
 				if(in_array($ucb_prod_id, $arr_rgp))
 				{
 					$rec_found = "no";
@@ -92,6 +101,7 @@
 					$thirdparty_mnsd .= ',"'.$products_name.'","'.$products_model.'",1"';
 					$mid_thirdparty_mnsd = str_replace("<br>", "", "$thirdparty_mnsd"); 
 					$new_thirdparty_mnsd = str_replace("'", "", "$mid_thirdparty_mnsd"); 
+
 
 					if ($rec_found == "no") {
 						$ttpp_query = "INSERT INTO orders_sps SET orders_id = ?, order_string = ?, shipping_name = ?, 
@@ -113,19 +123,23 @@
 						$customer_telephone, $customer_email, $bill_to_name, $bill_to_street, $bill_to_city, $bill_to_state, $bill_to_country, $bill_to_zip, $_REQUEST["bad_add_orders_id"]));
 					}					
 				}
-							
 				if(!in_array($ucb_prod_id, $arr_rgp))
 				{
 					$product_id_new = $ucb_prod_id;
-					$pord_order_id = ($pord_order_id == "")?$product_id_new:$pord_order_id.','.$product_id_new;
+					if (!isset($pord_order_id)) {
+						$pord_order_id = "";
+					}
+					$pord_order_id = $pord_order_id == "" ? $product_id_new : $pord_order_id.','.$product_id_new;
 
 					$pr_qty = "SELECT products_quantity FROM orders_products WHERE orders_id=? AND products_id=?";
-					$row_qty = array_shift(db_query($pr_qty, array("i","i"), array($_REQUEST["bad_add_orders_id"], $product_id_new)));
+					$result_qty = db_query($pr_qty, array("i","i"), array($_REQUEST["bad_add_orders_id"], $product_id_new));
+					$row_qty = array_shift($result_qty);
 					$y=$row_qty["products_quantity"];
 					for ($x=1; $x<=$y; $x++) 
 					{
 						$query = "SELECT kit_id FROM orders_products WHERE orders_id=? AND products_id=?";
-						$row_kits = array_shift(db_query($query, array("i","i"), array($_REQUEST["bad_add_orders_id"],$product_id_new)));
+						$result1 = db_query($query, array("i","i"), array($_REQUEST["bad_add_orders_id"],$product_id_new));
+						$row_kits = array_shift($result1);
 						
 
 						$query = "SELECT M.module_id, M.name, M.description, M.weight, M.length1, M.width, M.height, M.reference, M.tree_value, K.kit_id as kits_id, K.name as kits_name";
@@ -133,6 +147,7 @@
 						$query.= " INNER JOIN kits K ON MK.kit_id=K.kit_id WHERE MK.kit_id=?";
 						
 						$res_mk_info = db_query($query, array("i"), array($row_kits["kit_id"]));
+						$trees_saved = 0;// Line Added by devi for Tree Counter Update
 						while($row_mk_info = array_shift($res_mk_info))
 						{
 							$trees_saved += $row_mk_info['tree_value'];// Line Added by devi for Tree Counter Update
@@ -150,7 +165,8 @@
 								$dest_warehouse_id = $rwwc["warehouse_d_id"];
 								//$query = "SELECT * FROM warehouse WHERE warehouse_id='$dest_warehouse_id'";
 								$query = "SELECT * FROM warehouse WHERE warehouse_id=?";
-								$rw = array_shift(db_query($query, array("s") , array($dest_warehouse_id)));
+								$result = db_query($query, array("s") , array($dest_warehouse_id));
+								$rw = array_shift($result);
 								$dest_tbl_name = "orders_active_".str_replace(' ', '_', strtolower($rw["name"]));
 
 							}

@@ -140,3 +140,183 @@ function decryptstr(string $decryptValue): string|false
 
 	return $decryption;
 }
+function encrypt_url(string $encryptValue): string|false{
+    $ciphering = "AES-128-CTR";
+    $iv_length = openssl_cipher_iv_length($ciphering);
+    $options = 0;
+    $cryption_iv = '1234567891045679';
+    $cryption_key = "*UcB!278#sup&82";
+
+    $encryption = openssl_encrypt($encryptValue, $ciphering,
+            $cryption_key, $options, $cryption_iv);
+        
+    return $encryption;
+}
+
+function decrypt_url(string $decryptValue): string|false{
+    
+    $ciphering = "AES-128-CTR";
+    $iv_length = openssl_cipher_iv_length($ciphering);
+    $options = 0;
+    $cryption_iv = '1234567891045679';
+    $cryption_key = "*UcB!278#sup&82";
+
+    $decryption = openssl_decrypt ($decryptValue, $ciphering, 
+        $cryption_key, $options, $cryption_iv);
+
+    return $decryption;
+}
+
+function redirect(string $a): void
+	{
+		if (!headers_sent()){   
+			header('Location: ' . $a); exit;
+		}
+		else
+		{
+				echo "<script type=\"text/javascript\">";
+				echo "window.location.href=\"". $a. "\";";
+				echo "</script>";
+				echo "<noscript>";
+				echo "<meta http-equiv=\"refresh\" content=\"0;url=" . $a . "\" />";
+				echo "</noscript>"; exit;
+		}
+}
+/*function sendemail_php_function(null|array $files, string $path, string $mailto, string $scc, string $sbcc, string $from_mail, string $from_name, string $replyto, string $subject, string $message): string
+{
+	//Code to send mail
+	require 'phpmailer/PHPMailerAutoload.php';
+
+	$mail = new PHPMailer(true);
+	$mail->isSMTP();
+	$mail->Host = 'smtp.office365.com';
+	$mail->Port       = 587;
+	$mail->SMTPSecure = 'tls';
+	$mail->SMTPAuth   = true;
+	$mail->Username = "ucbemail@usedcardboardboxes.com";
+	$mail->Password = "#UCBgrn4652";
+	$mail->SetFrom($from_mail, $from_name);
+
+	//
+	if ($mailto != ""){
+		$cc_flg = "";
+		$tmppos_1 = strpos($mailto, ",");
+		if ($tmppos_1 != false)
+		{
+			$cc_ids = explode("," , $mailto);
+
+			foreach ($cc_ids as $cc_ids_tmp){
+				if ($cc_ids_tmp != "") {
+					$mail->addAddress($cc_ids_tmp);
+					$cc_flg = "y";
+				}	
+			}
+		}	
+
+		$tmppos_1 = strpos($mailto, ";");
+		if ($tmppos_1 != false)
+		{
+			$cc_flg = "";
+			$cc_ids1 = explode(";" , $mailto);
+
+			foreach ($cc_ids1 as $cc_ids_tmp2){
+				if ($cc_ids_tmp2 != "") {
+					$mail->addAddress($cc_ids_tmp2);
+					$cc_flg = "y";
+				}	
+			}
+		}	
+
+		if ($cc_flg == ""){
+			$mail->addAddress($mailto, $mailto);
+		}	
+	}			
+
+	if ($sbcc != ""){
+		$cc_flg = "";
+
+		$tmppos_1 = strpos($sbcc, ",");
+		if ($tmppos_1 != false)
+		{
+			$cc_ids = explode("," , $sbcc);
+			foreach ($cc_ids as $cc_ids_tmp){
+				if ($cc_ids_tmp != "") {
+					$mail->AddBCC($cc_ids_tmp);
+					$cc_flg = "y";
+				}	
+			}
+		}	
+
+		$tmppos_1 = strpos($sbcc, ";");
+		if ($tmppos_1 != false)
+		{
+			$cc_flg = "";
+			$cc_ids1 = explode(";" , $sbcc);
+			foreach ($cc_ids1 as $cc_ids_tmp2){
+				if ($cc_ids_tmp2 != "") {
+					$mail->AddBCC($cc_ids_tmp2);
+					$cc_flg = "y";
+				}	
+			}
+		}				
+
+		if ($cc_flg == ""){
+			$mail->AddBCC($sbcc, $sbcc);
+		}	
+	}			
+
+	if ($scc != ""){
+		$cc_flg = "";
+		$tmppos_1 = strpos($scc, ",");
+		if ($tmppos_1 != false)
+		{
+			$cc_ids = explode("," , $scc);
+
+			foreach ($cc_ids as $cc_ids_tmp){
+				if ($cc_ids_tmp != "") {
+					$mail->AddCC($cc_ids_tmp);
+					$cc_flg = "y";
+				}	
+			}
+		}	
+
+		$tmppos_1 = strpos($scc, ";");
+		if ($tmppos_1 != false)
+		{
+			$cc_flg = "";
+			$cc_ids1 = explode(";" , $scc);
+			foreach ($cc_ids1 as $cc_ids_tmp2){
+				if ($cc_ids_tmp2 != "") {
+					$mail->AddCC($cc_ids_tmp2);
+
+					$cc_flg = "y";
+				}	
+			}
+		}	
+
+		if ($cc_flg == ""){
+			$mail->AddCC($scc, $scc);
+		}	
+
+	}	
+	if($files!="null")
+	{
+		for($x=0;$x<count($files);$x++)	{
+		 $mail->addAttachment($path . $files[$x]);
+	  }		
+	}
+	
+	
+	$mail->IsHTML(true);
+	$mail->Encoding = 'base64';
+	$mail->CharSet = "UTF-8";
+	$mail->Subject = $subject;
+	$mail->Body    = $message;
+	$mail->AltBody = $message;
+	if(!$mail->send()) {
+		return 'emailerror';
+	} else {
+		return 'emailsend';
+	}	
+}	
+*/
