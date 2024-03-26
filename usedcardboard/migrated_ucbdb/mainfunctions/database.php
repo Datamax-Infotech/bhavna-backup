@@ -11,7 +11,7 @@ function db(): mysqli{
 	return $$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
 }
 	
-function db_b2b(): void
+function db_b2b(): mysqli
 {
 	$dbuser		= "usedcard_b2buser"; 
 	$dbserver	= "92.204.132.4"; 
@@ -21,10 +21,10 @@ function db_b2b(): void
 	//CONNECTION STRING
 	$con_db = 'db_link';
 	global $$con_db;
-	$$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
+	return $$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
 }
 
-function db_email(): void
+function db_email(): mysqli
 {
 	$dbuser		= "usedcard_ucbmail"; 
 	$dbserver	= "92.204.132.4"; 
@@ -34,10 +34,10 @@ function db_email(): void
 	//CONNECTION STRING
 	$con_db = 'db_link';
 	global $$con_db;
-	$$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
+	return $$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
 }
 
-function db_b2c_email_new(): void
+function db_b2c_email_new(): mysqli
 {
 	$dbuser		= "usedcard_b2c_mail"; 
 	$dbserver	= "92.204.132.4"; 
@@ -47,7 +47,7 @@ function db_b2c_email_new(): void
 	//CONNECTION STRING
 	$con_db = 'db_link';
 	global $$con_db;
-	$$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
+	return $$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
 }
 
 ?>
