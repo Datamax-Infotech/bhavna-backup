@@ -16,7 +16,7 @@ $customer_telephone = "";
 $customer_email = "";
 $order_comment = "";
 $fedex_bad_add = 0;
-$dt_view_qry = "Select * from orders where orders_id = '" . $_REQUEST["orders_id"] . "'";
+$dt_view_qry = "Select * from orders where orders_id = '" . decrypt_url($_REQUEST["orders_id"]) . "'";
 $data_res = db_query($dt_view_qry);
 db();
 while ($product_details_tmp = array_shift($data_res)) {

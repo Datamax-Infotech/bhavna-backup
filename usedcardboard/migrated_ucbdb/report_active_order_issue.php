@@ -4,6 +4,7 @@ session_start();
 require ("inc/header_session.php");
 require ("mainfunctions/database.php");
 require ("mainfunctions/general-functions.php");
+db();
 ?>
 
 <html>
@@ -262,7 +263,8 @@ table.table_style tr td{
 	
 	$crm_numberof_chr = 0; $crm_rows_per_page =0; $crm_numberof_chr_divheight = 0;
 	$sqlt_crm = "SELECT * FROM tblvariable";
-	$result_crm = db_query($sqlt_crm, db_b2c_email_new());
+	db_b2c_email_new();
+	$result_crm = db_query($sqlt_crm);
 	while ($myrowselt_crm = array_shift($result_crm)) {
 		if (strtoupper($myrowselt_crm["variablename"]) == strtoupper("crm_numberof_chr"))
 		{
@@ -280,7 +282,6 @@ table.table_style tr td{
 	
 	$crm_numberof_chr = 100;
 	$crm_numberof_chr_divheight = 80;
-	db();
 ?>
 
 <h3>B2C Active Order Issues</h3>
@@ -323,11 +324,13 @@ table.table_style tr td{
 		?>
 		<?php 
 			$rowcolor = "#E4E4E4"; $count=0;
+			db();
 			$dt_view_qry = "SELECT orders.*, b2c_order_issue.* ";
 			$dt_view_qry .= "FROM b2c_order_issue Right JOIN orders ON b2c_order_issue.order_id = orders.orders_id  ";
 			$dt_view_qry .= "where orders.order_issue = 1 ";
 			$dt_view_qry .= " order by order_issue_start_date_time asc";
-			$data_res = db_query($dt_view_qry, db() );
+			$data_res = db_query($dt_view_qry);
+			$MGArray = array();
 			while ($data = array_shift($data_res)) {
 				$count=$count+1;
 				$address=""; $orderlist="";
@@ -347,21 +350,27 @@ table.table_style tr td{
 
 				//
 				$sql = "SELECT * FROM ucbdb_crm WHERE orders_id = " . $orders_id . " ORDER BY message_date DESC, id DESC limit 1 ";
-				$result = db_query($sql, db() );
+				$result = db_query($sql);
 				$myrowsel = array_shift($result);
+				db_b2c_email_new();
 				if ($myrowsel["comm_type"] == "10"){
 					$query = "select emaildate, fromadd, toadd, ccadd, subject FROM tblemail WHERE unqid =" . $myrowsel["EmailID"];
-					$dt_view_eml = db_query($query , db_b2c_email_new() );
+					$dt_view_eml = db_query($query);
+					
+					$final_msg = "";
+					$email_body_toppart = "";
+				    $attstr = "";
+					$attachment_str = "";
+					$final_msg_top = "";
 					while ($rec_em = array_shift($dt_view_eml)) {
 						$query_att = "select attachmentname FROM tblemail_attachment WHERE emailid =" . $myrowsel["EmailID"];
-						$dt_view_eml_att = db_query($query_att , db_b2c_email_new() );
+						$dt_view_eml_att = db_query($query_att);
 						while ($rec_em_att = array_shift($dt_view_eml_att)) {		
 							$attachment_str = $attachment_str . "<a style='color:#0000FF' target='_blank' href='emailatt_uploads/" . $myrowsel["EmailID"]."/".$rec_em_att["attachmentname"] . "'>" . $rec_em_att["attachmentname"]."</a>, ";
 						}
 
-						$final_msg = "";
 						$query_att = "select body_txt FROM tblemail_body_txt WHERE email_id =" . $myrowsel["EmailID"];
-						$dt_view_eml_att = db_query($query_att , db_b2c_email_new() );
+						$dt_view_eml_att = db_query($query_att);
 						while ($rec_em_att = array_shift($dt_view_eml_att)) {		
 							$final_msg = $rec_em_att["body_txt"];
 						}
@@ -395,14 +404,13 @@ table.table_style tr td{
 					
 					}else { 
 						$last_note = $email_body_toppart . $attstr . $final_msg ;
-					}		
-					db();
+					}	
 				}else{
 					$last_note = $myrowsel["message"];
 				}	
 				$last_note_date = $myrowsel["timestamp"];
 				//
-				
+				db();
 				$wareh_query = db_query("select * from orders_active_export where orders_id = '" . (int)$orders_id . "'");
 				$orders_tracking = array_shift($wareh_query);
 				$orders_warehouse_query = db_query("select * from warehouse where warehouse_id = '" . $orders_tracking["warehouse_id"] . "'");
@@ -427,7 +435,7 @@ table.table_style tr td{
 	  ?>								
 		
 	  <tr id="row<?php  echo $count; ?>">
-			<td bgcolor="<?php echo $rowcolor?>"><a target="_blank" href="orders.php?id=<?php echo $data["orders_id"]?>&proc=View&searchcrit=<?php echo $data["orders_id"]?>&page=0"><font face="Arial, Helvetica, sans-serif" size="1" color="#333333"><?php echo $data["orders_id"]?></font></a></td>
+			<td bgcolor="<?php echo $rowcolor?>"><a target="_blank" href="orders.php?id=<?php echo encrypt_url($data["orders_id"])?>&proc=View&searchcrit=<?php echo $data["orders_id"]?>&page=0"><font face="Arial, Helvetica, sans-serif" size="1" color="#333333"><?php echo $data["orders_id"]?></font></a></td>
 			
 			<td bgcolor="<?php echo $rowcolor?>"><?php  echo $data["customers_name"]; ?></td>
 			
@@ -445,7 +453,7 @@ table.table_style tr td{
 
 			<td bgcolor="<?php echo $rowcolor?>"><textarea name="orderissue_lastnote<?php  echo $count; ?>" cols="20" id="orderissue_lastnote<?php  echo $count; ?>" style="width:98%;"></textarea></td>
 
-			<td align="center" bgcolor="<?php echo $rowcolor?>"><input type="button" name="btnupdate" id="btnupdate" value="Update" onclick="update_note(<?php  echo $count; ?>, <?php  echo $orders_id; ?>)"></td>
+			<td align="center" bgcolor="<?php echo $rowcolor?>"><input type="button" name="btnupdate" id="btnupdate" value="Update" onclick="update_note(<?php  echo $count; ?>, <?php  echo encrypt_url($orders_id); ?>)"></td>
 		</tr>
 		
 		<?php 
@@ -545,7 +553,7 @@ table.table_style tr td{
 				$count=$count+1;
 			?>
 			<tr id="row<?php  echo $count; ?>">
-				<td bgcolor="<?php echo $rowcolor?>"><a target="_blank" href="orders.php?id=<?php echo $MGArraytmp2["orders_id"]?>&proc=View&searchcrit=<?php echo $MGArraytmp2["orders_id"]?>&page=0"><font face="Arial, Helvetica, sans-serif" size="1" color="#333333"><?php echo $MGArraytmp2["orders_id"]?></font></a></td>
+				<td bgcolor="<?php echo $rowcolor?>"><a target="_blank" href="orders.php?id=<?php echo encrypt_url($MGArraytmp2["orders_id"])?>&proc=View&searchcrit=<?php echo $MGArraytmp2["orders_id"]?>&page=0"><font face="Arial, Helvetica, sans-serif" size="1" color="#333333"><?php echo $MGArraytmp2["orders_id"]?></font></a></td>
 
 				<td bgcolor="<?php echo $rowcolor?>"><?php  echo $MGArraytmp2["customers_name"]; ?></td>
 

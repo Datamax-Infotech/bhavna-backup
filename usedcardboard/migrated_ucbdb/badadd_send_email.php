@@ -3,7 +3,7 @@ require ("inc/header_session.php");
 require ("mainfunctions/database.php");
 require ("mainfunctions/general-functions.php");
 db();
-	$order_id = $_REQUEST["order_id"];
+	$order_id = decrypt_url($_REQUEST["order_id"]);
 	$order_comments = "";
 	$sql="select * from orders WHERE orders_id = " . $order_id;
 

@@ -1,16 +1,10 @@
 <?php  
-ini_set("display_errors", "0");
-error_reporting(E_ALL);
 require ("inc/header_session.php");
-?>
-
-<?php 
 require ("mainfunctions/database.php"); 
 require ("mainfunctions/general-functions.php");
-
+db();
 ?>
 <!DOCTYPE html>
-
 <html>
 <head>
 	<title>DASH - UPS Status Report</title>
@@ -70,7 +64,11 @@ require ("mainfunctions/general-functions.php");
 <?php 
 
 $status = $_GET["status"];
+$resFedexDt = "";
+$ship_it_result = "";
+$stat = "";
 $statUbox = '';
+$ship_it = "";
 switch($status)
 	{
 		case 'I':
@@ -125,13 +123,13 @@ switch($status)
 		}
 
 		//echo $ship_it . "<br>";
-		$ship_it_result = db_query($ship_it, db());
+		$ship_it_result = db_query($ship_it);
 		$ship_it_result_rows = tep_db_num_rows($ship_it_result);
 
 		if ($status != "TN_No_Shopify") {	
-			$resFedexDt = db_query("SELECT UOFD.product_description, UOFD.id, UOFD.orders_id, UOFD.ubox_order_tracking_number, UOFD.ubox_order_fedex_status, UOFD.ubox_order_fedex_description, O.date_purchased, O.customers_name, O.ubox_order_tracking_number AS uboxOrderTrackingNumber, O.ubox_order_carrier_code, O.cancel FROM ubox_order_fedex_details UOFD INNER JOIN orders O on UOFD.orders_id = O.orders_id WHERE ".$statUbox." AND UOFD.setignore != 1 ORDER BY O.date_purchased", db());
+			$resFedexDt = db_query("SELECT UOFD.product_description, UOFD.id, UOFD.orders_id, UOFD.ubox_order_tracking_number, UOFD.ubox_order_fedex_status, UOFD.ubox_order_fedex_description, O.date_purchased, O.customers_name, O.ubox_order_tracking_number AS uboxOrderTrackingNumber, O.ubox_order_carrier_code, O.cancel FROM ubox_order_fedex_details UOFD INNER JOIN orders O on UOFD.orders_id = O.orders_id WHERE ".$statUbox." AND UOFD.setignore != 1 ORDER BY O.date_purchased");
 
-			//$resFedexDt = db_query("SELECT UOFD.product_description, UOFD.id, UOFD.orders_id, UOFD.ubox_order_tracking_number, UOFD.ubox_order_fedex_status, UOFD.ubox_order_fedex_description, O.date_purchased, O.customers_name, O.ubox_order_tracking_number AS uboxOrderTrackingNumber, O.ubox_order_carrier_code, O.cancel, OE.fedex_description FROM ubox_order_fedex_details UOFD INNER JOIN orders O on UOFD.orders_id = O.orders_id INNER JOIN orders_active_export OE ON OE.orders_id = O.orders_id WHERE ".$statUbox." AND UOFD.setignore != 1 AND OE.fedex_description != 'Delivered' ORDER BY O.date_purchased", db());
+			//$resFedexDt = db_query("SELECT UOFD.product_description, UOFD.id, UOFD.orders_id, UOFD.ubox_order_tracking_number, UOFD.ubox_order_fedex_status, UOFD.ubox_order_fedex_description, O.date_purchased, O.customers_name, O.ubox_order_tracking_number AS uboxOrderTrackingNumber, O.ubox_order_carrier_code, O.cancel, OE.fedex_description FROM ubox_order_fedex_details UOFD INNER JOIN orders O on UOFD.orders_id = O.orders_id INNER JOIN orders_active_export OE ON OE.orders_id = O.orders_id WHERE ".$statUbox." AND UOFD.setignore != 1 AND OE.fedex_description != 'Delivered' ORDER BY O.date_purchased");
 
 			//echo "<br /> resFedexDt -> ";
 			//echo "SELECT UOFD.product_description, UOFD.id, UOFD.orders_id, UOFD.ubox_order_tracking_number, UOFD.ubox_order_fedex_status, UOFD.ubox_order_fedex_description, O.date_purchased, O.customers_name, O.ubox_order_tracking_number AS uboxOrderTrackingNumber, O.ubox_order_carrier_code, O.cancel FROM ubox_order_fedex_details UOFD INNER JOIN orders O on UOFD.orders_id = O.orders_id WHERE ".$statUbox." AND UOFD.setignore != 1 ORDER BY O.date_purchased <br>";
@@ -142,7 +140,7 @@ switch($status)
 	if ($status == "possible_issue") {	
 		$possible_issue_order_id_list = "";
 		$ship_it = "SELECT OE.module_name, OE.print_date, OE.warehouse_id, OE.id, OE.orders_id, OE.tracking_number, OE.status, OE.fedex_status, OE.fedex_description, OE.setignore, O.date_purchased, O.customers_name, O.ubox_order_tracking_number, O.ubox_order_carrier_code, O.cancel FROM orders_active_export OE INNER JOIN orders O on OE.orders_id = O.orders_id WHERE OE.status = '' AND OE.setignore != 1 AND OE.fedex_status = '' ORDER BY O.date_purchased";
-		$ship_it_result = db_query($ship_it, db());
+		$ship_it_result = db_query($ship_it);
 		while ($report_data = array_shift($ship_it_result)) {
 			$dp = $report_data["print_date"];
 			$print_date = date("F j Y H:i:s", strtotime($dp)); 			
@@ -156,7 +154,7 @@ switch($status)
 		//Not Picked Up: M case
 		$stat = " (OE.status = 'Manifest Pickup' OR OE.fedex_status LIKE 'OC') ";
 		$ship_it = "SELECT OE.module_name, OE.print_date, OE.warehouse_id, OE.id, OE.orders_id, OE.tracking_number, OE.status, OE.fedex_status, OE.fedex_description, OE.setignore, O.date_purchased, O.customers_name, O.ubox_order_tracking_number, O.ubox_order_carrier_code, O.cancel FROM orders_active_export OE INNER JOIN orders O on OE.orders_id = O.orders_id WHERE " . $stat . " AND OE.setignore != 1 ORDER BY O.date_purchased";
-		$ship_it_result = db_query($ship_it, db());
+		$ship_it_result = db_query($ship_it);
 		while ($report_data = array_shift($ship_it_result)) {
 			$dp = $report_data["print_date"];
 			$print_date = date("F j Y H:i:s", strtotime($dp)); 			
@@ -185,7 +183,7 @@ switch($status)
 		//In Transit: I case
 		$stat = " (OE.status = 'In transit' OR OE.fedex_status NOT LIKE 'DE' AND OE.fedex_status NOT LIKE 'SE' AND OE.fedex_status NOT LIKE 'DL' AND OE.fedex_status NOT LIKE '' AND OE.fedex_status NOT LIKE 'OC') ";
 		$ship_it = "SELECT OE.module_name, OE.print_date, OE.warehouse_id, OE.id, OE.orders_id, OE.tracking_number, OE.status, OE.fedex_status, OE.fedex_description, OE.setignore, O.date_purchased, O.customers_name FROM orders_active_export OE INNER JOIN orders O on OE.orders_id = O.orders_id WHERE " . $stat . " AND OE.setignore != 1 ORDER BY O.date_purchased";
-		$ship_it_result = db_query($ship_it, db());
+		$ship_it_result = db_query($ship_it);
 		while ($report_data = array_shift($ship_it_result)) {
 			$dp = $report_data["print_date"];
 			$print_date = date("F j Y H:i:s", strtotime($dp)); 			
@@ -213,7 +211,7 @@ switch($status)
 		//Exceptions: X case
 		$stat = " (OE.status = 'Exception' OR OE.fedex_status LIKE 'DE' OR OE.fedex_status LIKE 'SE') ";
 		$ship_it = "SELECT OE.module_name, OE.print_date, OE.warehouse_id, OE.id, OE.orders_id, OE.tracking_number, OE.status, OE.fedex_status, OE.fedex_description, OE.setignore, O.date_purchased, O.customers_name, O.ubox_order_tracking_number, O.ubox_order_carrier_code, O.cancel  FROM orders_active_export OE INNER JOIN orders O on OE.orders_id = O.orders_id WHERE " . $stat . " AND OE.setignore != 1 ORDER BY O.date_purchased";
-		$ship_it_result = db_query($ship_it, db());
+		$ship_it_result = db_query($ship_it);
 		while ($report_data = array_shift($ship_it_result)) {
 			$possible_issue_order_id_list .= $report_data["id"] . ",";
 		}		
@@ -224,7 +222,7 @@ switch($status)
 			$ship_it = "SELECT OE.module_name, OE.print_date, OE.warehouse_id, OE.id, OE.orders_id, OE.tracking_number, OE.status, OE.fedex_status, OE.fedex_description, OE.setignore, O.date_purchased, O.customers_name, O.ubox_order_tracking_number, O.ubox_order_carrier_code, O.cancel  FROM orders_active_export OE INNER JOIN orders O on OE.orders_id = O.orders_id WHERE OE.id in ( " . $possible_issue_order_id_list . ") ORDER BY O.date_purchased ";
 			//echo $ship_it . "<br>";
 			
-			$ship_it_result = db_query($ship_it, db());
+			$ship_it_result = db_query($ship_it);
 			$ship_it_result_rows = tep_db_num_rows($ship_it_result);
 		}
 	}
@@ -294,7 +292,7 @@ while ($report_data = array_shift($ship_it_result)) {
 	}
 	
 	$orders_warehouse = "";
-	$orders_warehouse_query = db_query("select name, abbreviation from warehouse where warehouse_id = '" . $report_data["warehouse_id"] . "'", db());
+	$orders_warehouse_query = db_query("select name, abbreviation from warehouse where warehouse_id = '" . $report_data["warehouse_id"] . "'");
 	while ($orders_warehousers = array_shift($orders_warehouse_query)) 
 	{
 		$orders_warehouse = $orders_warehousers["abbreviation"];
@@ -416,15 +414,15 @@ while ($report_data = array_shift($ship_it_result)) {
 		<td align="middle" style="width: 20%; height: 22px;" class="style3 style11">
 				<font face="Arial, Helvetica, sans-serif" color="#333333" size="1"><?php  echo $report_data["status"]; ?><?php  echo $report_data["fedex_description"]; ?></font></td>
 		<td align="middle" width="5%" class="style3 style11" style="height: 22px">
-				<font face="Arial, Helvetica, sans-serif" color="#333333" size="1"><a href="ups_status_report_ignore.php?id=<?php  echo $report_data["id"]; ?>&status=<?php  echo $status; ?>">IGNORE</a></td>
+				<font face="Arial, Helvetica, sans-serif" color="#333333" size="1"><a href="ups_status_report_ignore.php?id=<?php  echo encrypt_url($report_data["id"]); ?>&status=<?php  echo $status; ?>">IGNORE</a></td>
 	</tr>
 	<?php  
 	$i++;
 } ?>
 
 <?php  
-$query = "SELECT GROUP_CONCAT(p.products_id) as grp_prod_id FROM products p LEFT JOIN products_to_categories p2c ON p.products_id=p2c.products_id WHERE categories_id IN (46, 43, 44, 45, 49, 47, 48, 42, 50, 51, 52, 53, 54, 55, 62, 63, 64, 65, 66, 67, 68, 69, 70)";
-$rgp = array_shift(db_query($query));
+$query = db_query("SELECT GROUP_CONCAT(p.products_id) as grp_prod_id FROM products p LEFT JOIN products_to_categories p2c ON p.products_id=p2c.products_id WHERE categories_id IN (46, 43, 44, 45, 49, 47, 48, 42, 50, 51, 52, 53, 54, 55, 62, 63, 64, 65, 66, 67, 68, 69, 70)");
+$rgp = array_shift($query);
 $arr_rgp = explode(',', $rgp["grp_prod_id"]);
 //echo "<br /> resFedexDt -> <pre>"; print_r($resFedexDt);
 while ($rowDtFedex = array_shift($resFedexDt)) {
@@ -435,22 +433,6 @@ while ($rowDtFedex = array_shift($resFedexDt)) {
 	}
 
 	$shopify_product_nm = $rowDtFedex["product_description"];
-	/*$orders_products_query = db_query("select orders_products_id, products_id, orders_products.orders_id, products_name, products_model, products_price, products_tax, products_quantity, final_price from orders_products where orders_products.orders_id = '" . (int)$rowDtFedex["orders_id"] . "'");
-	while ($orders_products = array_shift($orders_products_query)) {
-		
-		if(in_array($orders_products["products_id"], $arr_rgp))
-		{
-		  $shopify_product_nm = "";
-		  $orders_products_query1 = db_query("select * from products_shopify where ucb_products_id = '" . $orders_products["products_id"] . "'");
-		  while ($orders_products1 = array_shift($orders_products_query1)) {
-			$shopify_product_nm = $orders_products1["product_description"];
-		  }
-		  
-		  //if ($shopify_product_nm == ""){
-		//	$shopify_product_nm = $orders_products['products_name'];
-		  //}
-		}
-	}*/	
 	?>
 	<tr vAlign="center" bgColor="<?php  echo $bgcolor; ?>" >
 		<td align="center" class="style3" style="width: 6%; height: 22px;">		
@@ -515,7 +497,7 @@ while ($rowDtFedex = array_shift($resFedexDt)) {
 		</td>
 		<td align="middle" width="10%" class="style3" style="height: 22px">
 			<font face="Arial, Helvetica, sans-serif" color="#333333" size="1">
-				<a href="ups_status_report_ignore.php?id=<?php  echo $rowDtFedex["id"]; ?>&status=<?php  echo $status; ?>&UboxexTrack=yes">IGNORE</a>
+				<a href="ups_status_report_ignore.php?id=<?php  echo encrypt_url($rowDtFedex["id"]); ?>&status=<?php  echo $status; ?>&UboxexTrack=yes">IGNORE</a>
 			</font>
 		</td>
 	</tr>

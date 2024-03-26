@@ -1,11 +1,8 @@
 <?php  
 require ("inc/header_session.php");
-?>
-
-<?php 
 require ("mainfunctions/database.php"); 
 require ("mainfunctions/general-functions.php");
-
+db();
 ?>
 <!DOCTYPE html>
 
@@ -62,13 +59,13 @@ require ("mainfunctions/general-functions.php");
 
 <body>
 	<div>
-	<?php  include("inc/header.php"); ?>
-</div>
+		<?php include("inc/header.php"); ?>
+	</div>
 <div class="main_data_css">
 <?php 
 
 $returns = "SELECT * FROM orders_active_export INNER JOIN orders ON orders_active_export.orders_id = orders.orders_id WHERE orders_active_export.return_tracking_number != ''";
-$returnsres = db_query($returns, db() );
+$returnsres = db_query($returns);
 $returnsresnum = tep_db_num_rows($returnsres);
 ?>
 
@@ -108,7 +105,7 @@ while ($report_data = array_shift($returnsres)) {
 ?>
 	<tr vAlign="center">
 		<td bgColor="#e4e4e4" class="style3" style="width: 6%; height: 22px;">		<font face="Arial, Helvetica, sans-serif" color="#333333" size="1">
-		<a href="orders.php?id=<?php  echo $report_data["orders_id"]; ?>&proc=View&searchcrit=&page=0"><?php  echo $report_data["orders_id"]; ?></a></td>
+		<a href="orders.php?id=<?php  echo encrypt_url($report_data["orders_id"]); ?>&proc=View&searchcrit=&page=0"><?php  echo $report_data["orders_id"]; ?></a></td>
 		<td bgColor="#e4e4e4" style="width: 6%; height: 22px;">
 		
 <?php  

@@ -1,16 +1,15 @@
 <?php  
 session_start();
-
 require ("inc/header_session.php");
 require ("mainfunctions/database.php");
 require ("mainfunctions/general-functions.php");
+db();
 ?>
 <!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
 <title>B2C Active Order Issues</title>
-	
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <style type="text/css">
 
@@ -67,24 +66,26 @@ table.table_style tr td{
 
 <body>
 	<?php 
+	$crm_numberof_chr_divheight = 'aut0';
 	if((isset($_REQUEST["updatenote"])) && ($_REQUEST["updatenote"]==1))
 	   {
 
 			$count=$_REQUEST["cnt"];
 			$updatenote=$_REQUEST["updatenote"];
-			$orders_id=$_REQUEST["ordersid"];
+			$orders_id=decrypt_url($_REQUEST["ordersid"]);
 			$orderissue_lastnote=$_REQUEST["orderissue_lastnote"];
 		    $today = date("Ymd"); 
 		    // 
 		   //Save log
-		   $sql = "INSERT INTO ucbdb_crm (orders_id, comm_type, message, message_date, employee, file_name) VALUES ( '" . $orders_id . "',8,'" . preg_replace( "/'/", "\'", $orderissue_lastnote) . "','" . $today . "','" . $_COOKIE['userinitials'] . "','')";
-		   $result = db_query($sql,db() );
+		   $sql = "INSERT INTO ucbdb_crm (orders_id, comm_type, message, message_date, employee, file_name) VALUES ( '" . $orders_id . "',8,'" . preg_replace( "/'/", "\'", $orderissue_lastnote) . "','" . $today . "','" . $_COOKIE['
+		   userinitials'] . "','')";
+		   $result = db_query($sql);
 		
 			$rowcolor = "#E4E4E4"; 
 			$dt_view_qry = "SELECT orders.*, b2c_order_issue.* ";
 			$dt_view_qry .= "FROM b2c_order_issue Right JOIN orders ON b2c_order_issue.order_id = orders.orders_id  ";
 			$dt_view_qry .= "where orders.order_issue = 1 and orders.orders_id=".$orders_id;
-			$data_res = db_query($dt_view_qry, db() );
+			$data_res = db_query($dt_view_qry);
 			$data = array_shift($data_res);
 				
 				$address=""; 
@@ -104,21 +105,26 @@ table.table_style tr td{
 				$order_date = $data["date_purchased"];
 				//
 				$sql = "SELECT * FROM ucbdb_crm WHERE orders_id = " . $orders_id . " ORDER BY message_date DESC, id DESC limit 1 ";
-				$result = db_query($sql, db() );
+				$result = db_query($sql);
 				$myrowsel = array_shift($result);
 				if ($myrowsel["comm_type"] == "10"){
+					db_b2c_email_new();
 					$query = "select emaildate, fromadd, toadd, ccadd, subject FROM tblemail WHERE unqid =" . $myrowsel["EmailID"];
-					$dt_view_eml = db_query($query , db_b2c_email_new() );
+					$dt_view_eml = db_query($query);
+					
+					$final_msg = "";
+					$email_body_toppart = "";
+				    $attstr = "";
+					$final_msg_top = "";
 					while ($rec_em = array_shift($dt_view_eml)) {
 						$query_att = "select attachmentname FROM tblemail_attachment WHERE emailid =" . $myrowsel["EmailID"];
-						$dt_view_eml_att = db_query($query_att , db_b2c_email_new() );
+						$dt_view_eml_att = db_query($query_att);
+						$attachment_str = "";
 						while ($rec_em_att = array_shift($dt_view_eml_att)) {		
 							$attachment_str = $attachment_str . "<a style='color:#0000FF' target='_blank' href='emailatt_uploads/" . $myrowsel["EmailID"]."/".$rec_em_att["attachmentname"] . "'>" . $rec_em_att["attachmentname"]."</a>, ";
 						}
-
-						$final_msg = "";
 						$query_att = "select body_txt FROM tblemail_body_txt WHERE email_id =" . $myrowsel["EmailID"];
-						$dt_view_eml_att = db_query($query_att , db_b2c_email_new() );
+						$dt_view_eml_att = db_query($query_att);
 						while ($rec_em_att = array_shift($dt_view_eml_att)) {		
 							$final_msg = $rec_em_att["body_txt"];
 						}
@@ -141,7 +147,7 @@ table.table_style tr td{
 					}
 					
 					$final_msg_nodivs = strip_tags($final_msg);
-					
+					$crm_numberof_chr = 0;
 					$tmppos = strlen($email_body_toppart . $attstr . $final_msg_nodivs);
 					if ($tmppos > $crm_numberof_chr) {
 						$tmpstr = "<br><div style='background-color:#E4E4E4; height:".$crm_numberof_chr_divheight."px; width:400px; overflow-x: hidden; overflow-y: hidden;'>". $final_msg_top . "</div> <br/><a href='#' onclick='displayemail(".$myrowsel["id"].")'>View Complete Email</a> <br/><br/>";
@@ -152,14 +158,13 @@ table.table_style tr td{
 					
 					}else { 
 						$last_note = $email_body_toppart . $attstr . $final_msg ;
-					}		
-					db();
+					}	
 				}else{
 					$last_note = $myrowsel["message"];
 				}	
 				$last_note_date = $myrowsel["timestamp"];
 				//
-				
+				db();
 				$wareh_query = db_query("select * from orders_active_export where orders_id = '" . (int)$orders_id . "'");
 				$orders_tracking = array_shift($wareh_query);
 				$orders_warehouse_query = db_query("select * from warehouse where warehouse_id = '" . $orders_tracking["warehouse_id"] . "'");
@@ -184,7 +189,7 @@ table.table_style tr td{
 				//
 			?>
 			 <tr id="row<?php  echo $count; ?>">
-			<td bgcolor="<?php echo $rowcolor?>"><a target="_blank" href="orders.php?id=<?php echo $data["orders_id"]?>&proc=View&searchcrit=<?php echo $data["orders_id"]?>&page=0"><font face="Arial, Helvetica, sans-serif" size="1" color="#333333"><?php echo $data["orders_id"]?></font></a></td>
+			<td bgcolor="<?php echo $rowcolor?>"><a target="_blank" href="orders.php?id=<?php echo encrypt_url($data["orders_id"])?>&proc=View&searchcrit=<?php echo $data["orders_id"]?>&page=0"><font face="Arial, Helvetica, sans-serif" size="1" color="#333333"><?php echo $data["orders_id"]?></font></a></td>
 			
 			<td bgcolor="<?php echo $rowcolor?>"><?php  echo $data["customers_name"]; ?></td>
 			

@@ -2,12 +2,12 @@
 require ("inc/header_session.php");
 require ("mainfunctions/database.php"); 
 require ("mainfunctions/general-functions.php");
-
-
+db();
+$order_id = "";
 if(count($_POST))
 {
 	$arr_data = array();
-	foreach($process as $process_id)
+	foreach($_POST['process'] as $process_id)
 	{
 		$id = ${"id_".$process_id};
 		$order_id = ${"orders_id_".$process_id};
@@ -32,7 +32,6 @@ if(count($_POST))
 		echo "<hr width='100%'>";
 		// Echo Out the Values for Testing
 
-		
 $auth_net_login_id			= "6Tg3s2VHA";
 $auth_net_tran_key			= "638s776J25vaHHvj";
 
@@ -51,24 +50,15 @@ $submit_data 				= array
 	"x_amount"				=> "$amount",
 	"x_trans_id"			=> "$auth_trans_id",	
 );
-unset($data);	
+//unset($data);	
+$data = "";
 // Concatenate - I love that word - the submission data and put into variable $data
 foreach($submit_data as $key => $value) {
     $data .= $key . '=' . urlencode(preg_replace('/,/', '', $value)) . '&';
 }
-
 // Remove the last "&" from the string
 $data = substr($data, 0, -1);
-
-// TESTING - COMMENT OUT
-// TESTING - COMMENT OUT
 //echo $data;
-//echo "<br><br>";
-// TESTING - COMMENT OUT
-// TESTING - COMMENT OUT
-
-// Clear the response just in case it is lingering from a previous transaction since David wants a crazy loop
-
 unset($response);
 
 $url = 'https://secure.authorize.net/gateway/transact.dll'; 
@@ -91,18 +81,7 @@ curl_close ($ch);
 
 //$response = split('\,', $authorize);
 $response = explode(',', $authorize);
-// TESTING - COMMENT OUT
-// TESTING - COMMENT OUT
 //	  print_r(array_values($response));
-//echo "<br><br>";
-//print_r($response);
-//echo "<br><br>";
-//exit;	
-// TESTING - COMMENT OUT
-// TESTING - COMMENT OUT
-
-
-// Parse the response code and text for custom error display
 $response_code = explode(',', $response[0]);
 $response_text = explode(',', $response[3]);
 $response_trans_id = explode(',', $response[6]);
@@ -126,8 +105,7 @@ echo "<br><br>";
 
 //Insert these values
 $ins_sql = "insert into auth_net (orders_id, trans_id, type) values (" . $order_id . "," . $x_response_trans_id . ", 'Credit')";
-db_query($ins_sql,db() );
-
+db_query($ins_sql);
 
 // Now that Auth.Net Processing is doe, do all the inserts.
 
@@ -135,9 +113,7 @@ $today = date("Ymd");
 
 //$sql = "UPDATE ucbdb_credits SET pending = 'Processed' WHERE orders_id = " . $order_id; 
 $sql = "UPDATE ucbdb_credits SET pending = 'Processed' WHERE id = " . $process_id;
-db_query($sql,db() );
-
-
+db_query($sql);
 $output = "<STRONG>CREDIT PROCESSED</STRONG><br> ";
 $output .= "Total:  ";
 $output .= number_format(($amount), 2);
@@ -145,30 +121,27 @@ $output .= "<br>Auth.Net ID:  ";
 $output .= $x_response_trans_id;
 
 $commqry = "SELECT * FROM ucbdb_customer_log_config WHERE comm_type='System'";
-$commqryrw = array_shift(db_query($commqry));
+$res_commqry = db_query($commqry);
+$commqryrw = array_shift($res_commqry);
 $comm_type = $commqryrw["id"];  
 
 $sql3 = "INSERT INTO ucbdb_crm (orders_id, comm_type, message, message_date, employee) VALUES ( '" . $order_id . "','" . $comm_type . "','" . $output . "','" . $today . "','" . $_COOKIE['userinitials'] . "')";
 //echo "<BR>SQL: $sql<BR>";
-$result3 = db_query($sql3,db() );
-
+$result3 = db_query($sql3);
 }
 
 }
-
-
-
 echo "<DIV CLASS='SQL_RESULTS'>Record Inserted<br><br>Please wait - the database is being updated and this page will automatically refresh.</DIV>";
 if (!headers_sent()){    //If headers not sent yet... then do php redirect
-        header('Location: orders.php?id=' . $order_id . '&proc=View'); exit;
+        header('Location: orders.php?id=' . encrypt_url($order_id) . '&proc=View'); exit;
 }
 else
 {
         echo "<script type=\"text/javascript\">";
-        echo "window.location.href=\"orders.php?id=" . $order_id . "&proc=View\";";
+        echo "window.location.href=\"orders.php?id=" . encrypt_url($order_id) . "&proc=View\";";
         echo "</script>";
         echo "<noscript>";
-        echo "<meta http-equiv=\"refresh\" content=\"0;url=orders.php?id=" . $order_id . "&proc=View\" />";
+        echo "<meta http-equiv=\"refresh\" content=\"0;url=orders.php?id=" . encrypt_url($order_id) . "&proc=View\" />";
         echo "</noscript>"; exit;
 }//==== End -- Redirect
 //header('Location: orders.php?id=' . $_POST[orders_id] . '&proc=View');

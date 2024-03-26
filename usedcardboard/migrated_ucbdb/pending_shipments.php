@@ -1,17 +1,13 @@
 <?php
 require("inc/header_session.php");
 ?>
-
 <!DOCTYPE html>
 <html>
-
 <head>
 	<title>DASH - Pending Shipments</title>
 </head>
-
 <body>
 	<?php
-
 	$sql_table = "";
 	$sql_query = "";
 	if (isset($_REQUEST["tbl"])) {
@@ -57,6 +53,7 @@ require("inc/header_session.php");
 	$addslash = "yes";
 	require("mainfunctions/database.php");
 	require("mainfunctions/general-functions.php");
+	db();
 	?>
 	<div>
 		<?php
@@ -66,9 +63,6 @@ require("inc/header_session.php");
 	</div>
 	<div class="main_data_css">
 		<?php
-		/*----------------------------------------
-			  ADD NEW LINK
-			  ----------------------------------------*/
 		$proc = isset($_REQUEST['proc']) ? $_REQUEST['proc'] : '';
 		if ($proc == "") {
 			if ($allowaddnew == "yes") {
@@ -77,21 +71,12 @@ require("inc/header_session.php");
 				<a href="<?php echo $thispage; ?>?proc=New&<?php echo $pagevars; ?>">New Record</a><br>
 			<?php }
 			//echo "<a href=\"index.php\">Home</a><br><br>";
-		
-
-			/*---------------------------------------------------------------------------------------
-					 BEGIN SEARCH SECTION 9991
-					 ---------------------------------------------------------------------------------------*/
-			/*-- SECTION: 9991FORM --*/
+	
 			?>
 
 			<br>
 			<?php
 
-			/*----------------------------------------------------------------
-					 IF THEY ARE POSTING TO THE SEARCH PAGE 
-					 (SHOW SEARCH RESULTS)
-					 ----------------------------------------------------------------*/
 			$posting = isset($_REQUEST['posting']) ? $_REQUEST['posting'] : '';
 			if ($posting == "yes") {
 				/*-- SECTION: 9991SQL --*/
@@ -103,17 +88,14 @@ require("inc/header_session.php");
 				if ($sql_debug_mode == 1) {
 					echo "<BR>SQL: $sql<BR>";
 				}
-				$resultcount = (db_query($sqlcount, db())) or DIE(ThrowError("9991SQLresultcount", $sqlcount));
+				$reccount = 0;
+				$resultcount = (db_query($sqlcount));
 				if ($myrowcount = array_shift($resultcount)) {
 					$reccount = $myrowcount["reccount"];
 				}
 				echo "<DIV CLASS='NUM_RECS_FOUND'>$reccount Records Found</DIV>";
-				
-/*----------------------------------------------------------------
-END PAGING LINK - THIS IS USED FOR NEXT/PREVIOUS X RECORDS
-----------------------------------------------------------------*/
 				//EXECUTE OUR SQL STRING FOR THE TABLE RECORDS
-				$result = db_query($sql, db());
+				$result = db_query($sql);
 				if ($sql_debug_mode == 1) {
 					echo "<BR>SQL: $sql<BR>";
 				}
@@ -181,19 +163,17 @@ END PAGING LINK - THIS IS USED FOR NEXT/PREVIOUS X RECORDS
 
 						$order_amount = 0;
 						$t_sql_1 = "SELECT value FROM orders_total WHERE class = 'ot_total' and orders_id = " . $orders_id;
-						$t_sql_1_res = db_query($t_sql_1, db());
+						$t_sql_1_res = db_query($t_sql_1);
 						while ($t_sql_1_row = array_shift($t_sql_1_res)) {
 							$order_amount = number_format($t_sql_1_row["value"], 2);
 						}
 
 						$date_purchased = "";
 						$t_sql_1 = "SELECT date_purchased FROM orders WHERE orders_id = " . $orders_id;
-						$t_sql_1_res = db_query($t_sql_1, db());
+						$t_sql_1_res = db_query($t_sql_1);
 						while ($t_sql_1_row = array_shift($t_sql_1_res)) {
 							$date_purchased = $t_sql_1_row["date_purchased"];
 						}
-
-
 
 						/*-------------------------------------------------------------------------------
 										  Addition Start check box show if order not found in tracking 
@@ -280,7 +260,7 @@ END PAGING LINK - THIS IS USED FOR NEXT/PREVIOUS X RECORDS
 						<?php } else { ?>
 							<TD CLASS='<?php echo $shade; ?>'>
 								<a
-									href="<?php echo $thispage; ?>?tbl=<?php echo $_REQUEST["tbl"]; ?>&id=<?php echo $id; ?>&proc=Delete&<?php echo $pagevars; ?>&orders_id=<?php echo $orders_id; ?>">Remove</a>
+									href="<?php echo $thispage; ?>?tbl=<?php echo $_REQUEST["tbl"]; ?>&id=<?php echo encrypt_url($id); ?>&proc=Delete&<?php echo $pagevars; ?>&orders_id=<?php echo $orders_id; ?>">Remove</a>
 							</TD>
 						<?php } ?>
 						</TR>
@@ -302,7 +282,7 @@ END PAGING LINK - THIS IS USED FOR NEXT/PREVIOUS X RECORDS
 					echo '<TD CLASS="' . $TBL_COL_HDR . '" colspan="2"><Select name="warehouse2move" id="warehouse2move" >';
 					echo '<option value=0>Please Select Warehouse</option>';
 					$warehouse = "SELECT * FROM ucbdb_warehouse";
-					$resw2 = db_query($warehouse, db());
+					$resw2 = db_query($warehouse);
 					while ($wrow2 = array_shift($resw2)) {
 						echo '<option value="' . $wrow2['id'] . '">' . $wrow2['distribution_center'] . '</option>';
 					}
@@ -391,9 +371,6 @@ END PAGING LINK - THIS IS USED FOR NEXT/PREVIOUS X RECORDS
 					<?php
 				} //END PROC == ""
 			} //END IF POSTING = YES
-/*---------------------------------------------------------------------------------
-END SEARCH SECTION 9991
----------------------------------------------------------------------------------*/
 
 		}// END IF PROC = ""
 		
@@ -401,7 +378,7 @@ END SEARCH SECTION 9991
 
 		<?php
 		if ($proc == "Delete") {
-			$id = $_REQUEST['id'];
+			$id = decrypt_url($_REQUEST['id']);
 			?>
 			<a href="<?php echo $thispage; ?>?proc=&<?php echo $pagevars; ?>">Search</a><br>
 			<?php
@@ -420,24 +397,20 @@ END SEARCH SECTION 9991
 					Are you sure you want to mark the remove flag?<BR><br>
 					<?php $orders_id = $_GET["orders_id"]; ?>
 					<a
-						href="<?php echo $thispage; ?>?tbl=<?php echo $_REQUEST["tbl"]; ?>&id=<?php echo $id; ?>&delete=yes&proc=Delete&orders_id=<?php echo $orders_id; ?>&<?php echo $pagevars; ?>">Yes</a>
+						href="<?php echo $thispage; ?>?tbl=<?php echo $_REQUEST["tbl"]; ?>&id=<?php echo encrypt_url($id); ?>&delete=yes&proc=Delete&orders_id=<?php echo $orders_id; ?>&<?php echo $pagevars; ?>">Yes</a>
 					<a href="<?php echo $thispage; ?>?tbl=<?php echo $_REQUEST["tbl"]; ?>&<?php echo $pagevars; ?>">No</a>
 				</DIV>
 				<?php
 			} //IF !DELETE
 		
 			if ($delete == "yes") {
-
-				/*-- SECTION: 9995SQL --*/
 				if ($_REQUEST["tbl"] == "newitem") {
 					$sql = "UPDATE $sql_table SET sent = '2' WHERE id='$id' $addl_select_crit ";
 				} else {
 					$sql = "UPDATE $sql_table SET ship_status = 'X' WHERE id='$id' $addl_select_crit ";
 				}
 				//echo "<BR>SQL: $sql<BR>";
-				$result = db_query($sql, db());
-
-
+				$result = db_query($sql);
 				if (empty($result)) {
 					if (!headers_sent()) {    //If headers not sent yet... then do php redirect
 						header('Location: http://b2c.usedcardboardboxes.com/pending_shipments.php?posting=yes&');
@@ -451,19 +424,11 @@ END SEARCH SECTION 9991
 						echo "</noscript>";
 						exit;
 					}
-
 				} else {
 					echo "Error Deleting Record (9995SQL)";
 				}
 			} //END IF $DELETE=YES
-/*-------------------------------------------------------------------------------
-END DELETE RECORD SECTION 9995
--------------------------------------------------------------------------------*/
 		}// END IF PROC = "DELETE"
-		
-
-
-
 		?>
 		<BR>
 

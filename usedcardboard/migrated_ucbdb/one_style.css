@@ -1,0 +1,216 @@
+BODY
+{
+}
+.TBL_COL_HDR
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 11px;
+    FONT-FAMILY: Arial;
+    BACKGROUND-COLOR: #f5f5f5
+}
+.TBL_COL_HDR_NOSHADE
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 11px;
+    FONT-FAMILY: Arial;
+}
+.TBL_ROW_DATA
+{
+    BORDER-RIGHT: gray 1px solid;
+    BORDER-TOP: gray 1px;
+    FONT-SIZE: 11px;
+    BORDER-LEFT: gray 1px;
+    WIDTH: 100%;
+    BORDER-BOTTOM: darkgray 1px solid;
+    FONT-FAMILY: Arial;
+    TEXT-ALIGN: left
+}
+.TXT_BOX
+{
+    BORDER-RIGHT: 1px solid;
+    BORDER-TOP: 1px solid;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 11px;
+    BORDER-LEFT: 1px solid;
+    BORDER-BOTTOM: 1px solid;
+    FONT-FAMILY: Arial
+}
+.TBL_ROW_HDR
+{
+    BORDER-RIGHT: gray 1px solid;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 11px;
+    BORDER-BOTTOM: darkgray 1px solid;
+    FONT-FAMILY: Arial;
+    BACKGROUND-COLOR: #f5f5f5
+}
+.TBL_ROW_DATA_DRK
+{
+    FONT-SIZE: 11px;
+    BACKGROUND-COLOR: gainsboro
+}
+.TBL_ROW_DATA_LIGHT
+{
+    FONT-SIZE: 11px;
+    BACKGROUND-COLOR: #fafafa
+}
+.BUTTON
+{
+    BORDER-RIGHT: gray 1px solid;
+    BORDER-TOP: gray 1px solid;
+    BORDER-LEFT: gray 1px solid;
+    CURSOR: hand;
+    BORDER-BOTTOM: gray 1px solid
+}
+.PAGE_STATUS
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 11px;
+    WIDTH: 100%;
+    COLOR: black;
+    FONT-FAMILY: Arial;
+    BACKGROUND-COLOR: gainsboro
+}
+.PAGE_OPTIONS
+{
+}
+.PAGE_OPTIONS A
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    COLOR: #006600;
+    FONT-FAMILY: Arial
+}
+.SQL_RESULTS
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 11px;
+    COLOR: #006600;
+    FONT-FAMILY: Arial
+}
+A
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    COLOR: #006600;
+    FONT-FAMILY: Arial
+}
+.CURR_PAGE
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    WIDTH: 100%;
+    FONT-FAMILY: Arial;
+    BACKGROUND-COLOR: #f8f8f8
+}
+.NUM_RECS_FOUND
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    WIDTH: 100%;
+    FONT-FAMILY: Arial;
+    BACKGROUND-COLOR: #f8f8f8
+}
+.style1 {
+	font-size: xx-small;
+}
+.style3 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: x-small;
+	color: #333333;
+}
+.style7 {
+	font-size: xx-small;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #333333;
+}
+.style8 {
+	text-align: right;
+}
+.style2 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: x-small;
+	background-color: #99FF99;
+}
+.style9 {
+	font-size: xx-small;
+	background-color: #FF9900;
+}
+.style12 {
+	font-size: xx-small;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #333333;
+	text-align: center;
+}
+.style12left {
+	font-size: xx-small;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #333333;
+	text-align: left;
+}
+
+.style13 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: x-small;
+	background-color: #99FF99;
+	text-align: center;
+}
+.style14 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: xx-small;
+	background-color: #FF0000;
+}
+.style15 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: xx-small;
+	text-align: center;
+	background-color: #FF0000;
+}
+.style19 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: xx-small;
+	background-color: #E4E4E4;
+}
+.style20 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: xx-small;
+	text-align: center;
+	background-color: #E4E4E4;
+}
+.style21 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: xx-small;
+	background-color: #FFFF00;
+}
+.style22 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: xx-small;
+	text-align: center;
+	background-color: #FFFF00;
+}
+.style23 {
+	font-size: xx-small;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #333333;
+	text-align: center;
+	background-color: #FFFF00;
+}
+.style24 {
+	font-size: xx-small;
+	background-color: #FF9900;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #333333;
+}
+.style25 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: x-small;
+	background-color: #99FF99;
+	text-align: right;
+}
+.style26 {
+	font-size: xx-small;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #333333;
+	text-align: center;
+	background-color: #FF0000;
+}

@@ -2,14 +2,14 @@
 require ("inc/header_session.php");
 require ("mainfunctions/database.php"); 
 require ("mainfunctions/general-functions.php");
-
+db();
 if ($_REQUEST["flg"] == 'off')
 {
 	$dt_view_qry = "UPDATE tblvariable SET variablevalue = 'off' WHERE variablename='zopim_chat_flg'";
-	$dt_view_res = db_query($dt_view_qry,db() );
+	$dt_view_res = db_query($dt_view_qry);
 }else{
 	$dt_view_qry = "UPDATE tblvariable SET variablevalue = 'on' WHERE variablename='zopim_chat_flg'";
-	$dt_view_res = db_query($dt_view_qry,db() );
+	$dt_view_res = db_query($dt_view_qry);
 }
 
 	echo "<script type=\"text/javascript\">";
@@ -18,5 +18,3 @@ if ($_REQUEST["flg"] == 'off')
 	echo "<noscript>";
 	echo "<meta http-equiv=\"refresh\" content=\"0;url=index.php" . "\" />";
 	echo "</noscript>"; exit;
-
-?>
