@@ -4,7 +4,6 @@ require ("mainfunctions/general-functions.php");
 require('meeting_common_function.php');
 $select_level=db_query("SELECT level from loop_employees where b2b_id =".$_COOKIE['b2b_id'], db());
 $emp_level = array_shift($select_level)['level'];
-
 $meeting_filter = "";
 if($emp_level!=2){
 	$meeting_filter =" and attendee_id='".$_COOKIE['b2b_id']."'";
@@ -30,8 +29,8 @@ function getMeetingProjectDataAfterAction($meeting_id){
 function getAllProjectDataAfterAction(){
     //$sql_main = db_query("SELECT id, meeting_name FROM meeting_master where status = 1 union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name", db_project_mgmt());
     $sql_main = db_query("SELECT mm.id, mm.meeting_name FROM meeting_attendees as ma JOIN meeting_master as mm ON mm.id = ma.meeting_id 
-								where mm.status = 1 $meeting_filter GROUP By ma.meeting_id 
-								union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name ", db_project_mgmt());
+	where mm.status = 1 $meeting_filter GROUP By ma.meeting_id 
+	union SELECT 0, 'Personal' ORDER BY (meeting_name <> 'Personal') ASC,meeting_name ", db_project_mgmt());
 								
 	$result=array();
     while($main_row = array_shift($sql_main)){
@@ -103,7 +102,7 @@ $empDetails=getOwerHeadshotForMeeting($empDetails_arr['Headshot'],$empDetails_ar
 		$data=[];
 		while($r = array_shift($sql1)){
 			$data=$r;
-			$sql2 = db_query("SELECT checked, milestone,milestone_date FROM project_milestones where project_id = $project_id " , db_project_mgmt());
+			$sql2 = db_query("SELECT checked, milestone,milestone_date FROM project_milestones where project_id = $project_id ORDER BY milestone_date" , db_project_mgmt());
 			$data_milestone=[];
 			while ($rowsel_getdata = array_shift($sql2)) {
 				$data_milestone[]=array('checked'=>$rowsel_getdata["checked"], 'milestone'=>$rowsel_getdata['milestone'],'milestone_date'=>$rowsel_getdata['milestone_date']);

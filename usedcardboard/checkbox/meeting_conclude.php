@@ -187,7 +187,7 @@
     $(document).ready(function() { 
         $('#conclude').addClass('active_user_page');
     });
-    $(document).on('blur','.meeting_ratings',function(){
+    $(document).on('input','.meeting_ratings',function(){
        var rating_table_id= $(this).attr('rating_table_id');
        var rating=$(this).val();
        $.ajax({
@@ -215,19 +215,22 @@
        });
     }
     function finish_meeting(meeting_timer_id){
-        var send_meeting_email_to=$('#send_meeting_email_to').val();
-        var archive_completed_meeting_todo=$("#archive_completed_meeting_todo").val();
-        var ajax_data_str="?finish_meeting_action=1 &meeting_id=<?= $meeting_id; ?>  &meeting_timer_id=<?= $meeting_timer_id; ?> &send_meeting_email_to="+send_meeting_email_to+"&archive_completed_meeting_todo="+archive_completed_meeting_todo;        
-        $.ajax({
-            url:'dashboard_meeting_action.php'+ajax_data_str,
-            type:'get',
-            async:false,
-            success:function(response){
-                var res=JSON.parse(response);
-                var para_str='tid='+res.tid+'&&mid='+res.mid;
-                window.location.href = 'meeting_conclusion_finish.php?'+para_str;	
-            }					
-        });
+        var conf = confirm("Are you sure you want to conclude this meeting?");
+        if(conf == true){
+            var send_meeting_email_to=$('#send_meeting_email_to').val();
+            var archive_completed_meeting_todo=$("#archive_completed_meeting_todo").val();
+            var ajax_data_str="?finish_meeting_action=1 &meeting_id=<?= $meeting_id; ?>  &meeting_timer_id=<?= $meeting_timer_id; ?> &send_meeting_email_to="+send_meeting_email_to+"&archive_completed_meeting_todo="+archive_completed_meeting_todo;        
+            $.ajax({
+                url:'dashboard_meeting_action.php'+ajax_data_str,
+                type:'get',
+                async:false,
+                success:function(response){
+                    var res=JSON.parse(response);
+                    var para_str='tid='+res.tid+'&&mid='+res.mid;
+                    window.location.href = 'meeting_conclusion_finish.php?'+para_str;	
+                }					
+            });
+        }
     }
 
     function finish_meeting1(meeting_timer_id){

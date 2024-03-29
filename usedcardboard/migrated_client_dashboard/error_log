@@ -1,0 +1,4 @@
+[17-Mar-2024 22:30:01 America/Chicago] PHP Warning:  mysqli::__construct(): (HY000/1040): Too many connections in /home/usedcardboardbox/public_html/client_dash/mainfunctions/database.php on line 13
+[17-Mar-2024 22:30:01 America/Chicago] PHP Warning:  mysqli::prepare(): Couldn't fetch mysqli in /home/usedcardboardbox/public_html/client_dash/mainfunctions/general-functions.php on line 244
+[17-Mar-2024 22:30:01 America/Chicago] PHP Warning:  mysqli_errno(): Couldn't fetch mysqli in /home/usedcardboardbox/public_html/client_dash/mainfunctions/general-functions.php on line 244
+[17-Mar-2024 22:30:01 America/Chicago] PHP Warning:  mysqli_error(): Couldn't fetch mysqli in /home/usedcardboardbox/public_html/client_dash/mainfunctions/general-functions.php on line 244
