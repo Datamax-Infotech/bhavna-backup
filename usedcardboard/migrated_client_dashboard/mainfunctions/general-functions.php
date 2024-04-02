@@ -334,6 +334,35 @@ function get_b2b_box_id( int|string $loop_id): string{
 	}
 	return $box_id;
 }
+
+function getnickname(string $warehouse_name, int $b2bid) : string{
+	$nickname = "";
+	if ($b2bid > 0) {
+		$sql = "SELECT nickname, company, shipCity, shipState FROM companyInfo where ID = " . $b2bid;
+		db_b2b();
+		$result_comp = db_query($sql);
+		while ($row_comp = array_shift($result_comp)) {
+			if ($row_comp["nickname"] != "") {
+				$nickname = $row_comp["nickname"];
+			}else {
+				$tmppos_1 = strpos($row_comp["company"], "-");
+				if ($tmppos_1 != false)
+				{
+					$nickname = $row_comp["company"];
+				}else {
+					if ($row_comp["shipCity"] <> "" || $row_comp["shipState"] <> "" ) 
+					{
+						$nickname = $row_comp["company"] . " - " . $row_comp["shipCity"] . ", " . $row_comp["shipState"] ;
+					}else { $nickname = $row_comp["company"]; }
+				}
+			}
+		}
+	}else {
+		$nickname = $warehouse_name;
+	}
+	
+	return $nickname;
+}	
 /*function sendemail_php_function(array|null $files, string $path, string $mailto, string $scc, string $sbcc, string $from_mail, string $from_name, string $replyto, string $subject, string $message): string
 	{
 		//Code to send mail
