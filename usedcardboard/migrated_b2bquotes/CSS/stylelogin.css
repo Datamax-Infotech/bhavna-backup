@@ -1,0 +1,96 @@
+
+/*
+Page Name: stylelogin.css
+Page created By: Amarendra
+Page created On: 03-04-2021
+Last Modified On: 
+Last Modified By: Amarendra
+Change History:
+Date           By            Description
+==================================================================================================================
+03-04-21      Amarendra     This file is created to add css for login.php.
+==================================================================================================================
+*/
+
+
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1; 
+  padding-top: 100px; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgb(0,0,0); 
+  background-color: rgba(0,0,0,0.6); 
+}
+
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  width: 80%;
+}
+
+
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+fieldset {
+	border: none;
+}
+
+.group2 { 
+	position: relative; 
+	margin-top: 16px; 
+}
+
+.btn-block{margin-top:20px;
+margin-bottom:20px;
+font-size:18px;}
+
+
+.group { 
+	position: relative; 
+	margin-top: 30px; 
+}
+
+
+.input {
+	font-size: 18px;
+	padding: 10px 10px 10px 5px;
+	-webkit-appearance: none;
+	display: block;
+	background: none;
+	color: #636363;
+	width: 95%;
+	border: none;
+	border-radius: 0;
+	border-bottom: 1px solid #757575;
+}
+
+.input:focus { outline: none; }
+
+@media  screen and (max-width: 767px) and (min-width: 576px){
+.modal-content  {width:400px;}
+
+.modal{ margin: 0 20%;}
+} 
+
+
+@media screen and (min-width: 768px) {
+	
+.modal-content  {width:500px;}
+  
+ 
+}
+
+
+em{display:none;}

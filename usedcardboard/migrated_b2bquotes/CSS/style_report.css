@@ -1,0 +1,122 @@
+/* report-lucido css*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,300;0,400;1,400&family=Roboto:wght@300;500&display=swap');
+body{
+	height:100%;
+	font-size:16px; color:#555555;font-family:Roboto; font-weight:0;line-height:1.4
+}
+*{margin:0; padding:0;}
+img{border:0 none;}
+
+p, h1, h2, h3, h4, h5, h6, ul{margin:0; padding:0;}
+a{color:#6b9624; text-decoration:none; }
+a:hover{text-decoration:underline;}
+main{margin-top:84px;}
+form{font-size:16px; color:#555555;font-family:Roboto; font-weight:lighter;}
+li{list-style:none;}
+table{ font-size:12px; text-align:center;}
+td{height:30px; padding:0 5px; /*background-color:#fdf0de;*/}
+
+.rowdata:hover td{background-color:#e4f9e3;color:#000}
+.headrow{background-color:#5cb726; color:#FFFFFF;}
+.mb-10{margin-bottom:10px;}
+.mb-30{margin:0 30px;}
+.pb-10{padding:0 10px;}
+.bg-color{background-color:#5cb726; border:1px solid #5cb726; color:#FFFFFF;transition: ease-out 0.4s;}
+.bg-color:hover{box-shadow: inset 400px 0 0 0 #FFFFFF; color: #555555;}
+.ftsize-14{font-size:14px;}
+.ftsize-12{font-size:12px;}
+h3{
+	font-size:20px;
+	font-weight:500;
+}
+
+.main_container{
+	float: left;
+	width: 100%;
+	clear: both !important;
+	position: fixed;
+	background:#ffffff;
+	z-index: 99;
+	border-bottom: 2px solid #e7e7e7;
+	height: 84px;
+}
+.sub_container{
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1440px;
+}
+.header{
+	margin: 0px 30px;
+	text-align: center;
+}
+.logo_img{
+	float: left;
+	margin-top: 10px;
+}
+.contact_number{
+	float: right;
+	padding-top: 12px;
+}
+.needhelp{
+	font-size: 20px;
+	font-weight:500;
+	color: #6b9624;
+}
+.needhelp_call{
+	font-size: 15px;
+}
+.leftalgn {
+    text-align: left!important;
+	float: none!important;
+}
+.call_img{
+	vertical-align: middle;
+	width: 18px;
+	height: 20px;
+}
+input[type=submit]{
+	font-size:16px;
+}
+input[type=text]{
+	border:1px solid #8f8f9d;
+}
+input[type=text], input[type=submit]{
+	width:20%;
+	padding:5px 15px;
+	border-radius:15px;
+	font-weight:0;
+}
+.footer_l{
+	border-top: 2px solid #e7e7e7;
+	height: 50px;
+	clear: both;
+	text-align: center;
+}
+.copytxt{
+	line-height: 48px;
+	font-weight: 0;
+
+}
+main{min-height:480px;}
+@media screen and (max-width: 480px) 
+{
+	main{min-height:250px;}
+	.header{
+		margin:0 10px;
+	}
+	.call_img{
+		vertical-align: middle;
+		width: 14px;
+		height: 16px;
+	}
+	.needhelp{
+		font-size: 16px;
+		color: #6b9532;
+	}
+	.needhelp_call{
+		font-size: 12px;
+	}
+	.mb-30{
+		margin:0;
+	}
+}
