@@ -1,0 +1,202 @@
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Columns Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<table id="myTable">
+    <tr>
+        <th>Header 1</th>
+        <th>Header 2</th>
+        <th>Header 3</th>
+    </tr>
+    <tr>
+        <td>Cell 1</td>
+        <td>Cell 2</td>
+        <td>Cell 3</td>
+    </tr>
+    <tr>
+        <td>Cell 4</td>
+        <td>Cell 5</td>
+        <td>Cell 6</td>
+    </tr>
+</table>
+
+<button id="mergeColumns">Merge Columns 2 and 3</button>
+
+
+<table id="myTable2">
+    <tr>
+        <th>Header 1</th>
+        <th colspan="2">Merged Header</th>
+    </tr>
+    <tr>
+        <td>Cell 1</td>
+        <td colspan="2">Merged Cell</td>
+    </tr>
+    <tr>
+        <td>Cell 4</td>
+        <td colspan="2">Merged Cell</td>
+    </tr>
+</table>
+
+<button id="splitColumns">Split Merged Columns</button>
+
+<script>
+    $(document).ready(function() {
+        $('#mergeColumns').click(function() {
+            $('#myTable tr').each(function() {
+                var $row = $(this);
+                $row.find('td:eq(1)').attr('colspan', 2); // Merge second column with the third
+                $row.find('td:eq(2)').remove(); // Remove the third column
+            });
+        });
+        $('#splitColumns').click(function() {
+            $('#myTable2 tr').each(function() {
+                var $row = $(this);
+                var $mergedCell = $row.find('td[colspan="2"]');
+                if ($mergedCell.length > 0) {
+                    $mergedCell.removeAttr('colspan');
+                    $mergedCell.after('<td>New Cell</td>');
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Context Menu for Multiple Tables</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .context-menu {
+            display: none;
+            position: absolute;
+            z-index: 1000;
+            width: 150px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .context-menu-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .context-menu-item:hover {
+            background-color: #f1f1f1;
+        }
+        .context-menu-item i {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+<div>
+<table class="myTable">
+    <tr>
+        <th>Header 1</th>
+        <th>Header 2</th>
+        <th>Header 3</th>
+    </tr>
+    <tr>
+        <td>Cell 1</td>
+        <td>Cell 2</td>
+        <td>Cell 3</td>
+    </tr>
+    <tr>
+        <td>Cell 4</td>
+        <td>Cell 5</td>
+        <td>Cell 6</td>
+    </tr>
+</table>
+</div>
+<div>
+<table class="myTable">
+    <tr>
+        <th>Header A</th>
+        <th>Header B</th>
+        <th>Header C</th>
+    </tr>
+    <tr>
+        <td>Cell A1</td>
+        <td>Cell B1</td>
+        <td>Cell C1</td>
+    </tr>
+    <tr>
+        <td>Cell A2</td>
+        <td>Cell B2</td>
+        <td>Cell C2</td>
+    </tr>
+</table>
+</div>
+<div class="context-menu" id="contextMenu">
+    <div class="context-menu-item" id="settings">
+        <i class="fas fa-cog"></i> Settings
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('.myTable').on("contextmenu", "tr", function(e) {
+            e.preventDefault();
+            $("#contextMenu").css({
+                display: "block",
+                left: e.pageX,
+                top: e.pageY
+            }).data("row", $(this));
+        });
+
+        $(document).on("click", function() {
+            $("#contextMenu").hide();
+        });
+
+        $("#settings").on("click", function() {
+            var $row = $("#contextMenu").data("row");
+            alert("Settings clicked for row: " + $row.index() + " in table: " + $row.closest('table').index('.myTable'));
+        });
+    });
+</script>
+
+</body>
+</html>

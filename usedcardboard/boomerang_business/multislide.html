@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bootstrap 4 Carousel</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+/* bootstrap mod: carousel controls */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%2322313F' stroke-miterlimit='10' stroke-width='2' viewBox='0 0 34.589 66.349'%3E%3Cpath d='M34.168.8 1.7 33.268 34.168 65.735'/%3E%3C/svg%3E");
+  height: 100px;
+}
+
+.carousel-control-next-icon {
+  transform: rotate(180deg);
+}
+
+/* medium - display 4  */
+@media (min-width: 768px) {
+    #gallery .carousel-inner .carousel-item-right.active,
+    #gallery .carousel-inner .carousel-item-next {
+      transform: translateX(33.33333%);
+    }
+    
+    #gallery .carousel-inner .carousel-item-left.active, 
+    #gallery .carousel-inner .carousel-item-prev {
+      transform: translateX(-33.33333%);
+    }
+}
+
+/* large - display 5 */
+@media (min-width: 992px) {
+    #gallery .carousel-inner .carousel-item-right.active,
+    #gallery .carousel-inner .carousel-item-next {
+      transform: translateX(90%);
+    }
+    
+    #gallery .carousel-inner .carousel-item-left.active, 
+    #gallery .carousel-inner .carousel-item-prev {
+      transform: translateX(-90%);
+    }
+}
+
+#gallery .carousel-inner .carousel-item-right,
+#gallery .carousel-inner .carousel-item-left{ 
+  transform: translateX(0);
+}
+
+#gallery .carousel-indicators li{
+    background-color: gray;
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+}
+/* gallery slider */
+#gallery .carousel-inner .carousel-item.active,
+#gallery .carousel-inner .carousel-item-next,
+#gallery .carousel-inner .carousel-item-prev {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  #gallery .carousel-inner .carousel-item > div {
+    display: none;
+  }
+  #gallery .carousel-inner .carousel-item > div:first-child {
+    display: block;
+    text-align: center;
+  }
+}
+
+
+  </style>
+</head>
+<body>
+
+    <div class="container h-100">
+        <div class="row mx-auto h-100">
+          <div id="gallery" class="carousel slide w-100 align-self-center" data-ride="carousel">
+            <ol class="carousel-indicators">
+                <li data-target="#gallery" data-slide-to="0" class="active"></li>
+                <li data-target="#gallery" data-slide-to="1"></li>
+                <li data-target="#gallery" data-slide-to="2"></li>
+                <!-- Add more indicators as needed -->
+              </ol>
+            <div class="carousel-inner mx-auto w-90" role="listbox" data-toggle="modal" data-target="#lightbox">
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/1.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/2.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/3.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/4.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/5.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/6.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/7.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/8.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/9.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/10.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/11.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/12.png" class="img-fluid">
+                </div>
+              </div>
+              <div class="carousel-item">
+                <div class="col-md-2">
+                    <img src="images/clients_slider/13.png" class="img-fluid">
+                </div>
+              </div>
+            </div>
+            <div class="w-100">
+              <a class="carousel-control-prev w-auto" href="#gallery" role="button" data-slide="prev">
+                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                      <span class="sr-only">Previous</span>
+                  </a>
+              <a class="carousel-control-next w-auto" href="#gallery" role="button" data-slide="next">
+                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                      <span class="sr-only">Next</span>
+                  </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    jQuery('#gallery').carousel({
+  interval: 4000
+})
+
+// Modify each slide to contain five columns of images
+jQuery('#gallery.carousel .carousel-item').each(function(){
+    var minPerSlide = 4;
+    var next = jQuery(this).next();
+    if (!next.length) {
+    next = jQuery(this).siblings(':first');
+    }
+    next.children(':first-child').clone().appendTo(jQuery(this));
+    
+    for (var i=0;i<minPerSlide;i++) {
+        next=next.next();
+        if (!next.length) {
+        	next = jQuery(this).siblings(':first');
+      	}
+        
+        next.children(':first-child').clone().appendTo(jQuery(this));
+      }
+});
+
+// Initialize carousel
+jQuery( ".carousel-item:first-of-type" ).addClass( "active" );
+jQuery( ".carousel-indicators:first-child" ).addClass( "active" );
+</script>
+
+</body>
+</html>
