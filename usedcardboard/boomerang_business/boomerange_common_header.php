@@ -15,7 +15,15 @@
   <script src="assets/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         var timerStart = Date.now();
-       // alert('timerStart -> '+timerStart)
+       
+        // Collapse navbar when clicking outside
+        $(document).click(function(event) {
+            var clickover = $(event.target);
+            var _opened = $("#navbarNavTop").hasClass("show");
+            if (_opened === true && !clickover.closest('.navbar-collapse').length) {
+                $("button.navbar-toggler").click();
+            }
+        });
     </script>
 	
 	<!-- TOOLTIP STYLE START -->
@@ -44,7 +52,7 @@
     </button>
     
   
-    <a class="" href="client_dashboard_new.php"><img class="header_logo" src="images/ucb-logo-zero.png" /></a>
+    <a class="" href="home.php"><img class="header_logo" src="images/ucb-logo.png" /></a>
 
     </div>
     <!-- Navbar links -->
@@ -53,14 +61,6 @@
         <li class="nav-item active">
           <a class="nav-link" href="home.php" onclick="show_loading()">Home</a>
         </li>
-        <!--<li class="nav-item">
-          <a class="nav-link" href="user_profile.php" >User profile</a>
-        </li> -->
-        <?php /*
-        <li class="nav-item">
-          <a class="nav-link" href="client_dashboard_new.php?compnewid=<?= urlencode(encrypt_password($client_companyid)); ?>&show=box_profile<?= $repchk_str ?>" onclick="show_loading()">Box profiles</a>
-        </li>
-        <?php */ ?>
         <li class="nav-item">
           <a class="nav-link" href="client_dashboard_new.php?show=closed_loop_inv<?= $repchk_str ?>" onclick="show_loading()">Closed Loop Inventory</a>
         </li>
@@ -96,26 +96,8 @@
 		
 	<?php if ($sales_rep_login == "no") { ?>  
       <div class="d-flex align-items-center">
-		 <? /*if ($hdmultiple_acc_flg == 1) { ?>
-              <form class="px-1 mb-0" name="frmchangepwd" action="client_dashboard_new.php?compnewid=ssQ3ZaqbEIAA3emPe%2FPxcO5%2BYM1P2cfi%2F67%2BRAITKjxq5EufBol9yMCnEJvmzZIit1uiCzZVVUOl9BGOxUgy%2Bg%3D%3D&amp;show=change_password" method="Post">
-                <input type="button" class="btn btn-topbar" id="btnswitchacc" name="btnswitchacc" onclick="swicthacc(201, 81689)" value="Switch Locations" style="cursor:pointer;">
-              </form>
-			   <? } */?>
-            <? /*if (!isset($_REQUEST["hd_chgpwd"])) { ?>
-              <form class="px-1 mb-0" name="frmchangepwd" action="client_dashboard_new.php?compnewid=urk%2F%2BS7UVfeB7Z4p5%2BImXBKvO%2Fa2h0f6RPTzUt5IX9AMci6uyhU0pw3MCDoBKYFUWEU5UvIK1IUZbTCFaQu6vQ%3D%3D&amp;show=change_password" method="Post">
-                <input type="submit" class="btn btn-topbar" name="btnchgpwd" value="Change password" style="cursor:pointer;">
-                <input type="hidden" name="hd_chgpwd" id="hd_chgpwd" value="yes">
-              </form>
-			   <? } */?>
           <?php 
               if(isset($_COOKIE['loginid']) && $_COOKIE['loginid']!= "" ){ ?>
-              <!--
-                <form class="px-1 mb-0" name="frmsignout" action="client_dashboard_new.php" method="Post">
-                <input type="submit" class="btn btn-topbar" name="btnsignout" value="Log off" style="cursor:pointer;">
-                <input type="hidden"  name="hd_signout" id="hd_signout" value="yes">
-              </form>
-			         <a class="mr-4 btn btn-topbar" href="user_profile.php">My Profile</a>
-              -->
                     <?php 
                     db();
                     $select_user = db_query("SELECT user_name FROM boomerang_usermaster WHERE loginid = '".$_COOKIE['loginid']."'");
@@ -131,55 +113,11 @@
         </div>
 		
         <?php } ?>
-        <!-- &nbsp;&nbsp;<p class="company_text_header"><i><? //echo $client_name. " - ".$shipCityNm.", ".$shipStateNm; ?></i></p> -->
-      </div>
+    </div>
   </nav>
   <div class="nav-top-2">
     <p class="pl-5 mb-0">
     Shop B2B:
-    <?php /* href="client_dashboard_new.php?compnewid=<?= urlencode(encrypt_password($client_companyid)); ?>&show=inventory<?= $repchk_str ?>" */ ?>
     <a class="gaylord_link"  href="client_dashboard_new.php?show=inventory<?= $repchk_str ?>" onclick="show_loading()">Browse Gaylords</a>
   </p>
   </div>
-
-  <?php 
-  if (isset($_REQUEST["hd_signout"])) {
-    if ($_REQUEST["hd_signout"] == "yes") {
-      $date_of_expiry = time() - 2 ;
-      setcookie( "loginid", "", $date_of_expiry );
-      
-      echo "<script type=\"text/javascript\">";
-      echo "window.location.href=\"index.php\";";
-      echo "</script>";
-      echo "<noscript>";
-      echo "<meta http-equiv=\"refresh\" content=\"0;url=index.php\" />";
-      echo "</noscript>"; exit;
-      
-    }
-    
-  }
-  
-  if (isset($_REQUEST["hd_chgpwd_upd"])) {
-    if ($_REQUEST["hd_chgpwd_upd"] == "yes") {
-  
-      $sql="UPDATE clientdashboard_usermaster SET password = '" . $_REQUEST["txt_newpwd"]  . "' WHERE loginid = " . $client_loginid ;
-      //echo "<br/>".$sql; exit();
-      $result = db_query($sql, db());
-      
-      $res1 = db_query("SELECT user_name FROM clientdashboard_usermaster WHERE loginid = " . $client_loginid, db()); 
-      while($fetch_data1=array_shift($res1)) {
-        $strQuery = "UPDATE clientdashboard_usermaster SET password = '".$_REQUEST["txt_newpwd"]."' WHERE user_name = '" . $fetch_data1["user_name"] . "'";
-        $result = db_query($strQuery, db());
-      }
-      
-      echo "<script type=\"text/javascript\">";
-      echo "window.location.href=\"client_dashboard_new.php?compnewid=" . urlencode(encrypt_password($_REQUEST["compnewid_chgpwd"])) . "\";";
-      echo "</script>";
-      echo "<noscript>";
-      echo "<meta http-equiv=\"refresh\" content=\"0;url=client_dashboard_new.php?compnewid=" . urlencode(encrypt_password($_REQUEST["compnewid_chgpwd"])) . "\" />";
-      echo "</noscript>"; exit;
-      
-    }
-    
-  }
-  ?>

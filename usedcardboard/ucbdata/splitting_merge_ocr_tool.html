@@ -80,7 +80,7 @@
 </html>
 
 -->
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -200,3 +200,129 @@
 
 </body>
 </html>
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Page</title>
+    <style>
+       body {
+            overflow:hidden;
+        }
+    </style>
+</head>
+<body>
+
+<iframe id="full-screen-me"  src="https://www.ucbdata.com/ucbloop/B2Binventory_Gaylords_user.php?shown_in_client_flg=1" style="overflow:hidden;height:100%;width:100%" height="100%" width="100%" frameborder="0" wmode="transparent"></iframe>
+<script language="javascript">
+    function autoResizeDiv()
+    {
+        document.getElementById('full-screen-me').style.height = window.innerHeight +'px';
+    }
+    window.onresize = autoResizeDiv;
+    autoResizeDiv();
+</script>
+</body>
+</html>
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table with Column Merge Option</title>
+    <style>
+        .arrow-button {
+            display: inline-block;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 16px;
+            color: blue;
+            user-select: none;
+        }
+        td {
+            padding: 10px;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+
+<table>
+    <tr>
+        <td>Row 1, Cell 1</td>
+        <td>Row 1, Cell 2</td>
+        <td>Row 1, Cell 3</td>
+        <td>Row 1, Cell 4</td>
+        <td>Row 1, Cell 5</td>
+        <td>Row 1, Cell 6</td>
+        <td>Row 1, Cell 7</td>
+    </tr>
+    <tr>
+        <td>Row 2, Cell 1</td>
+        <td>Row 2, Cell 2</td>
+        <td>Row 2, Cell 3</td>
+        <td>Row 2, Cell 4</td>
+        <td>Row 2, Cell 5</td>
+        <td>Row 2, Cell 6</td>
+        <td>Row 2, Cell 7</td>
+    </tr>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function addMergeArrows() {
+        const rows = $('table tr');
+
+        // Add merge arrows after the 4th column of each row
+        rows.each(function() {
+            const cells = $(this).find('td');
+            
+            // Start adding arrows after the 4th <td>
+            cells.each(function(index) {
+                if (index >= 3 && index < cells.length - 1) {
+                    const arrow = $('<span class="arrow-button">→</span>');
+
+                    arrow.on('click', function() {
+                        mergeColumns(index);
+                    });
+
+                    $(this).after(arrow);
+                }
+            });
+        });
+    }
+
+    function mergeColumns(index) {
+        $('table tr').each(function() {
+            const tds = $(this).find('td');
+            const targetCell = $(tds[index]);
+            const nextCell = $(tds[index + 1]);
+            //targetCell.text(targetCell.text() + ' ' + nextCell.text());
+            var merged_text = targetCell.text() + ' ' + nextCell.text();
+            var conf = confirm(`Merged Text will be ${merged_text}, Do you want to merge?`);
+            if(conf){
+                targetCell.text(merged_text);
+                nextCell.remove();
+            }
+        });
+
+        // Remove all arrow buttons
+        $('.arrow-button').remove();
+
+        // Re-add arrow buttons to reflect the new structure
+        addMergeArrows();
+    }
+
+    $(document).ready(function() {
+        addMergeArrows();
+    });
+</script>
+
+</body>
+</html>
+-->
+

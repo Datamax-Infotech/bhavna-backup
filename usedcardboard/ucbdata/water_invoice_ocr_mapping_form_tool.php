@@ -18,6 +18,7 @@ require("mainfunctions/general-functions.php");
 		.form-control {
 			border-radius: 0;
 		}
+
 		.form-control-sm {
 			font-size: 0.8rem !important;
 		}
@@ -114,36 +115,65 @@ require("mainfunctions/general-functions.php");
 		.table_container {
 			max-height: 380px;
 			overflow-y: auto;
+			margin-top: 20px;
 		}
 
 		#contentsplitter {
 			border: 1px solid #C4C4C4;
 		}
-		.btn.removeButton:focus,.btn.removeButton.focus,.btn.add_tbl_row.focus,.btn.add_tbl_row:focus {
+
+		.btn.removeButton:focus,
+		.btn.removeButton.focus,
+		.btn.add_tbl_row.focus,
+		.btn.add_tbl_row:focus {
 			box-shadow: none;
 			outline: none;
 		}
+
+		body {
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+		}
+
+		table {
+			width: 100%;
+			margin-bottom: 20px;
+			border-collapse: collapse;
+		}
+
+		th,
+		td {
+			border: 1px solid #ddd;
+			padding: 8px;
+			text-align: left;
+		}
+
+		tr:nth-child(even) {
+			background-color: #f2f2f2;
+		}
+
+		tr:hover {
+			background-color: #ddd;
+		}
+
 		.context-menu {
-            display: none;
-            position: absolute;
-            z-index: 1000;
-            width: 150px;
-            background-color: white;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        .context-menu-item {
-            padding: 10px;
-            cursor: pointer;
-        }
-        .context-menu-item:hover {
-            background-color: #f1f1f1;
-        }
-        .context-menu-item i {
-            margin-right: 8px;
-        }
-		.secondary_array_table{
-			position: relative;
+			display: none;
+			position: absolute;
+			z-index: 1000;
+			background-color: white;
+			border: 1px solid #ccc;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+			cursor: pointer;
+			top: 13px;
+		}
+
+		#settingModal tr:hover {
+			background: #FFF;
+		}
+
+		.arrow-button {
+			cursor: pointer;
 		}
 	</style>
 	<link href="css/bootstrap4.min.css" rel="stylesheet" />
@@ -151,6 +181,7 @@ require("mainfunctions/general-functions.php");
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.css" rel="stylesheet" />
 
 	<script type="text/javascript" src="scripts/jquery-3.7.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="scripts/pdf-lib.js"></script>
 	<script type="text/javascript" src="scripts/utils.js"></script>
 	<script type="text/javascript" src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.js"></script>
@@ -525,7 +556,7 @@ require("mainfunctions/general-functions.php");
 												<div class="col-md-9">
 													<div class="row">
 														<div class="col-sm-6 generic_field_dropdown_div">
-															<select class='form-control form-control-sm generic_field_dropdown' <?= $field_count == 1 && $account_data['account_no'] == 0 ? " readonly " : "" ?> name='mapped_field[]' id="<?= $field_name_unq."_dp"; ?>" <? echo $req_txt; ?>>
+															<select class='form-control form-control-sm generic_field_dropdown' <?= $field_count == 1 && $account_data['account_no'] == 0 ? " readonly " : "" ?> name='mapped_field[]' id="<?= $field_name_unq . "_dp"; ?>" <? echo $req_txt; ?>>
 																<option></option>
 																<?php
 																$water_ocr_all_generic_fields_dropdown = db_query("SELECT * FROM water_ocr_all_generic_fields_dropdown where template_id = $template_id", db());
@@ -764,7 +795,7 @@ require("mainfunctions/general-functions.php");
 																?>
 																	<td colspan="<?php echo $col_span_val; ?>">
 																		<textarea style="resize: both; padding:0px" name="table_mapping_field<?php echo $table_no . "" . $count1; ?>[]" id="row_txt<?php echo $index1 + 1; ?>" class="form-control form-control-sm" onclick="updateCursorPosition(this, <?php echo ($table_no + 2) . ',' . $count1; ?>)" onfocus="modifyPdf(<?php echo $coordinates_arr[0] . ',' . $coordinates_arr[1] . ',' . $coordinates_arr[2] . ',' . $coordinates_arr[3]; ?>)"><?php echo trim($field_data_arr[$index1]); ?></textarea>
-																		<input type="hidden" class="table_mapping_field_cord" name="table_mapping_field_cord<?php echo $table_no . "" . $count1; ?>[]" value="<?php echo $coordinates_arr[0] . ',' . $coordinates_arr[1] . ',' . $coordinates_arr[2] . ',' . $coordinates_arr[3]; ?>">
+																		<input type="hidden" class="table_mapping_field_cord" name="table_mapping_field_cord<?php echo $table_no . "" . $count1; ?>[]" value="<?php echo $coordinates_arr[0] . '|' . $coordinates_arr[1] . '|' . $coordinates_arr[2] . '|' . $coordinates_arr[3]; ?>">
 																	</td>
 																<?php } ?>
 															</tr>
@@ -798,13 +829,13 @@ require("mainfunctions/general-functions.php");
 							<div class="col-md-12 mt-4">
 								<p class="mb-1"><span id="pdf_file_name_pdf_lib"></span><span class="">&nbsp;&nbsp;<a id="pdf_file_href_pdf_lib" href="" class="text-dark fa fa-share-square-o fa-1x"></a></span></p>
 								<div class="embed-responsive embed-responsive-21by9" style="height:800px">
-									<iframe id="pdf_frame"  src="<?php echo $ocr_file; ?>"></iframe>
+									<iframe id="pdf_frame" src="<?php echo $ocr_file; ?>"></iframe>
 									<!--<iframe class="embed-responsive-item" src="https://loops.usedcardboardboxes.com/water_email_inbox_inv_files/2024_01/173/2024-01---Brand-Aromatics---WM--15-13198-32007--3335354-0515-8.pdf"></iframe>-->
 								</div>
 								<script>
 									load_pdf_first_time();
 									async function load_pdf_first_time() {
-										const url = `<?=$ocr_file; ?>`;
+										const url = `<?= $ocr_file; ?>`;
 										const existingPdfBytes = await fetch(url).then(res => res.arrayBuffer())
 										var bytes = new Uint8Array(existingPdfBytes);
 										const pdfDoc = await PDFDocument.load(existingPdfBytes)
@@ -917,7 +948,7 @@ require("mainfunctions/general-functions.php");
 
 									// $ocr_file = "https://loops.usedcardboardboxes.com/AZFormR/formrecognizer/ai-form-recognizer/upload/Republic_service_inv_sample.pdf";
 									$ocr_file = "Corridor_Recycling_108086.pdf";
-$mainstr = "CustomerAddress^[object Object]^0.878|
+									$mainstr = "CustomerAddress^[object Object]^0.878|
 0.8691^2.5924x
 3.0705^2.5924x
 3.0705^2.9123x
@@ -3709,7 +3740,7 @@ GALI^undefined|
 													<div class="col-md-9">
 														<div class="row">
 															<div class="col-sm-6 generic_field_dropdown_div">
-																<select class='form-control form-control-sm generic_field_dropdown generic_field_dropdown_add' name="mapped_field[]" id="<?= $field_name_unq."_dp"; ?>"  <? echo $req_txt; ?>>
+																<select class='form-control form-control-sm generic_field_dropdown generic_field_dropdown_add' name="mapped_field[]" id="<?= $field_name_unq . "_dp"; ?>" <? echo $req_txt; ?>>
 																	<option></option>
 																</select>
 															</div>
@@ -3754,11 +3785,6 @@ GALI^undefined|
 
 										<div class="col-md-12 p-0 table-responsive mt-3 secondary_array_table">
 										</div>
-										<div class="context-menu" id="contextMenu">
-											<div class="context-menu-item" id="settings">
-												<i class="fas fa-cog"></i> Settings
-											</div>
-										</div>
 										<div class="text-center d-flex justify-content-center">
 											<div id="save-ocr-data-loader" class="d-none spinner spinner-border text-primary" role="status">
 												<span class="sr-only">Loading...</span>
@@ -3767,7 +3793,7 @@ GALI^undefined|
 											<input type="hidden" id="form_action" name="form_action" value="add">
 											<input type="hidden" name="ocr_file_name" id="uploaded_ocr_file_name" value="<?= $ocr_file; ?>">
 											<button id="save-ocr-data" class="btn btn-sm btn-primary" type="submit">SAVE</button>
-												<!--<button class="btn btn-sm btn-primary">RESET</button> -->
+											<!--<button class="btn btn-sm btn-primary">RESET</button> -->
 										</div>
 										<div class="alert d-none mt-2" id="save-msg" data-dismiss="alert">
 											<span id="save-msg-text"></span>
@@ -3778,9 +3804,9 @@ GALI^undefined|
 							<div id="rightpanel_view">
 								<div class="col-md-12 mt-4">
 									<? if (isset($_FILES['ocr_file']) && $_FILES['ocr_file'] != "") { ?>
-										<p class="mb-1"><span id="pdf_file_name_pdf_lib"></span><span class="">&nbsp;&nbsp;<a target="_blank" id="pdf_file_href_pdf_lib" href="<?php echo "water_inv_files_PW/".$ocr_file; ?>" class="text-dark fa fa-share-square-o fa-1x"></a></span></p>
+										<p class="mb-1"><span id="pdf_file_name_pdf_lib"></span><span class="">&nbsp;&nbsp;<a target="_blank" id="pdf_file_href_pdf_lib" href="<?php echo "water_inv_files_PW/" . $ocr_file; ?>" class="text-dark fa fa-share-square-o fa-1x"></a></span></p>
 										<div class="embed-responsive embed-responsive-21by9" style="height:800px">
-											<iframe id="pdf_frame" src="<?php echo "water_inv_files_PW/".$ocr_file; ?>"></iframe>
+											<iframe id="pdf_frame" src="<?php echo "water_inv_files_PW/" . $ocr_file; ?>"></iframe>
 											<!--<iframe class="embed-responsive-item" src="https://loops.usedcardboardboxes.com/water_email_inbox_inv_files/2024_01/173/2024-01---Brand-Aromatics---WM--15-13198-32007--3335354-0515-8.pdf"></iframe>-->
 										</div>
 										<script>
@@ -3797,7 +3823,7 @@ GALI^undefined|
 												const blobUrl = URL.createObjectURL(blob);
 
 												document.getElementById('pdf_frame').src = blobUrl;
-												
+
 											}
 
 											$('#page-load').addClass('d-none');
@@ -3842,7 +3868,7 @@ GALI^undefined|
 
 
 		if ($mainstr != "") {
-				$mainstr = str_replace("`", "" ,$mainstr);
+			$mainstr = str_replace("`", "", $mainstr);
 				?>
 				<script>
 					var data = `<?= $mainstr; ?>`;
@@ -3954,13 +3980,20 @@ GALI^undefined|
 
 								}
 
-								if (colspan_cnt < total_cols_head) {
+								/*if (colspan_cnt < total_cols_head) {
+									colspan_val = "colspan=" + (total_cols_head - colspan_cnt + 1);
+								} else if (colspan_cnt == 1) {
+									colspan_val = "colspan=" + colspan_val;
+								} else {
+									colspan_val = "";
+								}
+								*/
+								/*if (colspan_cnt < total_cols_head) {
 									colspan_val = total_cols_head - colspan_cnt + 1;
 								}
-
 								if (colspan_cnt == 1) {
 									colspan_val = "colspan=" + colspan_val;
-								}
+								}*/
 
 								var tdcnt = 0;
 								//while ((tdMatch = tdRegex.exec(val)) !== null) {
@@ -3971,48 +4004,50 @@ GALI^undefined|
 
 									var option_name, option_val, cor_x, cor_y, w, h;
 									//if (val) {
-										tdcnt = tdcnt + 1;
+									tdcnt = tdcnt + 1;
 
-										var position_data_array = value.split(" ");
-										if (position_data_array[0]) {
-											var cor_x = position_data_array[0].split('^')[0];
-										}
-										if (position_data_array[1]) {
-											var cor_x2 = position_data_array[1].split('^')[0];
-										}
-										if (position_data_array[0]) {
-											var cor_y = position_data_array[0].split('^')[1];
-											cor_y = cor_y.replace("x", "");
-										}
-										if (position_data_array[2]) {
-											var cor_y2 = position_data_array[2].split('^')[1];
-											cor_y2 = cor_y2.replace("x", "");
-										}
-										var w = (cor_x2 - cor_x).toFixed(4);
-										var h = (cor_y - cor_y2).toFixed(4);
-										table_td_Data_flg = 1;
-										
-										//${colspan_val}
-										
-										table_td_Data += `
-									<td ${colspan_val} >
+									var position_data_array = value.split(" ");
+									if (position_data_array[0]) {
+										var cor_x = position_data_array[0].split('^')[0];
+									}
+									if (position_data_array[1]) {
+										var cor_x2 = position_data_array[1].split('^')[0];
+									}
+									if (position_data_array[0]) {
+										var cor_y = position_data_array[0].split('^')[1];
+										cor_y = cor_y.replace("x", "");
+									}
+									if (position_data_array[2]) {
+										var cor_y2 = position_data_array[2].split('^')[1];
+										cor_y2 = cor_y2.replace("x", "");
+									}
+									var w = (cor_x2 - cor_x).toFixed(4);
+									var h = (cor_y - cor_y2).toFixed(4);
+									table_td_Data_flg = 1;
+
+									//${colspan_val}
+									
+									table_td_Data += `
+									<td ${colspan_val} class="text-center">
+										<div>
 										<textarea style="resize: both; padding:0px" name="table_mapping_field${count}${uniq_count2}[]" id="row_txt${count}" class="form-control form-control-sm" 
 										onclick="updateCursorPosition(this, ${uniq_count1}, ${uniq_count2})" onfocus="modifyPdf(${cor_x ?? ''}, ${cor_y ?? ''}, ${w ?? ''},${h ?? ''})" >${val ?? ''}</textarea>
 										
 										<input class="table_mapping_field_cord" type="hidden" name="table_mapping_field_cord${count}${uniq_count2}[]" value="${cor_x}|${cor_y}|${w}|${h}"/>
-									</td>
+										</div>
+										</td>
 									`;
 
-										//console.log(`${cor_x} ${cor_x2} ${cor_y} ${cor_y2}  ${w}  ${h}`);
+									//console.log(`${cor_x} ${cor_x2} ${cor_y} ${cor_y2}  ${w}  ${h}`);
 
-										rowData.push({
-											"length": datalength,
-											"value": val,
-											"cor_x": cor_x,
-											"cor_y": cor_y,
-											"w": w,
-											"h": h
-										});
+									rowData.push({
+										"length": datalength,
+										"value": val,
+										"cor_x": cor_x,
+										"cor_y": cor_y,
+										"w": w,
+										"h": h
+									});
 									//}
 								}
 
@@ -4055,11 +4090,7 @@ GALI^undefined|
 									<input class="input_row_txt" id='input_row_txt-${uniq_count1}-${uniq_count2}' type="hidden" name="ocr_selected_text${count}[]" value="">
 								</td>
 								${table_td_Data}
-								<td>
-									<div class="context-menu">
-									<div class="context-menu-item" id="settings"> <i class="fas fa-cog"></i> Settings </div>
-									</div>
-								</td>
+								
 							</tr>
 							`;
 							}
@@ -4093,6 +4124,7 @@ GALI^undefined|
 							<input type="hidden" name="ocr_selected_text${count}[]" >
 							</td>
 							${tableData_top_tds}
+
 							</tr>
 						</thead>
 					`;
@@ -4105,7 +4137,7 @@ GALI^undefined|
 
 					}
 					// pre variable was $ocr_file_orgnm instead of $ocr_file in next line
-			</script>
+				</script>
 
 			<? } ?>
 
@@ -4116,13 +4148,13 @@ GALI^undefined|
 					$(this).val($(this).attr('edit_val'));
 				})
 
-				
+
 
 				$('body').on("change", ".generic_field_dropdown", function() {
 					var selected_op = $(this).val();
 					var selected_dp_id = $(this).attr('id');
 					var option_val = $('option:selected', this).attr('option_val');
-					if(selected_dp_id == "terms_dp" && selected_op!="" && $('#invoice_due_date').val()==""){
+					if (selected_dp_id == "terms_dp" && selected_op != "" && $('#invoice_due_date').val() == "") {
 						let digitsArray = [];
 						for (let i = 0; i < option_val.length; i++) {
 							if (!isNaN(parseInt(option_val[i]))) { // Check if the character is a digit
@@ -4131,12 +4163,12 @@ GALI^undefined|
 						}
 						let today = new Date();
 						let digitsString = digitsArray.join(""); // Convert array of digits to string
-						var daysToAdd = digitsString!="" ? parseInt(digitsString) : 1;
+						var daysToAdd = digitsString != "" ? parseInt(digitsString) : 1;
 						today.setDate(today.getDate() + daysToAdd);
 						// Extract month, day, and year components
 						let month = today.getMonth() + 1; // Months are zero-based, so we add 1
 						let day = today.getDate();
-						let year = today.getFullYear() % 100; 
+						let year = today.getFullYear() % 100;
 						let formattedDate = `${month}/${day}/${year < 10 ? '0' : ''}${year}`;
 						$('#invoice_due_date').val(formattedDate)
 					}
@@ -4173,27 +4205,28 @@ GALI^undefined|
 						modifyPdf(cor_x, cor_y, w, h);
 					}
 				});
+
 				function updateCursorPosition(ctrltextbox, uniq_count1, uniq_count2) {
-						// Get the current cursor position
-						var selectionStart = ctrltextbox.selectionStart;
-						var selectionEnd = ctrltextbox.selectionEnd;
-						var txtval = ctrltextbox.value;
-						var seltxtval = txtval.substring(selectionStart, selectionEnd);
-						$("#row_txt_start_position" + uniq_count1 + "" + uniq_count2).val(selectionStart + 1);
-						$("#row_txt_end_position" + uniq_count1 + "" + uniq_count2).val(selectionEnd);
-						$("#divrow_txt-" + uniq_count1 + "-" + uniq_count2).css("display", "inline");
-						$("#divrow_txt-" + uniq_count1 + "-" + uniq_count2).html("<small>" + seltxtval + "</small>");
+					// Get the current cursor position
+					var selectionStart = ctrltextbox.selectionStart;
+					var selectionEnd = ctrltextbox.selectionEnd;
+					var txtval = ctrltextbox.value;
+					var seltxtval = txtval.substring(selectionStart, selectionEnd);
+					$("#row_txt_start_position" + uniq_count1 + "" + uniq_count2).val(selectionStart + 1);
+					$("#row_txt_end_position" + uniq_count1 + "" + uniq_count2).val(selectionEnd);
+					$("#divrow_txt-" + uniq_count1 + "-" + uniq_count2).css("display", "inline");
+					$("#divrow_txt-" + uniq_count1 + "-" + uniq_count2).html("<small>" + seltxtval + "</small>");
 
-						// Update the display
-						//document.getElementById("row_txt_position"+tbl_head_cnt+ctrl_cnt).innerText = cursorPosition;
+					// Update the display
+					//document.getElementById("row_txt_position"+tbl_head_cnt+ctrl_cnt).innerText = cursorPosition;
 
-						$("#input_row_txt-" + uniq_count1 + "-" + uniq_count2).val(seltxtval);
-					}
-					
-				$('body').on("click",'.add_tbl_row',function(){
+					$("#input_row_txt-" + uniq_count1 + "-" + uniq_count2).val(seltxtval);
+				}
+
+				$('body').on("click", '.add_tbl_row', function() {
 					let parentTable = $(this).closest('table');
 					var added_now_count = parentTable.find('.added_now_count').val();
-					
+
 					let lastRow = parentTable.find('tbody tr:nth-last-child(2)');
 					// Get the second-to-last row of the table
 					let secondLastRow = parentTable.find('tbody tr:nth-last-child(1)');
@@ -4207,38 +4240,38 @@ GALI^undefined|
 					}
 					var unque_keys = clonedRow.find('.divrow_txt').attr('id').split('-');
 					let unque_number1 = unque_keys[1];
-					let unque_number2 = parseInt(unque_keys[2])+1;
-					console.log(unque_number1 +"- "+unque_number2);
-					clonedRow.find('.divrow_txt').attr('id', 'divrow_txt-'+unque_number1+'-'+unque_number2);
-					clonedRow.find('.row_txt_start_position').attr('id', 'row_txt_start_position'+unque_number1+unque_number2);
-					clonedRow.find('.row_txt_end_position').attr('id', 'row_txt_end_position'+unque_number1+unque_number2);
+					let unque_number2 = parseInt(unque_keys[2]) + 1;
+					console.log(unque_number1 + "- " + unque_number2);
+					clonedRow.find('.divrow_txt').attr('id', 'divrow_txt-' + unque_number1 + '-' + unque_number2);
+					clonedRow.find('.row_txt_start_position').attr('id', 'row_txt_start_position' + unque_number1 + unque_number2);
+					clonedRow.find('.row_txt_end_position').attr('id', 'row_txt_end_position' + unque_number1 + unque_number2);
 					clonedRow.find('.row_txt_start_position').val("");
 					clonedRow.find('.row_txt_end_position').val("");
-					clonedRow.find('textarea').attr('onclick', 'updateCursorPosition(this, '+unque_number1+', '+unque_number2+')');
+					clonedRow.find('textarea').attr('onclick', 'updateCursorPosition(this, ' + unque_number1 + ', ' + unque_number2 + ')');
 					clonedRow.find('textarea').attr('onfocus', 'modifyPdf(0,0,0,0,0)');
-					clonedRow.find('textarea').attr('name', 'table_mapping_field'+(unque_number1-2)+unque_number2+'[]');
-					clonedRow.find('.table_mapping_field_cord').attr('name', 'table_mapping_field_cord'+(unque_number1-2)+unque_number2+'[]');
+					clonedRow.find('textarea').attr('name', 'table_mapping_field' + (unque_number1 - 2) + unque_number2 + '[]');
+					clonedRow.find('.table_mapping_field_cord').attr('name', 'table_mapping_field_cord' + (unque_number1 - 2) + unque_number2 + '[]');
 					clonedRow.find('.row_no_text').val(unque_number2);
-					clonedRow.find('.input_row_txt').attr('id', 'input_row_txt-'+unque_number1+'-'+unque_number2);
+					clonedRow.find('.input_row_txt').attr('id', 'input_row_txt-' + unque_number1 + '-' + unque_number2);
 					clonedRow.find('.input_row_txt').val("");
 					clonedRow.find('.divrow_txt').text("");
 					clonedRow.find('select').val('');
 					clonedRow.find('input[type="checkbox"]').prop('checked', false);
 					clonedRow.find('.table_mapping_field_cord').val("0|0|0|0");
-					if(clonedRow.find('.water_list_item_body_id').length){
+					if (clonedRow.find('.water_list_item_body_id').length) {
 						clonedRow.find('.water_list_item_body_id').val('');
 					}
 					clonedRow.find('textarea').val('');
 					clonedRow.find('textarea').html('');
 					secondLastRow.before(clonedRow);
-					parentTable.find('.added_now_count').val(parseInt(added_now_count)+1);
+					parentTable.find('.added_now_count').val(parseInt(added_now_count) + 1);
 
 				});
 				$('body').on('click', '.removeButton', function() {
 					var added_now_count = $(this).closest('table').find('.added_now_count').val();
 					$(this).closest('table').find('tbody tr:nth-last-child(2)').remove();
-					$(this).closest('table').find('.added_now_count').val(parseInt(added_now_count)-1);
-					if(added_now_count == 1){
+					$(this).closest('table').find('.added_now_count').val(parseInt(added_now_count) - 1);
+					if (added_now_count == 1) {
 						$(this).remove();
 					}
 				});
@@ -4262,7 +4295,7 @@ GALI^undefined|
 					document.getElementById('pdf_frame').src = blobUrl;
 				};
 				async function modifyPdf(cor_x = "", cor_y = "", w = "", h = "") {
-					const url = `<?= $ocr_file; ?>`;
+					const url = `water_inv_files_PW/<?= $ocr_file; ?>`;
 					const existingPdfBytes = await fetch(url).then(res => res.arrayBuffer())
 					cor_y = cor_y - 0.026;
 
@@ -4272,7 +4305,7 @@ GALI^undefined|
 					var firstPage = pages[0];
 					var pgheight = firstPage.getHeight();
 					pgheight = pgheight - 2;
-					
+
 					if (cor_x != "") {
 						const {
 							pg_width,
@@ -4340,7 +4373,7 @@ GALI^undefined|
 								fd.append('generate_unique_account_no', 0);
 							}
 							fd.append('selected_line_item_array', selected_line_item);
-							if( $('#form_action').val() != 'update') {
+							if ($('#form_action').val() != 'update') {
 								var all_generic_fields_array_String = all_generic_fields_array.join(" && ");
 								fd.append('all_generic_fields_array', all_generic_fields_array_String);
 							}
@@ -4493,25 +4526,178 @@ GALI^undefined|
 						$(this).parent('td').find('.group_text_array').val(0);
 					}
 				});
-				
+
 				$(document).ready(function() {
-        $('.mapping_table').on("contextmenu", "tr", function(e) {
-            e.preventDefault();
-            $("#contextMenu").css({
-                display: "block",
-                left: e.pageX,
-                top: e.pageY
-            }).data("row", $(this));
-        });
+					$('.mapping_table tbody').on("contextmenu", "tr", function(e) {
+						e.preventDefault();
+						$('#settings').parents('td').remove();
+						$('#item_list_tbl_row').removeAttr('id');
+						$(this).append(`<td style="position:relative"><button class="context-menu btn btn-success btn-sm" type="button" data-toggle="modal" data-target="#settingModal" id="settings"><i class="fa fa-cog"></i></button></td>`);
+						$(this).css('position', 'relative');
+						$(this).find('.context-menu').css({
+							'display': 'block'
+						});
 
-        $(document).on("click", function() {
-            $("#contextMenu").hide();
-        });
+						$(this).attr('id', "item_list_tbl_row");
+					});
 
-        $("#settings").on("click", function() {
-            var $row = $("#contextMenu").data("row");
-            alert("Settings clicked for row: " + $row.index() + " in table: " + $row.closest('table').index('.myTable'));
-        });
-    });
+					$(document).on("click", '#settings', function() {
+						//alert($(this).parents('tr').html());
+						var tablerow = $(this).parents('tr').html();
+						var tablehead = $(this).parents('table').find('.thead-dark').html();
+						//alert(tablehead);
+
+						$('#settingModal .modal-body table').html(`<tr>${tablehead}</tr><tr id="modal_tbl_row">${tablerow}</tr>`);
+						$("#settingModal").modal('show');
+						addMergeArrows();
+						$('#settingModal').find('#settings').parents('td').remove();
+					});
+				});
+
+				function addMergeArrows() {
+					const rows = $('#modal_tbl_row');
+
+					// Add merge arrows after the 4th column of each row
+					rows.each(function() {
+						const cells = $(this).find('td');
+
+						// Start adding arrows after the 4th <td>
+						cells.each(function(index) {
+							if (index >= 5 && index < cells.length - 1) {
+								const merge_arrow = $('<span class="arrow-button fa fa-arrow-right" data-toggle="tooltip" data-placement="bottom" title="Merge With Next Column"></span>');
+								const split_arrow = $('<span class="arrow-button fa fa-arrows-h" data-toggle="tooltip" data-placement="bottom" title="Split Current Column"> </span>');
+								merge_arrow.on('click', function() {
+									mergeColumns(index);
+								});
+								split_arrow.on('click', function() {
+									splitColumns(index);
+								});
+
+								$(this).find('div').append(merge_arrow);
+								$(this).append(split_arrow);
+								$(this).find('div').css({
+									'display': 'flex',
+									'align-items': 'center'
+								});
+							}
+						});
+					});
+				}
+
+				function mergeColumns(index) {
+					$('#modal_tbl_row').each(function() {
+						const tds = $(this).find('td');
+						const targetCell = $(tds[index]);
+						const nextCell = $(tds[index + 1]);
+						const merged_text = targetCell.find('textarea').val() + " " + nextCell.find("textarea").val();
+						var conf = confirm(`Merged Text will be "${merged_text}", Do you want to merge?`);
+						if (conf) {
+							targetCell.find('textarea').val(merged_text);
+							targetCell.find('textarea').html(merged_text);
+							nextCell.remove();
+						}
+						//targetCell.remove(".arrow_button")
+						nextCell.remove();
+					});
+
+					// Remove all arrow buttons
+					$('.arrow-button').remove();
+
+					// Re-add arrow buttons to reflect the new structure
+					addMergeArrows();
+				}
+
+				function splitColumns(index) {
+					$("#current_target_index").val(index);
+					$("#split_inputs").removeClass('d-none');
+					$("#split_input1").focus();
+					/*$('#modal_tbl_row').each(function() {
+						const tds = $(this).find('td');
+						const targetCell = $(tds[index]);
+						const split_text_arr = (targetCell.find('textarea').val()).split(" ");
+						var conf = confirm(`Split Text will be "${existing_cell_val}" & "${new_cell_val}", Do you want to split?`);
+						if (conf) {
+							targetCell.find('textarea').val(existing_cell_val);
+							targetCell.find('textarea').html(existing_cell_val);
+							let newCell = targetCell.clone();
+							newCell.find('textarea').val(existing_cell_val);
+							newCell.find('textarea').html(existing_cell_val);
+							targetCell.after(newCell);
+
+						}
+					});
+					// Remove all arrow buttons
+					//$('.arrow-button').remove();
+					// Re-add arrow buttons to reflect the new structure
+					addMergeArrows();
+					
+					*/
+				}
+
+				function split_cols_value(){
+					var index = $("#current_target_index").val();
+					$('#modal_tbl_row').each(function() {
+						const tds = $(this).find('td');
+						const targetCell = $(tds[index]);
+						const existing_cell_val = $("#split_input1").val();
+						const new_cell_val = $("#split_input2").val();
+						var conf = confirm(`Split Text will be "${existing_cell_val}" & "${new_cell_val}", Do you want to split?`);
+						if (conf) {
+							targetCell.find('textarea').val(existing_cell_val);
+							targetCell.find('textarea').html(existing_cell_val);
+							let newCell = targetCell.clone();
+							newCell.find('textarea').val(new_cell_val);
+							newCell.find('textarea').html(new_cell_val);
+							targetCell.after(newCell);
+
+						}
+					});
+					// Remove all arrow buttons
+					$("#split_inputs").addClass('d-none');
+					$('.arrow-button').remove();
+					// Re-add arrow buttons to reflect the new structure
+					addMergeArrows();
+				}
+
+				function row_setting() {
+					//alert($("#modal_tbl_row").html());
+					$("#modal_tbl_row").find('.arrow-button').remove();
+					$("#item_list_tbl_row").html($("#modal_tbl_row").html());
+					$("#settingModal").modal('hide')
+				}
 			</script>
+			<!-- Modal -->
+			<div class="modal fade" id="settingModal" tabindex="-1" aria-labelledby="settingModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered modal-xl">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="settingModalLabel">Setting</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<table class="table"></table>
+							<div id="split_inputs" class="d-none">
+							<div class="form-row align-items-end">
+								<div class="form-group col-md-4 mb-0">
+									<label><b>Value of Existing Column</b></label>
+									<input type="text" id="split_input1" class="form-control form-control-sm"/>
+								</div>
+								<div class="form-group col-md-4 mb-0">
+									<label><b>Value of New Column</b></label>
+									<input type="text" id="split_input2" class="form-control form-control-sm"/>
+									<input type="hidden" id="current_target_index"/>
+								</div> 
+								<button onclick="split_cols_value()" class="btn btn-primary btn-sm" style="height: max-content">Ok</button>
+							</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-primary btn-sm" onclick="row_setting()">Apply changes</button>
+						</div>
+					</div>
+				</div>
+			</div>
 </body>
