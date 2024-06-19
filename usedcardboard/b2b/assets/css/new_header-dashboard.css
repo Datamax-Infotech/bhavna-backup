@@ -1,0 +1,215 @@
+body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-family: Montserrat, sans-serif;
+	font-size: 0.9rem;
+	line-height: normal;
+}
+
+.main_container {
+	float: left;
+	width: 100%;
+	clear: both !important;
+	background-color: #f7f7f7;
+	position: fixed;
+	z-index: 99999;
+	border-bottom: 2px solid #f29e00;
+	height: 35px;
+}
+
+.sub_container {
+	margin: 0 auto;
+	width: 100%;
+	/*max-width: 1440px;*/
+	position: relative;
+}
+
+.header {
+	margin: 0px 20px;
+	text-align: center;
+}
+
+.logo_img {
+	float: left;
+	z-index: 99999;
+	position: relative;
+}
+
+.link_txt {
+	float: left;
+	margin-left: 10px;
+	line-height: 30px;
+	font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+	font-size: 14px;
+	z-index: 9999;
+	position: relative;
+	text-transform: uppercase;
+}
+
+.link_txt a {
+	color: #272727;
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: Arial;
+}
+
+.login-user {
+	float: right;
+	line-height: 30px;
+	font-weight: bold;
+}
+
+.login-user img {
+	vertical-align: middle;
+	margin-left: 8px;
+	height: 25px;
+	width: auto;
+}
+
+.login-username {
+	font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+	font-size: 13px;
+	color: #333333;
+}
+.nav-top-1 {
+	border-bottom: 3px solid #f29e00;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 5px 10px;
+	position: relative;
+}
+
+.nav-top-1 .header_logo {
+	width: 20%;
+}
+
+.nav-top-1 .company_text_header {
+	color: #000; 
+	font-weight: 600;
+	margin: 0px;
+	font-size: 16px;
+	text-decoration: underline;
+}
+
+.nav-top-2 {
+	background-color: #5CB726;
+	color: #FFF;
+	font-weight: 500;
+	font-size: 0.9rem;
+	padding: 5px;
+}
+
+.gaylord_link {
+	color: #FFF;
+	margin-left: 10px;
+	font-weight: 400;
+}
+
+.gaylord_link:hover {
+	color: #FFF;
+	text-decoration: none;
+}
+
+.fontDtls {
+	font-size: 12px;
+	color: #555555;
+	font-weight: 600;
+}
+
+.fontDtls span {
+	display: block;
+}
+
+.header_need_help {
+	font-size: 20px;
+	font-weight: 500;
+	color: #6b9624;
+	display: block;
+}
+
+.btn-topbar {
+	padding: 5px 10px;
+	border-radius: 10px;
+	font-size: 12px;
+	border: solid 2px #000000;
+	color: #000000;
+	font-family: Montserrat, sans-serif;
+}
+
+.footer_l {
+	height: auto;
+	text-align: center;
+}
+
+.collapse-custom {
+	position: absolute;
+	background: #f8f9fa;
+	top: 45px;
+	left: 27px;
+	width: 20%;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	z-index: 1;
+}
+
+.collapse-custom a {
+	color: #000;
+	font-weight: 500;
+}
+
+.collapse-custom a:hover {
+	color: #5CB726;
+}
+
+.collapse-custom .nav-item {
+	border: solid 1px #DDD;
+	padding: 0px 20px;
+}
+
+.my-account-tab.nav-pills .nav-link {
+	color: #000;
+	font-size: 16px;
+	text-align: left;
+}
+
+.my-account-tab.nav-pills .nav-link.active,
+.my-account-tab.nav-pills .show>.nav-link {
+	color: #5CB726;
+	background-color: transparent;
+}
+main{
+	min-height: 60vh;
+}
+.btn-custom{
+	background-color: #5CB726;
+    color: #FFF;
+    font-weight: normal;
+    padding: 2px 10px;
+    font-size: 14px;
+}
+.btn-custom:hover, .btn-custom:focus{
+    color: #FFF;
+	box-shadow: none;
+}
+.form_error{
+	color: red;
+}
+.card-body{
+	padding: 1rem;
+}
+.video-heading{
+	background-color: #5CB726;
+	padding: 10px;
+	text-align: center;
+	color: #FFF;
+}
+.form-group label{
+	margin-bottom: .1rem;
+}
+
+.color_000{
+	color: #000;
+}

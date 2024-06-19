@@ -3,8 +3,9 @@ body {
 	padding: 0;
 	border: 0;
 	outline: 0;
-	font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
-	font-size: 0.9rem;
+	font-family: Montserrat, sans-serif !important;
+	font-size: 13px;
+	line-height: normal;
 }
 
 .main_container {
@@ -90,7 +91,7 @@ body {
 	color: #000; 
 	font-weight: 600;
 	margin: 0px;
-	font-size: 20px;
+	font-size: 16px;
 	text-decoration: underline;
 }
 
@@ -98,7 +99,7 @@ body {
 	background-color: #5CB726;
 	color: #FFF;
 	font-weight: 500;
-	font-size: 1rem;
+	font-size: 0.9rem;
 	padding: 5px;
 }
 
@@ -136,7 +137,7 @@ body {
 	font-size: 12px;
 	border: solid 2px #000000;
 	color: #000000;
-	font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
+	font-family: Montserrat, sans-serif;
 }
 
 .footer_l {

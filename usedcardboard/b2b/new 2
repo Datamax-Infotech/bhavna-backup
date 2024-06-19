@@ -1,0 +1,73 @@
+https://b2b.usedcardboardboxes.com/?id=2802
+
+All outstanding feedback points repeated below so easier to read:
+Select Quantity
+	c. Fix the quantity calculation for "Quarter" row. =ROUNDUP([truckload qty]/[pallet qty]/4)*[pallet qty] * Still incorrect, not fixed. The total value is still wrong as it's still calcated BEFORE the rounding (instead of after).
+g. Fix the "See map" pop up. Make it show just like the pictures on the right side where it overlays the screen. *On iphone, the map pop up window is bigger than the screen, so you can't see it all.
+	- For the "Frequency" row on the right side, if the value is blank or 0, then echo "0/mo" (in live page, it shows blank right now, which is bad).
+
+Contact
+	- Update the design to be more like the Shopify design, snips sent on teams.
+	--- Remove "Tell us who you are" at top
+	--- Remove "Provide your contact information so we...your order:" below breadcrumb links
+	--- Change "Shipping/Billing" link to "Shipping" (repeat for all pages)
+	--- Remove "Proceed as guest" and "login to your account" radio buttons and text. No need for options or this text (like in shopify design)
+	--- Add "Contact information" and "Already have an account? Log in" text and link
+- Make the "Create an account (saves time in future)" a checkbox instead of radio button, 
+user has the option to create an account or not (or click "log in" at the top
+- Center the text when no image.
+
+Shipping
+	- Clean up the "Shipping Type" heading and 2 options, make it look better, because it is too close together right now.
+	- Confirm that "Customer Pickup" option only shows if "Customer Pickups Allowed" is flagged. If not, it must be hidden.
+	- Remove "Billing address" heading, remove "Select the address...credit card.", remove the 2 drop down options for billing. 
+	(Keep the 2 checkbox statements below it.
+
+	- If "Customer Pickup" radio option is selected, then the 2 current checkboxes at the bottom need to be hidden 
+	(they aren't relavent to customer pickups) and the "Continue to payment" button won't require it. 
+	Instead, in this case, replace it with a new checkbox statement which says 
+	"I understand that UCB will provide me with the exact pickup address of this item after I place my order." 
+	This option will be required in this case when click "Continue to payment" button (for Customer Pickup).
+
+	- Make the "Calculate Shipping" "Re-calculate shipping" and "Continue to payment" button text match that of the button in the Contact step. (Not all caps).
+	- Don't allow the user to click "Continue to payment" unless user is UCB Delivery, calculate shipping has been done (with no errors), 
+	and 2 checkboxes checked...or Customer Pickup clicked and 1 checkbox checked.
+
+- Make sure the state input box does not mess up the uber API, will it make difference if user types "California" or "CA"? If it makes a difference, we need to code it so it takes this into account.
+	- it works in both cases
+	
+	- When I tried clicking "RE-CALCULATE SHIPPING" it didn't change anything after it loaded, even if I changed the shipping address details. bug,
+
+Payment
+	- Add another border line below "Use credit terms (or apply)" so it looks separate from the 
+	"We will follow up with you after your order....with credit terms." line of text.
+
+	- If the credit card option is selected (which is the default), change the text above the "Process" 
+	button to "We will follow up with you after your order is placed to collect your credit card payment. We will only authorize the card to check for funds. 
+	We will not capture the funds until after delivery."
+
+	- If the "Use credit terms (or apply)" option is selected, then the text should read 
+	"We will use your existing credit terms for the order. If you not have credit terms setup, we will follow up with you to get setup."
+
+	- Change "Process" button to say "Place order"
+
+Confirmation
+- Remove the "italics" on all of the paragraph text. Makes it hard to read.
+
+Login Account Details
+- If the user is logged into their account, then do the following:
+--- Use their saved info to auto-fill the contact page, Shipping page, and Payment pages. 
+(Shipping rates will still need to be calculate and "Calculate Shipping" button clicked though).
+--- Contact info is stored as the "SELL TO" contact table.
+--- Shipping info is stored as the "SHIP TO" contact table.
+
+Database & Orders Report
+ a. We need to create a database table for all orders received in this new method so we can track all details. 
+ We need to be able to see if the orders were completed or not. 
+ For the orders which were completed, we need to signify if we added an actual transaction for them or not. 
+ We have an existing report we already started, we can just add more detail to it. *Still pending
+ 
+c. Make sure the report has the header search bar, a title, and a sub-heading describing what the report is for. 
+*Need to add the search bar header and the sub-heading text.
+
+- On b2becommerce_reports.php, so from the dashboardnew links section, I'd like a link to a report that shows us all of the completed orders for the new b2b buy direct pages. On this page, we will need a way to input whether or not we have added the transaction in loops yet (a button to mark as complete for example). That way, we know which transactions we've received, which we need to add transactions to loops, and which we've already added to loops and be able to link it so we can click and get to the linked transaction easily. On the same report, we'll also want to have the ability to see all incomplete transactions so we can learn from them, maybe with a filter at the top, or a different report. Operations Team email group will also need to be notified when we receive an online order so we know to look at it.

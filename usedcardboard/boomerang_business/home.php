@@ -31,7 +31,7 @@ require_once('boomerange_common_header.php');
     }
 
     .main_section {
-        padding: 3rem 5rem;
+        padding: 2rem 5rem;
     }
 
     .bg_F4F4F4 {
@@ -61,7 +61,10 @@ require_once('boomerange_common_header.php');
     .product-category-title .number {
         font-size: 70px;
     }
-
+    .category-img{
+        height: 169px;
+        width: 186px;
+    }
     .product-category-title .description {
         margin-left: 10px;
     }
@@ -102,6 +105,9 @@ require_once('boomerange_common_header.php');
         height: 10px;
         width: 10px;
         border-radius: 50%;
+    }
+    .width_50px{
+        width:50px;
     }
 
     #gallery .carousel-indicators li.active {
@@ -161,29 +167,31 @@ require_once('boomerange_common_header.php');
     }
 </style>
 <div class="container-fluid main_section bg_F4F4F4">
-    <div class="row">
-        <div class="col-md-6">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
             <a href="client_dashboard_new.php?show=inventory">
                 <img src="images/UsedGaylordTotes_MainBanner.png" class="img-fluid">
             </a>
         </div>
-        <div class="col-md-6">
+        <div class="width_50px"></div>
+        <div class="col-md-4 ">
             <img src="images/UsedShippingBoxes_MainBanner_ComingSoon.png" class="img-fluid">
         </div>
     </div>
 </div>
-<div class="container-fluid main_section">
+<div class="container-fluid main_section product-categories">
     <h2 class="section-title"><span>Product Categories</span></h2>
     <div class="px-5">
         <div class="row justify-content-center">
-            <div class="col-md-4">
-                <a href="client_dashboard_new.php?show=inventory"><img src="images/UsedGaylordTotes_MainBanner.png" class="img-fluid"></a>
+            <div class="col-md-2">
+                <a href="client_dashboard_new.php?show=inventory"><img src="images/product_category1.jpg" class="img-fluid category-img"></a>
                 <a href="client_dashboard_new.php?show=inventory">
                     <h5 class="text-center mt-2">Used Gaylord Totes</h5>
                 </a>
             </div>
-            <div class="col-md-4">
-                <img src="images/UsedGaylordTotes_MainBanner.png" class="img-fluid">
+            <div class="width_50px"></div>
+            <div class="col-md-2">
+                <img src="images/product_category2.jpeg" class="img-fluid category-img">
                 <h5 class="text-center mt-2">Used Shipping Boxes</h5>
             </div>
         </div>
@@ -219,10 +227,10 @@ require_once('boomerange_common_header.php');
             </div>
             <div class="col-md-4">
                 <div class="product-category-title">
-                    <div class="number color_orange">2</div>
+                    <div class="number color_orange">3</div>
                     <div class="description">
                         <span class="title1 color_orange">Why</span><br>
-                        <span class="title2">CHOOSE UCB -</span>
+                        <span class="title2">CHOOSE UCB</span>
                     </div>
                 </div>
                 <p>

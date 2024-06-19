@@ -115,7 +115,6 @@ require("mainfunctions/general-functions.php");
 		.table_container {
 			max-height: 380px;
 			overflow-y: auto;
-			margin-top: 20px;
 		}
 
 		#contentsplitter {
@@ -129,59 +128,12 @@ require("mainfunctions/general-functions.php");
 			box-shadow: none;
 			outline: none;
 		}
-
-		body {
-			font-family: Arial, sans-serif;
-			margin: 0;
-			padding: 0;
-		}
-
-		table {
-			width: 100%;
-			margin-bottom: 20px;
-			border-collapse: collapse;
-		}
-
-		th,
-		td {
-			border: 1px solid #ddd;
-			padding: 8px;
-			text-align: left;
-		}
-
-		tr:nth-child(even) {
-			background-color: #f2f2f2;
-		}
-
-		tr:hover {
-			background-color: #ddd;
-		}
-
-		.context-menu {
-			display: none;
-			position: absolute;
-			z-index: 1000;
-			background-color: white;
-			border: 1px solid #ccc;
-			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-			cursor: pointer;
-			top: 13px;
-		}
-
-		#settingModal tr:hover {
-			background: #FFF;
-		}
-
-		.arrow-button {
-			cursor: pointer;
-		}
 	</style>
 	<link href="css/bootstrap4.min.css" rel="stylesheet" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.css" rel="stylesheet" />
 
 	<script type="text/javascript" src="scripts/jquery-3.7.1.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="scripts/pdf-lib.js"></script>
 	<script type="text/javascript" src="scripts/utils.js"></script>
 	<script type="text/javascript" src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.js"></script>
@@ -455,7 +407,8 @@ require("mainfunctions/general-functions.php");
 
 											while ($fields_arr_generic = array_shift($water_ocr_all_generic_fields_dropdown)) {
 												$coordinates_op = explode("|", $fields_arr_generic['coordinates']);
-												echo '<option ' . (trim($fields_arr_generic['field_name']) == $fields_arr['maaped_field_name'] ? "selected" : "") . ' value="' . $fields_arr_generic['field_name'] . '" cor_x = "' . $coordinates_op[0] . '" cor_y = "' . $coordinates_op[1] . '" w="' . $coordinates_op[2] . '"  h="' . $coordinates_op[3] . '" option_val="' . $fields_arr_generic['field_val'] . '">'
+$pageNo = isset($coordinates_op[4]) ? $coordinates_op[4] : 1;																							
+echo '<option ' . (trim($fields_arr_generic['field_name']) == $fields_arr['maaped_field_name'] ? "selected" : "") . ' value="' . $fields_arr_generic['field_name'] . '" cor_x = "' . $coordinates_op[0] . '" cor_y = "' . $coordinates_op[1] . '" w="' . $coordinates_op[2] . '"  h="' . $coordinates_op[3] . '" pageNo="' . $pageNo . '" option_val="' . $fields_arr_generic['field_val'] . '">'
 													. $fields_arr_generic['field_name']
 													. '</option>';
 											}
@@ -561,6 +514,7 @@ require("mainfunctions/general-functions.php");
 																<?php
 																$water_ocr_all_generic_fields_dropdown = db_query("SELECT * FROM water_ocr_all_generic_fields_dropdown where template_id = $template_id", db());
 																$input_coordinates = array();
+$pageNo = 1;
 																$option_val = "";
 																$selected_op = "";
 																while ($fields_arr_generic = array_shift($water_ocr_all_generic_fields_dropdown)) {
@@ -569,8 +523,9 @@ require("mainfunctions/general-functions.php");
 																		$input_coordinates = $coordinates_op;
 																		$option_val = $fields_arr_generic['field_val'];
 																		$selected_op = $fields_arr_generic['field_name'];
+																		$pageNo = isset($coordinates_op[4]) ? $coordinates_op[4] : 1;
 																	}
-																	echo '<option ' . (trim($fields_arr_generic['field_name']) == $fields_arr['maaped_field_name'] ? "selected" : "") . ' value="' . $fields_arr_generic['field_name'] . '" cor_x = "' . $coordinates_op[0] . '" cor_y = "' . $coordinates_op[1] . '" w="' . $coordinates_op[2] . '"  h="' . $coordinates_op[3] . '" option_val="' . $fields_arr_generic['field_val'] . '">'
+																	echo '<option ' . (trim($fields_arr_generic['field_name']) == $fields_arr['maaped_field_name'] ? "selected" : "") . ' value="' . $fields_arr_generic['field_name'] . '" cor_x = "' . $coordinates_op[0] . '" cor_y = "' . $coordinates_op[1] . '" w="' . $coordinates_op[2] . '"  h="' . $coordinates_op[3] . '" pageNo="' . $pageNo . '" option_val="' . $fields_arr_generic['field_val'] . '">'
 																		. $fields_arr_generic['field_name']
 																		. '</option>';
 																}
@@ -580,7 +535,7 @@ require("mainfunctions/general-functions.php");
 														<div class="col-sm-6">
 															<input type="hidden" name="mapped_with[]" value="<?= $fields_arr['uniq']; ?>">
 															<input type="hidden" name="fv_id[]" value="<?= $fields_arr['fv_id']; ?>">
-															<input type="text" <?= $field_count == 1 && $account_data['account_no'] == 0 ? " readonly " : "" ?> value="<?= $fields_arr['field_value']; ?>" name="field_value[]" id="<?= $field_name_unq; ?>" class="form-control form-control-sm generic_field_input <?= $fields_arr['field_type'] ? "date" : ""; ?>" cor_x="<?php echo $input_coordinates[0]; ?>" cor_y="<?php echo $input_coordinates[1]; ?>" w="<?php echo $input_coordinates[2]; ?>" h="<?php echo $input_coordinates[3]; ?>" option_val="<?php echo $option_val; ?>" selected_op="<?php echo $selected_op; ?>" <? echo $req_txt; ?>>
+															<input type="text" <?= $field_count == 1 && $account_data['account_no'] == 0 ? " readonly " : "" ?> value="<?= $fields_arr['field_value']; ?>" name="field_value[]" id="<?= $field_name_unq; ?>" class="form-control form-control-sm generic_field_input <?= $fields_arr['field_type'] ? "date" : ""; ?>" cor_x="<?php echo $input_coordinates[0]; ?>" cor_y="<?php echo $input_coordinates[1]; ?>" w="<?php echo $input_coordinates[2]; ?>" h="<?php echo $input_coordinates[3]; ?>" pageNo="<?php echo $pageNo; ?>" option_val="<?php echo $option_val; ?>" selected_op="<?php echo $selected_op; ?>" <? echo $req_txt; ?>>
 														</div>
 													</div>
 												</div>
@@ -607,12 +562,13 @@ require("mainfunctions/general-functions.php");
 																					$selected_op = "";
 																					while ($fields_arr_generic = array_shift($water_ocr_all_generic_fields_dropdown)) {
 																						$coordinates_op = explode("|", $fields_arr_generic['coordinates']);
+	$pageNo = isset($coordinates_op[4]) ? $coordinates_op[4] : 1;
 																						if (trim($fields_arr_generic['field_name']) == $no_account_data['field_name']) {
 																							$input_coordinates = $coordinates_op;
 																							$option_val = $fields_arr_generic['field_val'];
 																							$selected_op = $fields_arr_generic['field_name'];
 																						}
-																						echo '<option ' . (trim($fields_arr_generic['field_name']) == $no_account_data['field_name'] ? "selected" : "") . ' value="' . $fields_arr_generic['field_name'] . '" cor_x = "' . $coordinates_op[0] . '" cor_y = "' . $coordinates_op[1] . '" w="' . $coordinates_op[2] . '"  h="' . $coordinates_op[3] . '" option_val="' . $fields_arr_generic['field_val'] . '">'
+																						echo '<option ' . (trim($fields_arr_generic['field_name']) == $no_account_data['field_name'] ? "selected" : "") . ' value="' . $fields_arr_generic['field_name'] . '" cor_x = "' . $coordinates_op[0] . '" cor_y = "' . $coordinates_op[1] . '" w="' . $coordinates_op[2] . '"  h="' . $coordinates_op[3] . '" pageNo="' . $pageNo . '" option_val="' . $fields_arr_generic['field_val'] . '">'
 																							. $fields_arr_generic['field_name']
 																							. '</option>';
 																					}
@@ -657,7 +613,7 @@ require("mainfunctions/general-functions.php");
 										</div>
 									<? $field_count++;
 									} ?>
-									<div class="col-md-12 p-0 table-responsive mt-3 secondary_array_table">
+									<div class="col-md-12 p-0 table-responsive mt-3">
 										<?php
 										$select_consider_checkbox = db_query("SELECT * FROM water_ocr_consideration_of_tables_for_mapping where template_id = $template_id ORDER BY id ASC", db());
 										while ($consider_check = array_shift($select_consider_checkbox)) {
@@ -707,7 +663,7 @@ require("mainfunctions/general-functions.php");
 																	<td><span class="nowrap_word"><?php echo $column_text_array[$index]; ?></span>
 																		<input type="hidden" name="tbl_column_no-<?php echo $table_no; ?>[]" value="<?php echo $column_no_array[$index]; ?>">
 																		<input type="hidden" name="tbl_column_text-<?php echo $table_no; ?>[]" value="<?php echo $column_text_array[$index]; ?>">
-																		<select name="table_mapping_field<?php echo $table_no; ?>0[]" class="form-control form-control-sm mt-1">
+																		<select <?php echo $selected_value_array[$index] == "Material/Fee column"? "id='mapping_field_head_$table_no'" : ""; ?> name="table_mapping_field<?php echo $table_no; ?>0[]" class="form-control form-control-sm mt-1 table_mapping_field_head_dp" table_id="<?php echo $table_no; ?>">
 																			<option <?php echo $selected_value_array[$index] == "" ? "selected" : "" ?>></option>
 																			<option <?php echo $selected_value_array[$index] == "Material/Fee column" ? "selected" : "" ?>>Material/Fee column</option>
 																			<option <?php echo $selected_value_array[$index] == "Quantity" ? "selected" : "" ?>>Quantity</option>
@@ -779,7 +735,7 @@ require("mainfunctions/general-functions.php");
 																	<input type="hidden" name="text_end_position<?php echo $table_no; ?>[]" id="row_txt_end_position<?php echo ($table_no + 2) . '' . $count1; ?>" class="form-control form-control-sm row_txt_end_position" value="<?php echo $mapped_data['end_position'] == 0 ? "" : $mapped_data['end_position']; ?>" size="5">
 																	<input type="hidden" class="row_no_text" name="row_no<?php echo $table_no; ?>[]" value="<?php echo $mapped_data['row_no']; ?>">
 
-																	<div id='divrow_txt-<?php echo ($table_no + 2) . '-' . $count1; ?>' class="divrow_txt"><small><?php echo $mapped_data['ocr_selected_text'] ?></small></div>
+																	<div id='divrow_txt-<?php echo ($table_no + 2) . '-' . $count1.'-'.$table_no; ?>' class="divrow_txt"><small><?php echo $mapped_data['ocr_selected_text'] ?></small></div>
 																	<input class="input_row_txt" id='input_row_txt-<?php echo ($table_no + 2) . '-' . $count1; ?>' type="hidden" name="ocr_selected_text<?php echo $table_no; ?>[]" value="<?php echo $mapped_data['ocr_selected_text'] ?>">
 
 																</td>
@@ -792,10 +748,11 @@ require("mainfunctions/general-functions.php");
 																for ($index1 = 0; $index1 < count($field_data_arr); $index1++) {
 																	$col_span_val = $count_row_data == 1 ? $total_head_fields : 1;
 																	$coordinates_arr = explode('|', $coordinates_arr_row[$index1]);
+																	$pageNo = isset($coordinates_arr[4]) ? $coordinates_arr[4] : 1;
 																?>
 																	<td colspan="<?php echo $col_span_val; ?>">
-																		<textarea style="resize: both; padding:0px" name="table_mapping_field<?php echo $table_no . "" . $count1; ?>[]" id="row_txt<?php echo $index1 + 1; ?>" class="form-control form-control-sm" onclick="updateCursorPosition(this, <?php echo ($table_no + 2) . ',' . $count1; ?>)" onfocus="modifyPdf(<?php echo $coordinates_arr[0] . ',' . $coordinates_arr[1] . ',' . $coordinates_arr[2] . ',' . $coordinates_arr[3]; ?>)"><?php echo trim($field_data_arr[$index1]); ?></textarea>
-																		<input type="hidden" class="table_mapping_field_cord" name="table_mapping_field_cord<?php echo $table_no . "" . $count1; ?>[]" value="<?php echo $coordinates_arr[0] . '|' . $coordinates_arr[1] . '|' . $coordinates_arr[2] . '|' . $coordinates_arr[3]; ?>">
+																		<textarea style="resize: both; padding:0px" name="table_mapping_field<?php echo $table_no . "" . $count1; ?>[]" id="row_txt<?php echo $index1 + 1; ?>" class="form-control form-control-sm" onclick="updateCursorPosition(this, <?php echo ($table_no + 2) . ',' . $count1 .','. $table_no; ?>)" onfocus="modifyPdf(<?php echo $coordinates_arr[0] . ',' . $coordinates_arr[1] . ',' . $coordinates_arr[2] . ',' . $coordinates_arr[3].',' . $pageNo; ?>)"><?php echo trim($field_data_arr[$index1]); ?></textarea>
+																		<input type="hidden" class="table_mapping_field_cord" name="table_mapping_field_cord<?php echo $table_no . "" . $count1; ?>[]" value="<?php echo $coordinates_arr[0] . '|' . $coordinates_arr[1] . '|' . $coordinates_arr[2] . '|' . $coordinates_arr[3] . '|'. $pageNo; ?>">
 																	</td>
 																<?php } ?>
 															</tr>
@@ -947,2707 +904,7 @@ require("mainfunctions/general-functions.php");
 									}
 
 									// $ocr_file = "https://loops.usedcardboardboxes.com/AZFormR/formrecognizer/ai-form-recognizer/upload/Republic_service_inv_sample.pdf";
-									$ocr_file = "Corridor_Recycling_108086.pdf";
-									$mainstr = "CustomerAddress^[object Object]^0.878|
-0.8691^2.5924x
-3.0705^2.5924x
-3.0705^2.9123x
-0.8691^2.9123
-|Keypair|<br>
-CustomerAddressRecipient^kdc-one #1
-UCB Zero Waste, LLC.^0.748|
-0.8643^2.1819x
-2.5747^2.1895x
-2.5731^2.5491x
-0.8627^2.5414
-|Keypair|<br>
-CustomerName^kdc-one #1
-UCB Zero Waste, LLC.^0.748|
-0.8643^2.1819x
-2.5747^2.1895x
-2.5731^2.5491x
-0.8627^2.5414
-|Keypair|<br>
-DueDate^Tue Nov 14 2023 18:00:00 GMT-0600 (Central Standard Time)^0.938|
-5.8831^2.8121x
-6.4037^2.8121x
-6.4037^2.9601x
-5.8879^2.9553
-|Keypair|<br>
-InvoiceDateVal^11/2/2023^0.789|
-5.8067^10.1979x
-6.2986^10.1931x
-6.2986^10.3125x
-5.8115^10.3125
-|Keypair|<br>
-InvoiceId^108086^0.68|
-6.3798^0.974x
-6.9289^0.9644x
-6.9242^1.1363x
-6.3846^1.122
-|Keypair|<br>
-InvoiceTotal^$4,213.64^0.833|
-7.3826^9.5295x
-7.9604^9.5295x
-7.9604^9.6727x
-7.3874^9.6727
-|Keypair|<br>
-VendorAddress^[object Object]^0.879|
-0.4202^1.0933x
-2.0343^1.0933x
-2.0343^1.3845x
-0.4202^1.3845
-|Keypair|<br>
-VendorName^CORRIDOR
-RECYCLING, INC^0.716|
-0.4215^0.4345x
-3.832^0.4462x
-3.8298^1.1029x
-0.4193^1.0912
-|Keypair|<br>
-Phone:^(310) 835-9109^0.874|
-2.7507^1.0993x
-3.884^1.1124x
-3.8822^1.264x
-2.7489^1.2509
-|Keypair|<br>
-FAX:^(310) 835-0366^0.874|
-2.6264^1.2516x
-3.8637^1.2556x
-3.8632^1.4036x
-2.6259^1.3996
-|Keypair|<br>
-Customer:^kdc-one #1
-UCB Zero Waste, LLC.
-4032 Wilshire Boulevard Suite #402
-Los Angeles, CA 90010^0.704|
-0.8548^2.1723x
-3.0633^2.1815x
-3.0603^2.9134x
-0.8518^2.9042
-|Keypair|<br>
-Purchase Ticket #^108086^0.858|
-6.3989^0.9883x
-6.9194^0.9787x
-6.9194^1.1506x
-6.3989^1.1411
-|Keypair|<br>
-Purchase Date^10/31/23^0.875|
-6.375^1.184x
-6.9958^1.1793x
-6.9958^1.3559x
-6.375^1.3511
-|Keypair|<br>
-Currency^US Dollar^0.874|
-6.353^1.4144x
-7.1075^1.4227x
-7.1056^1.5981x
-6.3511^1.5898
-|Keypair|<br>
-Account Rep^Steve Noh^0.859|
-4.7619^2.1246x
-5.6405^2.1289x
-5.6396^2.3104x
-4.761^2.306
-|Keypair|<br>
-Payment Due^11/15/23^0.878|
-5.8831^2.8121x
-6.4037^2.8121x
-6.4037^2.9601x
-5.8879^2.9553
-|Keypair|<br>
-WT Ticket
-Ticket
-Ticket
-# / Deliv^387399
-387690
-GALI^0.172|
-2.1489^4.0868x
-2.738^4.0917x
-2.7113^7.3095x
-2.1222^7.3046
-|Keypair|<br>
-Rec:^10/20/23^0.906|
-0.6256^7.3906x
-1.0506^7.3906x
-1.0553^7.5148x
-0.6303^7.5148
-|Keypair|<br>
-WT Ticket #S^388005^0.605|
-2.1346^7.4145x
-2.507^7.4097x
-2.5118^7.5339x
-2.1393^7.5291
-|Keypair|<br>
-Release # / Deliv^arline^0.832|
-2.4306^7.8585x
-2.7362^7.8585x
-2.7362^7.9826x
-2.4306^7.9826
-|Keypair|<br>
-Rec:^10/23/23^0.906|
-0.6351^8.0734x
-1.0601^8.0686x
-1.0601^8.1975x
-0.6351^8.1975
-|Keypair|<br>
-WT Ticket #S^388099^0.857|
-2.1441^8.0829x
-2.5166^8.0924x
-2.5166^8.2118x
-2.1441^8.2023
-|Keypair|<br>
-Release # / Deliv^GALI^0.833|
-2.4258^8.5174x
-2.7171^8.5174x
-2.7124^8.651x
-2.4258^8.6463
-|Keypair|<br>
-Weight Adjusted :^2,400.0 Pallets^0.843|
-4.0733^8.4076x
-4.8039^8.4076x
-4.8039^8.5221x
-4.0733^8.5221
-|Keypair|<br>
-Rec:^10/25/23^0.905|
-0.6256^8.737x
-1.0553^8.7322x
-1.0553^8.8611x
-0.6303^8.8563
-|Keypair|<br>
-WT Ticket #S^388186^0.859|
-2.1298^8.7513x
-2.507^8.7561x
-2.507^8.8707x
-2.1346^8.8707
-|Keypair|<br>
-Weight Adjusted :^2,600.0 Pallets^0.845|
-4.0685^9.0712x
-4.8087^9.0712x
-4.8087^9.1953x
-4.0685^9.1953
-|Keypair|<br>
-Release # / Deliv^GALI^0.602|
-2.4258^9.181x
-2.7171^9.181x
-2.7124^9.3147x
-2.4258^9.3099
-|Keypair|<br>
-Prepared By^Gil Dodson^0.857|
-1.9292^10.1665x
-2.485^10.1755x
-2.483^10.3x
-1.9272^10.291
-|Keypair|<br>
-Phone:^(310) 835-9109^0.908|
-2.7553^1.1084x
-3.868^1.1124x
-3.8675^1.2604x
-2.7548^1.2564
-|Keypair|<br>
-FAX:^(310) 835-0366^0.908|
-2.6312^1.2509x
-3.868^1.2509x
-3.868^1.4036x
-2.6312^1.4036
-|Keypair|<br>
-Purchase Ticket #^108086^0.897|
-6.3798^0.974x
-6.9289^0.9644x
-6.9242^1.1363x
-6.3846^1.122
-|Keypair|<br>
-Purchase Date^10/31/23^0.909|
-6.3607^1.1793x
-7.0006^1.1697x
-7.0006^1.332x
-6.3654^1.332
-|Keypair|<br>
-Currency^US Dollar^0.908|
-6.3464^1.4x
-7.1027^1.4084x
-7.1008^1.5815x
-6.3445^1.573
-|Keypair|<br>
-Customer:^kdc-one #1
-UCB Zero Waste, LLC.
-4032 Wilshire Boulevard Suite #402
-Los Angeles, CA 90010^0.739|
-0.8643^2.1819x
-3.0705^2.1819x
-3.0705^2.9123x
-0.8643^2.9123
-|Keypair|<br>
-Account Rep^Steve Noh^0.898|
-4.7755^2.1064x
-5.6539^2.1198x
-5.6511^2.305x
-4.7727^2.2916
-|Keypair|<br>
-Payment Due^11/15/23^0.909|
-5.8784^2.7882x
-6.4037^2.793x
-6.4084^2.9553x
-5.8831^2.9553
-|Keypair|<br>
-Gross^undefined^0.256|
-|Keypair|<br>
-Tare^undefined^0.263|
-|Keypair|<br>
-RECEIVED BY:^undefined^0.74|
-|Keypair|<br>
-Prepared By^Gil Dodson^0.897|
-1.958^10.1742x
-2.5186^10.1836x
-2.5166^10.3052x
-1.9559^10.2958
-|Keypair|<br>
-|Delimiter|
-<table border=1>
-<tr>
-<td>Item Name^undefined|
-0.2045^3.1453x
-1.0827^3.1533x
-1.0827^3.3608x
-0.2045^3.3528
-</td>
-<td>Order #^undefined|
-1.0827^3.1533x
-2.9509^3.1612x
-2.9509^3.3767x
-1.0827^3.3608
-</td>
-<td>Gross^undefined|
-2.9509^3.1612x
-3.7892^3.1612x
-3.7892^3.3767x
-2.9509^3.3767
-</td>
-<td>Tare^undefined|
-3.7892^3.1612x
-4.8909^3.1692x
-4.8909^3.3927x
-3.7892^3.3767
-</td>
-<td>Net^undefined|
-4.8909^3.1692x
-5.817^3.1692x
-5.817^3.3927x
-4.8909^3.3927
-</td>
-<td>Price^undefined|
-5.817^3.1692x
-7.1663^3.1772x
-7.1663^3.4007x
-5.817^3.3927
-</td>
-<td>Total^undefined|
-7.1663^3.1772x
-8.0125^3.1772x
-8.0125^3.4007x
-7.1663^3.4007
-</td>
-<tr>
-<td>Rec:^undefined|
-0.2045^3.3528x
-0.5718^3.3608x
-0.5718^3.5523x
-0.2045^3.5443
-</td>
-<td>10/4/23^undefined|
-0.5718^3.3608x
-1.0827^3.3608x
-1.0827^3.5523x
-0.5718^3.5523
-</td>
-<td>WT Ticket #S^undefined|
-1.0827^3.3608x
-2.1685^3.3767x
-2.1685^3.5603x
-1.0827^3.5523
-</td>
-<td>387394^undefined|
-2.1685^3.3767x
-2.9509^3.3767x
-2.9509^3.5603x
-2.1685^3.5603
-</td>
-<td>^undefined|
-2.9509^3.3767x
-3.7892^3.3767x
-3.7892^3.5683x
-2.9509^3.5603
-</td>
-<td>^undefined|
-3.7892^3.3767x
-4.8909^3.3927x
-4.8909^3.5763x
-3.7892^3.5683
-</td>
-<td>^undefined|
-4.8909^3.3927x
-5.817^3.3927x
-5.817^3.5763x
-4.8909^3.5763
-</td>
-<td>^undefined|
-5.817^3.3927x
-7.1663^3.4007x
-7.1663^3.5842x
-5.817^3.5763
-</td>
-<td>^undefined|
-7.1663^3.4007x
-8.0125^3.4007x
-8.0125^3.5922x
-7.1663^3.5842
-</td>
-<tr>
-<td>Occ^undefined|
-0.2045^3.5443x
-0.5718^3.5523x
-0.5718^3.704x
-0.2045^3.696
-</td>
-<td>^undefined|
-0.5718^3.5523x
-1.0827^3.5523x
-1.0827^3.704x
-0.5718^3.704
-</td>
-<td>152042^undefined|
-1.0827^3.5523x
-2.1685^3.5603x
-2.1685^3.7119x
-1.0827^3.704
-</td>
-<td>^undefined|
-2.1685^3.5603x
-2.9509^3.5603x
-2.9509^3.7119x
-2.1685^3.7119
-</td>
-<td>25,100.0^undefined|
-2.9509^3.5603x
-3.7892^3.5683x
-3.7892^3.7199x
-2.9509^3.7119
-</td>
-<td>15,140.0^undefined|
-3.7892^3.5683x
-4.8909^3.5763x
-4.8909^3.7199x
-3.7892^3.7199
-</td>
-<td>7,760.0 LB^undefined|
-4.8909^3.5763x
-5.817^3.5763x
-5.817^3.7279x
-4.8909^3.7199
-</td>
-<td>$80.000000 Ton^undefined|
-5.817^3.5763x
-7.1663^3.5842x
-7.1663^3.7279x
-5.817^3.7279
-</td>
-<td>$310.40^undefined|
-7.1663^3.5842x
-8.0125^3.5922x
-8.0125^3.7359x
-7.1663^3.7279
-</td>
-<tr>
-<td>^undefined|
-0.2045^3.696x
-0.5718^3.704x
-0.5718^3.8316x
-0.2045^3.8237
-</td>
-<td>^undefined|
-0.5718^3.704x
-1.0827^3.704x
-1.0827^3.8316x
-0.5718^3.8316
-</td>
-<td>^undefined|
-1.0827^3.704x
-2.1685^3.7119x
-2.1685^3.8396x
-1.0827^3.8316
-</td>
-<td>Weight^undefined|
-2.1685^3.7119x
-2.9509^3.7119x
-2.9509^3.8396x
-2.1685^3.8396
-</td>
-<td>Adjusted :^undefined|
-2.9509^3.7119x
-3.7892^3.7199x
-3.7892^3.8476x
-2.9509^3.8396
-</td>
-<td>2,200.0 Pallets^undefined|
-3.7892^3.7199x
-4.8909^3.7199x
-4.8909^3.8476x
-3.7892^3.8476
-</td>
-<td>^undefined|
-4.8909^3.7199x
-5.817^3.7279x
-5.817^3.8556x
-4.8909^3.8476
-</td>
-<td>^undefined|
-5.817^3.7279x
-7.1663^3.7279x
-7.1663^3.8636x
-5.817^3.8556
-</td>
-<td>^undefined|
-7.1663^3.7279x
-8.0125^3.7359x
-8.0125^3.8636x
-7.1663^3.8636
-</td>
-<tr>
-<td>^undefined|
-0.2045^3.8237x
-0.5718^3.8316x
-0.5718^4.0152x
-0.2045^4.0072
-</td>
-<td>^undefined|
-0.5718^3.8316x
-1.0827^3.8316x
-1.0827^4.0152x
-0.5718^4.0152
-</td>
-<td>Release # / Deliv^undefined|
-1.0827^3.8316x
-2.1685^3.8396x
-2.1605^4.0232x
-1.0827^4.0152
-</td>
-<td>ANA^undefined|
-2.1685^3.8396x
-2.9509^3.8396x
-2.9509^4.0232x
-2.1605^4.0232
-</td>
-<td>^undefined|
-2.9509^3.8396x
-3.7892^3.8476x
-3.7892^4.0312x
-2.9509^4.0232
-</td>
-<td>^undefined|
-3.7892^3.8476x
-4.8909^3.8476x
-4.8909^4.0312x
-3.7892^4.0312
-</td>
-<td>^undefined|
-4.8909^3.8476x
-5.817^3.8556x
-5.817^4.0312x
-4.8909^4.0312
-</td>
-<td>^undefined|
-5.817^3.8556x
-7.1663^3.8636x
-7.1663^4.0392x
-5.817^4.0312
-</td>
-<td>^undefined|
-7.1663^3.8636x
-8.0125^3.8636x
-8.0125^4.0471x
-7.1663^4.0392
-</td>
-<tr>
-<td>Rec:^undefined|
-0.2045^4.0072x
-0.5718^4.0152x
-0.5718^4.2227x
-0.2045^4.2147
-</td>
-<td>10/4/23^undefined|
-0.5718^4.0152x
-1.0827^4.0152x
-1.0827^4.2227x
-0.5718^4.2227
-</td>
-<td>WT Ticket #S^undefined|
-1.0827^4.0152x
-2.1605^4.0232x
-2.1605^4.2307x
-1.0827^4.2227
-</td>
-<td>387399^undefined|
-2.1605^4.0232x
-2.9509^4.0232x
-2.9509^4.2307x
-2.1605^4.2307
-</td>
-<td>^undefined|
-2.9509^4.0232x
-3.7892^4.0312x
-3.7892^4.2387x
-2.9509^4.2307
-</td>
-<td>^undefined|
-3.7892^4.0312x
-4.8909^4.0312x
-4.8909^4.2467x
-3.7892^4.2387
-</td>
-<td>^undefined|
-4.8909^4.0312x
-5.817^4.0312x
-5.817^4.2467x
-4.8909^4.2467
-</td>
-<td>^undefined|
-5.817^4.0312x
-7.1663^4.0392x
-7.1663^4.2546x
-5.817^4.2467
-</td>
-<td>^undefined|
-7.1663^4.0392x
-8.0125^4.0471x
-8.0125^4.2626x
-7.1663^4.2546
-</td>
-<tr>
-<td>#1^undefined|
-0.2045^4.2147x
-0.5718^4.2227x
-0.5718^4.3744x
-0.2045^4.3744
-</td>
-<td>Unprepared^undefined|
-0.5718^4.2227x
-1.0827^4.2227x
-1.0827^4.3744x
-0.5718^4.3744
-</td>
-<td>152042^undefined|
-1.0827^4.2227x
-2.9509^4.2307x
-2.9509^4.3823x
-1.0827^4.3744
-</td>
-<td>35,240.0^undefined|
-2.9509^4.2307x
-3.7892^4.2387x
-3.7892^4.3823x
-2.9509^4.3823
-</td>
-<td>27,540.0^undefined|
-3.7892^4.2387x
-4.8909^4.2467x
-4.8909^4.3903x
-3.7892^4.3823
-</td>
-<td>7,520.0 LB^undefined|
-4.8909^4.2467x
-5.817^4.2467x
-5.817^4.3903x
-4.8909^4.3903
-</td>
-<td>$170.000000 GT^undefined|
-5.817^4.2467x
-7.1663^4.2546x
-7.1663^4.3983x
-5.817^4.3903
-</td>
-<td>$570.71^undefined|
-7.1663^4.2546x
-8.0125^4.2626x
-8.0125^4.4063x
-7.1663^4.3983
-</td>
-<tr>
-<td>^undefined|
-0.2045^4.3744x
-0.5718^4.3744x
-0.5718^4.4941x
-0.2045^4.4861
-</td>
-<td>^undefined|
-0.5718^4.3744x
-1.0827^4.3744x
-1.0747^4.4941x
-0.5718^4.4941
-</td>
-<td>Release # / Deliv^undefined|
-1.0827^4.3744x
-2.1605^4.3744x
-2.1605^4.6936x
-1.0747^4.6856
-</td>
-<td>Weight
-FLOR^undefined|
-2.1605^4.3744x
-2.9509^4.3823x
-2.9509^4.6936x
-2.1605^4.6936
-</td>
-<td>Adjusted :^undefined|
-2.9509^4.3823x
-3.7892^4.3823x
-3.7892^4.51x
-2.9509^4.5021
-</td>
-<td>180.0 Trash^undefined|
-3.7892^4.3823x
-4.8909^4.3903x
-4.8909^4.51x
-3.7892^4.51
-</td>
-<td>^undefined|
-4.8909^4.3903x
-5.817^4.3903x
-5.817^4.518x
-4.8909^4.51
-</td>
-<td>^undefined|
-5.817^4.3903x
-7.1663^4.3983x
-7.1663^4.526x
-5.817^4.518
-</td>
-<td>^undefined|
-7.1663^4.3983x
-8.0125^4.4063x
-8.0125^4.7175x
-7.1663^4.7175
-</td>
-<tr>
-<td>^undefined|
-0.2045^4.4861x
-0.5718^4.4941x
-0.5718^4.6776x
-0.1965^4.6697
-</td>
-<td>^undefined|
-0.5718^4.4941x
-1.0747^4.4941x
-1.0747^4.6856x
-0.5718^4.6776
-</td>
-<td>^undefined|
-2.9509^4.5021x
-3.7892^4.51x
-3.7892^4.6936x
-2.9509^4.6936
-</td>
-<td>^undefined|
-3.7892^4.51x
-4.8909^4.51x
-4.8909^4.7016x
-3.7892^4.6936
-</td>
-<td>^undefined|
-4.8909^4.51x
-5.817^4.518x
-5.817^4.7016x
-4.8909^4.7016
-</td>
-<td>^undefined|
-5.817^4.518x
-7.1663^4.526x
-7.1663^4.7175x
-5.817^4.7016
-</td>
-<tr>
-<td>Rec:^undefined|
-0.1965^4.6697x
-0.5718^4.6776x
-0.5718^4.8852x
-0.1965^4.8772
-</td>
-<td>10/6/23^undefined|
-0.5718^4.6776x
-1.0747^4.6856x
-1.0747^4.8852x
-0.5718^4.8852
-</td>
-<td>WT Ticket #S^undefined|
-1.0747^4.6856x
-2.1605^4.6936x
-2.1605^4.9011x
-1.0747^4.8852
-</td>
-<td>387500^undefined|
-2.1605^4.6936x
-2.9509^4.6936x
-2.9509^4.9011x
-2.1605^4.9011
-</td>
-<td>^undefined|
-2.9509^4.6936x
-3.7892^4.6936x
-3.7892^4.9091x
-2.9509^4.9011
-</td>
-<td>^undefined|
-3.7892^4.6936x
-4.8909^4.7016x
-4.8909^4.9171x
-3.7892^4.9091
-</td>
-<td>^undefined|
-4.8909^4.7016x
-5.817^4.7016x
-5.817^4.9171x
-4.8909^4.9171
-</td>
-<td>^undefined|
-5.817^4.7016x
-7.1663^4.7175x
-7.1663^4.9251x
-5.817^4.9171
-</td>
-<td>^undefined|
-7.1663^4.7175x
-8.0125^4.7175x
-8.0125^4.933x
-7.1663^4.9251
-</td>
-<tr>
-<td>occ^undefined|
-0.1965^4.8772x
-0.5718^4.8852x
-0.5718^5.0368x
-0.1965^5.0368
-</td>
-<td>^undefined|
-0.5718^4.8852x
-1.0747^4.8852x
-1.0747^5.0368x
-0.5718^5.0368
-</td>
-<td>152042^undefined|
-1.0747^4.8852x
-2.9509^4.9011x
-2.9509^5.0448x
-1.0747^5.0368
-</td>
-<td>41,620.0^undefined|
-2.9509^4.9011x
-3.7892^4.9091x
-3.7892^5.0528x
-2.9509^5.0448
-</td>
-<td>31,120.0^undefined|
-3.7892^4.9091x
-4.8909^4.9171x
-4.8909^5.0528x
-3.7892^5.0528
-</td>
-<td>7,800.0 LB^undefined|
-4.8909^4.9171x
-5.817^4.9171x
-5.817^5.0528x
-4.8909^5.0528
-</td>
-<td>$80.000000 Ton^undefined|
-5.817^4.9171x
-7.1663^4.9251x
-7.1663^5.0607x
-5.817^5.0528
-</td>
-<td>$312.00^undefined|
-7.1663^4.9251x
-8.0125^4.933x
-8.0125^5.0687x
-7.1663^5.0607
-</td>
-<tr>
-<td>^undefined|
-0.1965^5.0368x
-0.5718^5.0368x
-0.5718^5.1645x
-0.1965^5.1565
-</td>
-<td>^undefined|
-0.5718^5.0368x
-1.0747^5.0368x
-1.0747^5.1645x
-0.5718^5.1645
-</td>
-<td>^undefined|
-1.0747^5.0368x
-2.1605^5.0368x
-2.1605^5.1725x
-1.0747^5.1645
-</td>
-<td>Weight^undefined|
-2.1605^5.0368x
-2.9509^5.0448x
-2.9509^5.1805x
-2.1605^5.1725
-</td>
-<td>Adjusted :^undefined|
-2.9509^5.0448x
-3.7892^5.0528x
-3.7892^5.1805x
-2.9509^5.1805
-</td>
-<td>2,700.0 Pallets^undefined|
-3.7892^5.0528x
-4.8909^5.0528x
-4.8909^5.1884x
-3.7892^5.1805
-</td>
-<td>^undefined|
-4.8909^5.0528x
-5.817^5.0528x
-5.817^5.1964x
-4.8909^5.1884
-</td>
-<td>^undefined|
-5.817^5.0528x
-7.1663^5.0607x
-7.1663^5.2044x
-5.817^5.1964
-</td>
-<td>^undefined|
-7.1663^5.0607x
-8.0125^5.0687x
-8.0125^5.2124x
-7.1663^5.2044
-</td>
-<tr>
-<td>^undefined|
-0.1965^5.1565x
-0.5718^5.1645x
-0.5718^5.3481x
-0.1965^5.3401
-</td>
-<td>^undefined|
-0.5718^5.1645x
-1.0747^5.1645x
-1.0747^5.3481x
-0.5718^5.3481
-</td>
-<td>Release # / Deliv GALI^undefined|
-1.0747^5.1645x
-2.9509^5.1805x
-2.9509^5.356x
-1.0747^5.3481
-</td>
-<td>^undefined|
-2.9509^5.1805x
-3.7892^5.1805x
-3.7892^5.364x
-2.9509^5.356
-</td>
-<td>^undefined|
-3.7892^5.1805x
-4.8909^5.1884x
-4.8909^5.364x
-3.7892^5.364
-</td>
-<td>^undefined|
-4.8909^5.1884x
-5.817^5.1964x
-5.817^5.372x
-4.8909^5.364
-</td>
-<td>^undefined|
-5.817^5.1964x
-7.1663^5.2044x
-7.1663^5.38x
-5.817^5.372
-</td>
-<td>^undefined|
-7.1663^5.2044x
-8.0125^5.2124x
-8.0125^5.388x
-7.1663^5.38
-</td>
-<tr>
-<td>Rec:^undefined|
-0.1965^5.3401x
-0.5718^5.3481x
-0.5638^5.5476x
-0.1965^5.5476
-</td>
-<td>10/12/23^undefined|
-0.5718^5.3481x
-1.0747^5.3481x
-1.0747^5.5556x
-0.5638^5.5476
-</td>
-<td>WT Ticket #S^undefined|
-1.0747^5.3481x
-2.1605^5.356x
-2.1605^5.5635x
-1.0747^5.5556
-</td>
-<td>387690^undefined|
-2.1605^5.356x
-2.9509^5.356x
-2.9509^5.5715x
-2.1605^5.5635
-</td>
-<td>^undefined|
-2.9509^5.356x
-3.7892^5.364x
-3.7812^5.5795x
-2.9509^5.5715
-</td>
-<td>^undefined|
-3.7892^5.364x
-4.8909^5.364x
-4.8829^5.5795x
-3.7812^5.5795
-</td>
-<td>^undefined|
-4.8909^5.364x
-5.817^5.372x
-5.817^5.5875x
-4.8829^5.5795
-</td>
-<td>^undefined|
-5.817^5.372x
-7.1663^5.38x
-7.1663^5.5875x
-5.817^5.5875
-</td>
-<td>^undefined|
-7.1663^5.38x
-8.0125^5.388x
-8.0125^5.5955x
-7.1663^5.5875
-</td>
-<tr>
-<td>OCC^undefined|
-0.1965^5.5476x
-0.5638^5.5476x
-0.5638^5.7072x
-0.1965^5.7072
-</td>
-<td>^undefined|
-0.5638^5.5476x
-1.0747^5.5556x
-1.0747^5.7072x
-0.5638^5.7072
-</td>
-<td>152042^undefined|
-1.0747^5.5556x
-2.9509^5.5715x
-2.9509^5.7152x
-1.0747^5.7072
-</td>
-<td>25,100.0^undefined|
-2.9509^5.5715x
-3.7812^5.5795x
-3.7812^5.7232x
-2.9509^5.7152
-</td>
-<td>14,220.0^undefined|
-3.7812^5.5795x
-4.8829^5.5795x
-4.8829^5.7232x
-3.7812^5.7232
-</td>
-<td>8,180.0 LB^undefined|
-4.8829^5.5795x
-5.817^5.5875x
-5.817^5.7232x
-4.8829^5.7232
-</td>
-<td>$80.000000 Ton^undefined|
-5.817^5.5875x
-7.1663^5.5875x
-7.1663^5.7311x
-5.817^5.7232
-</td>
-<td>$327.20^undefined|
-7.1663^5.5875x
-8.0125^5.5955x
-8.0125^5.7391x
-7.1663^5.7311
-</td>
-<tr>
-<td>^undefined|
-0.1965^5.7072x
-0.5638^5.7072x
-0.5638^5.8349x
-0.1965^5.8349
-</td>
-<td>^undefined|
-0.5638^5.7072x
-1.0747^5.7072x
-1.0747^5.8349x
-0.5638^5.8349
-</td>
-<td>Release # / Deliv^undefined|
-1.0747^5.7072x
-2.1605^5.7072x
-2.1605^6.0264x
-1.0747^6.0185
-</td>
-<td>Weight
-ANA^undefined|
-2.1605^5.7072x
-2.9509^5.7152x
-2.9509^6.0344x
-2.1605^6.0264
-</td>
-<td>Adjusted :^undefined|
-2.9509^5.7152x
-3.7812^5.7232x
-3.7812^5.8509x
-2.9509^5.8429
-</td>
-<td>2,700.0 Pallets^undefined|
-3.7812^5.7232x
-4.8829^5.7232x
-4.8829^5.8509x
-3.7812^5.8509
-</td>
-<td>^undefined|
-4.8829^5.7232x
-5.817^5.7232x
-5.817^5.8509x
-4.8829^5.8509
-</td>
-<td>^undefined|
-5.817^5.7232x
-7.1663^5.7311x
-7.1663^5.8588x
-5.817^5.8509
-</td>
-<td>^undefined|
-7.1663^5.7311x
-8.0125^5.7391x
-8.0125^6.0584x
-7.1663^6.0504
-</td>
-<tr>
-<td>^undefined|
-0.1965^5.8349x
-0.5638^5.8349x
-0.5638^6.0185x
-0.1965^6.0105
-</td>
-<td>^undefined|
-0.5638^5.8349x
-1.0747^5.8349x
-1.0747^6.0185x
-0.5638^6.0185
-</td>
-<td>^undefined|
-2.9509^5.8429x
-3.7812^5.8509x
-3.7812^6.0344x
-2.9509^6.0344
-</td>
-<td>^undefined|
-3.7812^5.8509x
-4.8829^5.8509x
-4.8829^6.0424x
-3.7812^6.0344
-</td>
-<td>^undefined|
-4.8829^5.8509x
-5.817^5.8509x
-5.817^6.0424x
-4.8829^6.0424
-</td>
-<td>^undefined|
-5.817^5.8509x
-7.1663^5.8588x
-7.1663^6.0504x
-5.817^6.0424
-</td>
-<tr>
-<td>Rec:^undefined|
-0.1965^6.0105x
-0.5638^6.0185x
-0.5638^6.218x
-0.1885^6.218
-</td>
-<td>10/14/23^undefined|
-0.5638^6.0185x
-1.0747^6.0185x
-1.0747^6.218x
-0.5638^6.218
-</td>
-<td>WT Ticket #S^undefined|
-1.0747^6.0185x
-2.1605^6.0264x
-2.1605^6.218x
-1.0747^6.218
-</td>
-<td>387789^undefined|
-2.1605^6.0264x
-2.9509^6.0344x
-2.9509^6.226x
-2.1605^6.218
-</td>
-<td>^undefined|
-2.9509^6.0344x
-3.7812^6.0344x
-3.7812^6.234x
-2.9509^6.226
-</td>
-<td>^undefined|
-3.7812^6.0344x
-4.8829^6.0424x
-4.8829^6.2419x
-3.7812^6.234
-</td>
-<td>^undefined|
-4.8829^6.0424x
-5.817^6.0424x
-5.817^6.2499x
-4.8829^6.2419
-</td>
-<td>^undefined|
-5.817^6.0424x
-7.1663^6.0504x
-7.1663^6.2579x
-5.817^6.2499
-</td>
-<td>^undefined|
-7.1663^6.0504x
-8.0125^6.0584x
-8.0125^6.2659x
-7.1663^6.2579
-</td>
-<tr>
-<td>Occ^undefined|
-0.1885^6.218x
-0.5638^6.218x
-0.5638^6.3696x
-0.1885^6.3617
-</td>
-<td>^undefined|
-0.5638^6.218x
-1.0747^6.218x
-1.0747^6.3696x
-0.5638^6.3696
-</td>
-<td>152042^undefined|
-1.0747^6.218x
-2.9509^6.226x
-2.9509^6.3776x
-1.0747^6.3696
-</td>
-<td>26,600.0^undefined|
-2.9509^6.226x
-3.7812^6.234x
-3.7812^6.3856x
-2.9509^6.3776
-</td>
-<td>14,140.0^undefined|
-3.7812^6.234x
-4.8829^6.2419x
-4.8829^6.3856x
-3.7812^6.3856
-</td>
-<td>9,760.0 LB^undefined|
-4.8829^6.2419x
-5.817^6.2499x
-5.817^6.3936x
-4.8829^6.3856
-</td>
-<td>$80.000000 Ton^undefined|
-5.817^6.2499x
-7.1663^6.2579x
-7.1663^6.4016x
-5.817^6.3936
-</td>
-<td>$390.40^undefined|
-7.1663^6.2579x
-8.0125^6.2659x
-8.0125^6.4016x
-7.1663^6.4016
-</td>
-<tr>
-<td>^undefined|
-0.1885^6.3617x
-0.5638^6.3696x
-0.5638^6.4973x
-0.1885^6.4894
-</td>
-<td>^undefined|
-0.5638^6.3696x
-1.0747^6.3696x
-1.0747^6.4973x
-0.5638^6.4973
-</td>
-<td>Release # / Deliv^undefined|
-1.0747^6.3696x
-2.1605^6.3776x
-2.1605^6.6889x
-1.0747^6.6809
-</td>
-<td>Weight^undefined|
-2.1605^6.3776x
-2.9509^6.3776x
-2.9509^6.5053x
-2.1605^6.5053
-</td>
-<td>Adjusted :^undefined|
-2.9509^6.3776x
-3.7812^6.3856x
-3.7812^6.5133x
-2.9509^6.5053
-</td>
-<td>2,700.0 Pallets^undefined|
-3.7812^6.3856x
-4.8829^6.3856x
-4.8829^6.5133x
-3.7812^6.5133
-</td>
-<td>^undefined|
-4.8829^6.3856x
-5.817^6.3936x
-5.817^6.5213x
-4.8829^6.5133
-</td>
-<td>^undefined|
-5.817^6.3936x
-7.1663^6.4016x
-7.1663^6.5293x
-5.817^6.5213
-</td>
-<td>^undefined|
-7.1663^6.4016x
-8.0125^6.4016x
-8.0125^6.7208x
-7.1663^6.7128
-</td>
-<tr>
-<td>^undefined|
-0.1885^6.4894x
-0.5638^6.4973x
-0.5638^6.6809x
-0.1885^6.6729
-</td>
-<td>^undefined|
-0.5638^6.4973x
-1.0747^6.4973x
-1.0747^6.6809x
-0.5638^6.6809
-</td>
-<td>ANA^undefined|
-2.1605^6.5053x
-2.9509^6.5053x
-2.9509^6.6969x
-2.1605^6.6889
-</td>
-<td>^undefined|
-2.9509^6.5053x
-3.7812^6.5133x
-3.7812^6.6969x
-2.9509^6.6969
-</td>
-<td>^undefined|
-3.7812^6.5133x
-4.8829^6.5133x
-4.8829^6.6969x
-3.7812^6.6969
-</td>
-<td>^undefined|
-4.8829^6.5133x
-5.817^6.5213x
-5.817^6.7048x
-4.8829^6.6969
-</td>
-<td>^undefined|
-5.817^6.5213x
-7.1663^6.5293x
-7.1663^6.7128x
-5.817^6.7048
-</td>
-<tr>
-<td>Rec:^undefined|
-0.1885^6.6729x
-0.5638^6.6809x
-0.5638^6.8804x
-0.1885^6.8724
-</td>
-<td>10/19/23^undefined|
-0.5638^6.6809x
-1.0747^6.6809x
-1.0747^6.8804x
-0.5638^6.8804
-</td>
-<td>WT Ticket #S^undefined|
-1.0747^6.6809x
-2.1605^6.6889x
-2.1605^6.8964x
-1.0747^6.8804
-</td>
-<td>387973^undefined|
-2.1605^6.6889x
-2.9509^6.6969x
-2.9509^6.8964x
-2.1605^6.8964
-</td>
-<td>^undefined|
-2.9509^6.6969x
-3.7812^6.6969x
-3.7812^6.9044x
-2.9509^6.8964
-</td>
-<td>^undefined|
-3.7812^6.6969x
-4.8829^6.6969x
-4.8829^6.9124x
-3.7812^6.9044
-</td>
-<td>^undefined|
-4.8829^6.6969x
-5.817^6.7048x
-5.817^6.9124x
-4.8829^6.9124
-</td>
-<td>^undefined|
-5.817^6.7048x
-7.1663^6.7128x
-7.1663^6.9283x
-5.817^6.9124
-</td>
-<td>^undefined|
-7.1663^6.7128x
-8.0125^6.7208x
-8.0125^6.9283x
-7.1663^6.9283
-</td>
-<tr>
-<td>OCC^undefined|
-0.1885^6.8724x
-0.5638^6.8804x
-0.5638^7.0321x
-0.1885^7.0241
-</td>
-<td>^undefined|
-0.5638^6.8804x
-1.0747^6.8804x
-1.0668^7.0321x
-0.5638^7.0321
-</td>
-<td>152042^undefined|
-1.0747^6.8804x
-2.9509^6.8964x
-2.9509^7.048x
-1.0668^7.0321
-</td>
-<td>43,240.0^undefined|
-2.9509^6.8964x
-3.7812^6.9044x
-3.7812^7.048x
-2.9509^7.048
-</td>
-<td>31,720.0^undefined|
-3.7812^6.9044x
-4.8829^6.9124x
-4.8829^7.056x
-3.7812^7.048
-</td>
-<td>8,920.0 LB^undefined|
-4.8829^6.9124x
-5.817^6.9124x
-5.817^7.056x
-4.8829^7.056
-</td>
-<td>$80.000000 Ton^undefined|
-5.817^6.9124x
-7.1663^6.9283x
-7.1663^7.072x
-5.817^7.056
-</td>
-<td>$356.80^undefined|
-7.1663^6.9283x
-8.0125^6.9283x
-8.0125^7.072x
-7.1663^7.072
-</td>
-<tr>
-<td>^undefined|
-0.1885^7.0241x
-0.5638^7.0321x
-0.5638^7.1598x
-0.1885^7.1598
-</td>
-<td>^undefined|
-0.5638^7.0321x
-1.0668^7.0321x
-1.0668^7.1598x
-0.5638^7.1598
-</td>
-<td>^undefined|
-1.0668^7.0321x
-2.1605^7.04x
-2.1605^7.1598x
-1.0668^7.1598
-</td>
-<td>Weight^undefined|
-2.1605^7.04x
-2.9509^7.048x
-2.9509^7.1677x
-2.1605^7.1598
-</td>
-<td>Adjusted :^undefined|
-2.9509^7.048x
-3.7812^7.048x
-3.7812^7.1757x
-2.9509^7.1677
-</td>
-<td>2,600.0 Pallets^undefined|
-3.7812^7.048x
-4.8829^7.056x
-4.8829^7.1757x
-3.7812^7.1757
-</td>
-<td>^undefined|
-4.8829^7.056x
-5.817^7.056x
-5.817^7.1757x
-4.8829^7.1757
-</td>
-<td>^undefined|
-5.817^7.056x
-7.1663^7.072x
-7.1663^7.1837x
-5.817^7.1757
-</td>
-<td>^undefined|
-7.1663^7.072x
-8.0125^7.072x
-8.0125^7.1917x
-7.1663^7.1837
-</td>
-<tr>
-<td>^undefined|
-0.1885^7.1598x
-0.5638^7.1598x
-0.5638^7.3433x
-0.1885^7.3353
-</td>
-<td>^undefined|
-0.5638^7.1598x
-1.0668^7.1598x
-1.0668^7.3433x
-0.5638^7.3433
-</td>
-<td>Release # / Deliv^undefined|
-1.0668^7.1598x
-2.1605^7.1598x
-2.1605^7.3513x
-1.0668^7.3433
-</td>
-<td>GALI^undefined|
-2.1605^7.1598x
-2.9509^7.1677x
-2.9509^7.3513x
-2.1605^7.3513
-</td>
-<td>^undefined|
-2.9509^7.1677x
-3.7812^7.1757x
-3.7812^7.3593x
-2.9509^7.3513
-</td>
-<td>^undefined|
-3.7812^7.1757x
-4.8829^7.1757x
-4.8829^7.3593x
-3.7812^7.3593
-</td>
-<td>^undefined|
-4.8829^7.1757x
-5.817^7.1757x
-5.817^7.3593x
-4.8829^7.3593
-</td>
-<td>^undefined|
-5.817^7.1757x
-7.1663^7.1837x
-7.1663^7.3673x
-5.817^7.3593
-</td>
-<td>^undefined|
-7.1663^7.1837x
-8.0125^7.1917x
-8.0125^7.3753x
-7.1663^7.3673
-</td>
-<tr>
-<td>Rec:^undefined|
-0.1885^7.3353x
-0.5638^7.3433x
-0.5638^7.5429x
-0.1885^7.5429
-</td>
-<td>10/20/23^undefined|
-0.5638^7.3433x
-1.0668^7.3433x
-1.0668^7.5429x
-0.5638^7.5429
-</td>
-<td>WT Ticket #S^undefined|
-1.0668^7.3433x
-2.1605^7.3513x
-2.1605^7.5508x
-1.0668^7.5429
-</td>
-<td>388005^undefined|
-2.1605^7.3513x
-2.9509^7.3513x
-2.9509^7.5588x
-2.1605^7.5508
-</td>
-<td>^undefined|
-2.9509^7.3513x
-3.7812^7.3593x
-3.7812^7.5668x
-2.9509^7.5588
-</td>
-<td>^undefined|
-3.7812^7.3593x
-4.8829^7.3593x
-4.8829^7.5668x
-3.7812^7.5668
-</td>
-<td>^undefined|
-4.8829^7.3593x
-5.817^7.3593x
-5.817^7.5748x
-4.8829^7.5668
-</td>
-<td>^undefined|
-5.817^7.3593x
-7.1663^7.3673x
-7.1663^7.5828x
-5.817^7.5748
-</td>
-<td>^undefined|
-7.1663^7.3673x
-8.0125^7.3753x
-8.0125^7.5828x
-7.1663^7.5828
-</td>
-<tr>
-<td>#1^undefined|
-0.1885^7.5429x
-0.5638^7.5429x
-0.5638^7.6945x
-0.1885^7.6865
-</td>
-<td>Unprepared^undefined|
-0.5638^7.5429x
-1.0668^7.5429x
-1.0668^7.6945x
-0.5638^7.6945
-</td>
-<td>152042^undefined|
-1.0668^7.5429x
-2.9509^7.5588x
-2.9509^7.7025x
-1.0668^7.6945
-</td>
-<td>45,980.0^undefined|
-2.9509^7.5588x
-3.7812^7.5668x
-3.7812^7.7105x
-2.9509^7.7025
-</td>
-<td>27,800.0^undefined|
-3.7812^7.5668x
-4.8829^7.5668x
-4.8829^7.7184x
-3.7812^7.7105
-</td>
-<td>18,180.0 LB^undefined|
-4.8829^7.5668x
-5.817^7.5748x
-5.817^7.7184x
-4.8829^7.7184
-</td>
-<td>$170.000000 GT^undefined|
-5.817^7.5748x
-7.1663^7.5828x
-7.1663^7.7264x
-5.817^7.7184
-</td>
-<td>$1,379.73^undefined|
-7.1663^7.5828x
-8.0125^7.5828x
-8.0125^7.7344x
-7.1663^7.7264
-</td>
-<tr>
-<td>Trash^undefined|
-0.1885^7.6865x
-0.5638^7.6945x
-0.5638^7.8382x
-0.1806^7.8302
-</td>
-<td>^undefined|
-0.5638^7.6945x
-1.0668^7.6945x
-1.0668^7.8382x
-0.5638^7.8382
-</td>
-<td>152042^undefined|
-1.0668^7.6945x
-2.9509^7.7025x
-2.9509^7.8541x
-1.0668^7.8382
-</td>
-<td>47,780.0^undefined|
-2.9509^7.7025x
-3.7812^7.7105x
-3.7812^7.8541x
-2.9509^7.8541
-</td>
-<td>45,980.0^undefined|
-3.7812^7.7105x
-4.8829^7.7184x
-4.8829^7.8621x
-3.7812^7.8541
-</td>
-<td>1,800.0 LB^undefined|
-4.8829^7.7184x
-5.817^7.7184x
-5.817^7.8621x
-4.8829^7.8621
-</td>
-<td>-$120.000000 Ton^undefined|
-5.817^7.7184x
-7.1663^7.7264x
-7.1663^7.8701x
-5.817^7.8621
-</td>
-<td>-$108.00^undefined|
-7.1663^7.7264x
-8.0125^7.7344x
-8.0125^7.8781x
-7.1663^7.8701
-</td>
-<tr>
-<td>^undefined|
-0.1806^7.8302x
-0.5638^7.8382x
-0.5638^8.0217x
-0.1806^8.0137
-</td>
-<td>^undefined|
-0.5638^7.8382x
-1.0668^7.8382x
-1.0668^8.0217x
-0.5638^8.0217
-</td>
-<td>Release # / Deliv^undefined|
-1.0668^7.8382x
-2.1605^7.8461x
-2.1605^8.0297x
-1.0668^8.0217
-</td>
-<td>arline^undefined|
-2.1605^7.8461x
-2.9509^7.8541x
-2.9509^8.0297x
-2.1605^8.0297
-</td>
-<td>^undefined|
-2.9509^7.8541x
-3.7812^7.8541x
-3.7812^8.0377x
-2.9509^8.0297
-</td>
-<td>^undefined|
-3.7812^7.8541x
-4.8829^7.8621x
-4.8829^8.0377x
-3.7812^8.0377
-</td>
-<td>^undefined|
-4.8829^7.8621x
-5.817^7.8621x
-5.817^8.0377x
-4.8829^8.0377
-</td>
-<td>^undefined|
-5.817^7.8621x
-7.1663^7.8701x
-7.1663^8.0536x
-5.817^8.0377
-</td>
-<td>^undefined|
-7.1663^7.8701x
-8.0125^7.8781x
-8.0125^8.0536x
-7.1663^8.0536
-</td>
-<tr>
-<td>Rec:^undefined|
-0.1806^8.0137x
-0.5638^8.0217x
-0.5638^8.2212x
-0.1806^8.2133
-</td>
-<td>10/23/23^undefined|
-0.5638^8.0217x
-1.0668^8.0217x
-1.0668^8.2212x
-0.5638^8.2212
-</td>
-<td>WT Ticket #S^undefined|
-1.0668^8.0217x
-2.1605^8.0297x
-2.1605^8.2372x
-1.0668^8.2212
-</td>
-<td>388099^undefined|
-2.1605^8.0297x
-2.9509^8.0297x
-2.9429^8.2372x
-2.1605^8.2372
-</td>
-<td>^undefined|
-2.9509^8.0297x
-3.7812^8.0377x
-3.7812^8.2452x
-2.9429^8.2372
-</td>
-<td>^undefined|
-3.7812^8.0377x
-4.8829^8.0377x
-4.8829^8.2452x
-3.7812^8.2452
-</td>
-<td>^undefined|
-4.8829^8.0377x
-5.817^8.0377x
-5.817^8.2532x
-4.8829^8.2452
-</td>
-<td>^undefined|
-5.817^8.0377x
-7.1663^8.0536x
-7.1663^8.2612x
-5.817^8.2532
-</td>
-<td>^undefined|
-7.1663^8.0536x
-8.0125^8.0536x
-8.0125^8.2691x
-7.1663^8.2612
-</td>
-<tr>
-<td>Occ^undefined|
-0.1806^8.2133x
-0.5638^8.2212x
-0.5638^8.3809x
-0.1806^8.3809
-</td>
-<td>^undefined|
-0.5638^8.2212x
-1.0668^8.2212x
-1.0668^8.3809x
-0.5638^8.3809
-</td>
-<td>152042^undefined|
-1.0668^8.2212x
-2.9429^8.2372x
-2.9429^8.3889x
-1.0668^8.3809
-</td>
-<td>41,660.0^undefined|
-2.9429^8.2372x
-3.7812^8.2452x
-3.7812^8.3889x
-2.9429^8.3889
-</td>
-<td>30,860.0^undefined|
-3.7812^8.2452x
-4.8829^8.2452x
-4.8829^8.3968x
-3.7812^8.3889
-</td>
-<td>8,400.0 LB^undefined|
-4.8829^8.2452x
-5.817^8.2532x
-5.817^8.3968x
-4.8829^8.3968
-</td>
-<td>$80.000000 Ton^undefined|
-5.817^8.2532x
-7.1663^8.2612x
-7.1663^8.4128x
-5.817^8.3968
-</td>
-<td>$336.00^undefined|
-7.1663^8.2612x
-8.0125^8.2691x
-8.0125^8.4128x
-7.1663^8.4128
-</td>
-<tr>
-<td>^undefined|
-0.1806^8.3809x
-0.5638^8.3809x
-0.5638^8.5006x
-0.1806^8.5006
-</td>
-<td>^undefined|
-0.5638^8.3809x
-1.0668^8.3809x
-1.0668^8.6842x
-0.5638^8.6842
-</td>
-<td>Release # / Deliv^undefined|
-1.0668^8.3809x
-2.1605^8.3809x
-2.1525^8.6921x
-1.0668^8.6842
-</td>
-<td>Weight
-GALI^undefined|
-2.1605^8.3809x
-2.9429^8.3889x
-2.9429^8.6921x
-2.1525^8.6921
-</td>
-<td>Adjusted :^undefined|
-2.9429^8.3889x
-3.7812^8.3889x
-3.7812^8.5086x
-2.9429^8.5086
-</td>
-<td>2,400.0 Pallets^undefined|
-3.7812^8.3889x
-4.8829^8.3968x
-4.8829^8.7001x
-3.7812^8.7001
-</td>
-<td>^undefined|
-4.8829^8.3968x
-5.817^8.3968x
-5.817^8.5166x
-4.8829^8.5166
-</td>
-<td>^undefined|
-5.817^8.3968x
-7.1663^8.4128x
-7.1663^8.7161x
-5.817^8.7081
-</td>
-<td>^undefined|
-7.1663^8.4128x
-8.0125^8.4128x
-8.0125^8.7241x
-7.1663^8.7161
-</td>
-<tr>
-<td>^undefined|
-0.1806^8.5006x
-0.5638^8.5006x
-0.5638^8.6842x
-0.1806^8.6762
-</td>
-<td>^undefined|
-2.9429^8.5086x
-3.7812^8.5086x
-3.7812^8.7001x
-2.9429^8.6921
-</td>
-<td>^undefined|
-4.8829^8.5166x
-5.817^8.5166x
-5.817^8.7081x
-4.8829^8.7001
-</td>
-<tr>
-<td>Rec:^undefined|
-0.1806^8.6762x
-0.5638^8.6842x
-0.5638^8.8757x
-0.1806^8.8757
-</td>
-<td>10/25/23^undefined|
-0.5638^8.6842x
-1.0668^8.6842x
-1.0668^8.8837x
-0.5638^8.8757
-</td>
-<td>WT Ticket #S^undefined|
-1.0668^8.6842x
-2.1525^8.6921x
-2.1525^8.8837x
-1.0668^8.8837
-</td>
-<td>388186^undefined|
-2.1525^8.6921x
-2.9429^8.6921x
-2.9429^8.8917x
-2.1525^8.8837
-</td>
-<td>^undefined|
-2.9429^8.6921x
-3.7812^8.7001x
-3.7812^8.8996x
-2.9429^8.8917
-</td>
-<td>^undefined|
-3.7812^8.7001x
-4.8829^8.7001x
-4.8829^8.9076x
-3.7812^8.8996
-</td>
-<td>^undefined|
-4.8829^8.7001x
-5.817^8.7081x
-5.817^8.9076x
-4.8829^8.9076
-</td>
-<td>^undefined|
-5.817^8.7081x
-7.1663^8.7161x
-7.1663^8.9236x
-5.817^8.9076
-</td>
-<td>^undefined|
-7.1663^8.7161x
-8.0125^8.7241x
-8.0125^8.9236x
-7.1663^8.9236
-</td>
-<tr>
-<td>occ^undefined|
-0.1806^8.8757x
-0.5638^8.8757x
-0.5558^9.0433x
-0.1806^9.0433
-</td>
-<td>^undefined|
-0.5638^8.8757x
-1.0668^8.8837x
-1.0668^9.0433x
-0.5558^9.0433
-</td>
-<td>152042^undefined|
-1.0668^8.8837x
-2.9429^8.8917x
-2.9429^9.0513x
-1.0668^9.0433
-</td>
-<td>42,380.0^undefined|
-2.9429^8.8917x
-3.7812^8.8996x
-3.7732^9.0513x
-2.9429^9.0513
-</td>
-<td>31,320.0^undefined|
-3.7812^8.8996x
-4.8829^8.9076x
-4.8829^9.0593x
-3.7732^9.0513
-</td>
-<td>8,460.0 LB^undefined|
-4.8829^8.9076x
-5.817^8.9076x
-5.817^9.0593x
-4.8829^9.0593
-</td>
-<td>$80.000000 Ton^undefined|
-5.817^8.9076x
-7.1663^8.9236x
-7.1663^9.0752x
-5.817^9.0593
-</td>
-<td>$338.40^undefined|
-7.1663^8.9236x
-8.0125^8.9236x
-8.0125^9.0752x
-7.1663^9.0752
-</td>
-<tr>
-<td>^undefined|
-0.1806^9.0433x
-0.5558^9.0433x
-0.5558^9.179x
-0.1806^9.179
-</td>
-<td>^undefined|
-0.5558^9.0433x
-1.0668^9.0433x
-1.0668^9.179x
-0.5558^9.179
-</td>
-<td>^undefined|
-1.0668^9.0433x
-2.1525^9.0433x
-2.1525^9.179x
-1.0668^9.179
-</td>
-<td>Weight^undefined|
-2.1525^9.0433x
-2.9429^9.0513x
-2.9429^9.187x
-2.1525^9.179
-</td>
-<td>Adjusted :^undefined|
-2.9429^9.0513x
-3.7732^9.0513x
-3.7732^9.187x
-2.9429^9.187
-</td>
-<td>2,600.0 Pallets^undefined|
-3.7732^9.0513x
-4.8829^9.0593x
-4.875^9.1949x
-3.7732^9.187
-</td>
-<td>^undefined|
-4.8829^9.0593x
-5.817^9.0593x
-5.817^9.1949x
-4.875^9.1949
-</td>
-<td>^undefined|
-5.817^9.0593x
-7.1663^9.0752x
-7.1663^9.2029x
-5.817^9.1949
-</td>
-<td>^undefined|
-7.1663^9.0752x
-8.0125^9.0752x
-8.0125^9.2109x
-7.1663^9.2029
-</td>
-<tr>
-<td>^undefined|
-0.1806^9.179x
-0.5558^9.179x
-0.5558^9.4424x
-0.1726^9.4344
-</td>
-<td>^undefined|
-0.5558^9.179x
-1.0668^9.179x
-1.0588^9.4424x
-0.5558^9.4424
-</td>
-<td>Release # / Deliv GALI^undefined|
-1.0668^9.179x
-2.9429^9.187x
-2.9429^9.4503x
-1.0588^9.4424
-</td>
-<td>^undefined|
-2.9429^9.187x
-3.7732^9.187x
-3.7732^9.4583x
-2.9429^9.4503
-</td>
-<td>^undefined|
-3.7732^9.187x
-4.875^9.1949x
-4.875^9.4663x
-3.7732^9.4583
-</td>
-<td>^undefined|
-4.875^9.1949x
-5.817^9.1949x
-5.817^9.4743x
-4.875^9.4663
-</td>
-<td>^undefined|
-5.817^9.1949x
-7.1663^9.2029x
-7.1663^9.4823x
-5.817^9.4743
-</td>
-<td>^undefined|
-7.1663^9.2029x
-8.0125^9.2109x
-8.0125^9.4823x
-7.1663^9.4823
-</td>
-<tr>
-<td>^undefined|
-0.1726^9.4344x
-0.5558^9.4424x
-0.5558^9.6898x
-0.1726^9.6818
-</td>
-<td>^undefined|
-0.5558^9.4424x
-1.0588^9.4424x
-1.0588^9.6898x
-0.5558^9.6898
-</td>
-<td>Totals:^undefined|
-1.0588^9.4424x
-2.9429^9.4503x
-2.9429^9.6978x
-1.0588^9.6898
-</td>
-<td>374,700.0^undefined|
-2.9429^9.4503x
-3.7732^9.4583x
-3.7732^9.7057x
-2.9429^9.6978
-</td>
-<td>269,840.0^undefined|
-3.7732^9.4583x
-4.875^9.4663x
-4.875^9.7057x
-3.7732^9.7057
-</td>
-<td>86,780.0^undefined|
-4.875^9.4663x
-5.817^9.4743x
-5.817^9.7137x
-4.875^9.7057
-</td>
-<td>^undefined|
-5.817^9.4743x
-7.1663^9.4823x
-7.1663^9.7217x
-5.817^9.7137
-</td>
-<td>$4,213.64^undefined|
-7.1663^9.4823x
-8.0125^9.4823x
-8.0125^9.7297x
-7.1663^9.7217
-</td>
-</table><br>
-<table border=1>
-<tr>
-<td>Item Name^undefined|
-0.1935^3.1756x
-1.871^3.1756x
-1.871^3.3751x
-0.1935^3.3751
-</td>
-<td>Order #^undefined|
-1.871^3.1756x
-2.7977^3.1756x
-2.7977^3.3751x
-1.871^3.3751
-</td>
-<td>Gross^undefined|
-2.7977^3.1756x
-3.8761^3.1756x
-3.8761^3.3751x
-2.7977^3.3751
-</td>
-<td>Tare^undefined|
-3.8761^3.1756x
-4.8267^3.1756x
-4.8267^3.3831x
-3.8761^3.3751
-</td>
-<td>Net^undefined|
-4.8267^3.1756x
-5.8971^3.1756x
-5.9051^3.3831x
-4.8267^3.3831
-</td>
-<td>Price^undefined|
-5.8971^3.1756x
-7.0475^3.1756x
-7.0475^3.3831x
-5.9051^3.3831
-</td>
-<td>Total^undefined|
-7.0475^3.1756x
-8.014^3.1836x
-8.014^3.3831x
-7.0475^3.3831
-</td>
-<tr>
-<td>Hauling Charge^undefined|
-0.1935^3.3751x
-1.871^3.3751x
-1.871^3.6465x
-0.1935^3.6465
-</td>
-<td>^undefined|
-1.871^3.3751x
-2.7977^3.3751x
-2.7977^3.6465x
-1.871^3.6465
-</td>
-<td>^undefined|
-2.7977^3.3751x
-3.8761^3.3751x
-3.8761^3.6465x
-2.7977^3.6465
-</td>
-<td>^undefined|
-3.8761^3.3751x
-4.8267^3.3831x
-4.8347^3.6465x
-3.8761^3.6465
-</td>
-<td>^undefined|
-4.8267^3.3831x
-5.9051^3.3831x
-5.9051^3.6465x
-4.8347^3.6465
-</td>
-<td>^undefined|
-5.9051^3.3831x
-7.0475^3.3831x
-7.0554^3.6545x
-5.9051^3.6465
-</td>
-<td>$0.00^undefined|
-7.0475^3.3831x
-8.014^3.3831x
-8.014^3.6545x
-7.0554^3.6545
-</td>
-<tr>
-<td>Freight Charge - S387394^undefined|
-0.1935^3.6465x
-1.871^3.6465x
-1.871^3.8141x
-0.1935^3.8141
-</td>
-<td>^undefined|
-1.871^3.6465x
-2.7977^3.6465x
-2.7977^3.8141x
-1.871^3.8141
-</td>
-<td>^undefined|
-2.7977^3.6465x
-3.8761^3.6465x
-3.8761^3.8221x
-2.7977^3.8141
-</td>
-<td>^undefined|
-3.8761^3.6465x
-4.8347^3.6465x
-4.8347^3.8221x
-3.8761^3.8221
-</td>
-<td>^undefined|
-4.8347^3.6465x
-5.9051^3.6465x
-5.9051^3.8221x
-4.8347^3.8221
-</td>
-<td>^undefined|
-5.9051^3.6465x
-7.0554^3.6545x
-7.0554^3.8221x
-5.9051^3.8221
-</td>
-<td>-$442.00^undefined|
-7.0554^3.6545x
-8.014^3.6545x
-8.022^3.8221x
-7.0554^3.8221
-</td>
-<tr>
-<td>Freight Charge - S387399^undefined|
-0.1935^3.8141x
-1.871^3.8141x
-1.871^3.9897x
-0.1855^3.9897
-</td>
-<td>^undefined|
-1.871^3.8141x
-2.7977^3.8141x
-2.7977^3.9897x
-1.871^3.9897
-</td>
-<td>^undefined|
-2.7977^3.8141x
-3.8761^3.8221x
-3.8761^3.9897x
-2.7977^3.9897
-</td>
-<td>^undefined|
-3.8761^3.8221x
-4.8347^3.8221x
-4.8347^3.9897x
-3.8761^3.9897
-</td>
-<td>^undefined|
-4.8347^3.8221x
-5.9051^3.8221x
-5.9051^3.9897x
-4.8347^3.9897
-</td>
-<td>^undefined|
-5.9051^3.8221x
-7.0554^3.8221x
-7.0554^3.9977x
-5.9051^3.9897
-</td>
-<td>-$312.00^undefined|
-7.0554^3.8221x
-8.022^3.8221x
-8.022^3.9977x
-7.0554^3.9977
-</td>
-<tr>
-<td>Freight Charge - S387500^undefined|
-0.1855^3.9897x
-1.871^3.9897x
-1.871^4.1493x
-0.1855^4.1493
-</td>
-<td>^undefined|
-1.871^3.9897x
-2.7977^3.9897x
-2.7977^4.1493x
-1.871^4.1493
-</td>
-<td>^undefined|
-2.7977^3.9897x
-3.8761^3.9897x
-3.8761^4.1493x
-2.7977^4.1493
-</td>
-<td>^undefined|
-3.8761^3.9897x
-4.8347^3.9897x
-4.8347^4.1493x
-3.8761^4.1493
-</td>
-<td>^undefined|
-4.8347^3.9897x
-5.9051^3.9897x
-5.9051^4.1493x
-4.8347^4.1493
-</td>
-<td>^undefined|
-5.9051^3.9897x
-7.0554^3.9977x
-7.0554^4.1573x
-5.9051^4.1493
-</td>
-<td>$442.00^undefined|
-7.0554^3.9977x
-8.022^3.9977x
-8.022^4.1573x
-7.0554^4.1573
-</td>
-<tr>
-<td>Freight Charge - S387690^undefined|
-0.1855^4.1493x
-1.871^4.1493x
-1.871^4.3169x
-0.1855^4.3169
-</td>
-<td>^undefined|
-1.871^4.1493x
-2.7977^4.1493x
-2.7977^4.3249x
-1.871^4.3169
-</td>
-<td>^undefined|
-2.7977^4.1493x
-3.8761^4.1493x
-3.8761^4.3249x
-2.7977^4.3249
-</td>
-<td>^undefined|
-3.8761^4.1493x
-4.8347^4.1493x
-4.8347^4.3249x
-3.8761^4.3249
-</td>
-<td>^undefined|
-4.8347^4.1493x
-5.9051^4.1493x
-5.9051^4.3249x
-4.8347^4.3249
-</td>
-<td>^undefined|
-5.9051^4.1493x
-7.0554^4.1573x
-7.0554^4.3249x
-5.9051^4.3249
-</td>
-<td>-$442.00^undefined|
-7.0554^4.1573x
-8.022^4.1573x
-8.022^4.3329x
-7.0554^4.3249
-</td>
-<tr>
-<td>Freight Charge - S387789^undefined|
-0.1855^4.3169x
-1.871^4.3169x
-1.871^4.4846x
-0.1855^4.4846
-</td>
-<td>^undefined|
-1.871^4.3169x
-2.7977^4.3249x
-2.7977^4.4846x
-1.871^4.4846
-</td>
-<td>^undefined|
-2.7977^4.3249x
-3.8761^4.3249x
-3.8761^4.4846x
-2.7977^4.4846
-</td>
-<td>^undefined|
-3.8761^4.3249x
-4.8347^4.3249x
-4.8347^4.4846x
-3.8761^4.4846
-</td>
-<td>^undefined|
-4.8347^4.3249x
-5.9051^4.3249x
-5.9051^4.4846x
-4.8347^4.4846
-</td>
-<td>^undefined|
-5.9051^4.3249x
-7.0554^4.3249x
-7.0554^4.4925x
-5.9051^4.4846
-</td>
-<td>-$442.00^undefined|
-7.0554^4.3249x
-8.022^4.3329x
-8.022^4.4925x
-7.0554^4.4925
-</td>
-<tr>
-<td>Freight Charge - S387973^undefined|
-0.1855^4.4846x
-1.871^4.4846x
-1.871^4.6442x
-0.1855^4.6442
-</td>
-<td>^undefined|
-1.871^4.4846x
-2.7977^4.4846x
-2.7977^4.6522x
-1.871^4.6442
-</td>
-<td>^undefined|
-2.7977^4.4846x
-3.8761^4.4846x
-3.8761^4.6522x
-2.7977^4.6522
-</td>
-<td>^undefined|
-3.8761^4.4846x
-4.8347^4.4846x
-4.8347^4.6522x
-3.8761^4.6522
-</td>
-<td>^undefined|
-4.8347^4.4846x
-5.9051^4.4846x
-5.9051^4.6522x
-4.8347^4.6522
-</td>
-<td>^undefined|
-5.9051^4.4846x
-7.0554^4.4925x
-7.0554^4.6522x
-5.9051^4.6522
-</td>
-<td>-$442.00^undefined|
-7.0554^4.4925x
-8.022^4.4925x
-8.022^4.6601x
-7.0554^4.6522
-</td>
-<tr>
-<td>Freight Charge - S388005^undefined|
-0.1855^4.6442x
-1.871^4.6442x
-1.871^4.8198x
-0.1855^4.8198
-</td>
-<td>^undefined|
-1.871^4.6442x
-2.7977^4.6522x
-2.7977^4.8198x
-1.871^4.8198
-</td>
-<td>^undefined|
-2.7977^4.6522x
-3.8761^4.6522x
-3.8761^4.8198x
-2.7977^4.8198
-</td>
-<td>^undefined|
-3.8761^4.6522x
-4.8347^4.6522x
-4.8347^4.8198x
-3.8761^4.8198
-</td>
-<td>^undefined|
-4.8347^4.6522x
-5.9051^4.6522x
-5.9051^4.8198x
-4.8347^4.8198
-</td>
-<td>^undefined|
-5.9051^4.6522x
-7.0554^4.6522x
-7.0554^4.8278x
-5.9051^4.8198
-</td>
-<td>-$312.00^undefined|
-7.0554^4.6522x
-8.022^4.6601x
-8.022^4.8278x
-7.0554^4.8278
-</td>
-<tr>
-<td>Freight Charge - S388099^undefined|
-0.1855^4.8198x
-1.871^4.8198x
-1.871^4.9874x
-0.1855^4.9874
-</td>
-<td>^undefined|
-1.871^4.8198x
-2.7977^4.8198x
-2.8056^4.9874x
-1.871^4.9874
-</td>
-<td>^undefined|
-2.7977^4.8198x
-3.8761^4.8198x
-3.8761^4.9874x
-2.8056^4.9874
-</td>
-<td>^undefined|
-3.8761^4.8198x
-4.8347^4.8198x
-4.8347^4.9874x
-3.8761^4.9874
-</td>
-<td>^undefined|
-4.8347^4.8198x
-5.9051^4.8198x
-5.9051^4.9874x
-4.8347^4.9874
-</td>
-<td>^undefined|
-5.9051^4.8198x
-7.0554^4.8278x
-7.0554^4.9954x
-5.9051^4.9874
-</td>
-<td>-$442.00^undefined|
-7.0554^4.8278x
-8.022^4.8278x
-8.022^4.9954x
-7.0554^4.9954
-</td>
-<tr>
-<td>Freight Charge - S388186^undefined|
-0.1855^4.9874x
-1.871^4.9874x
-1.871^5.155x
-0.1855^5.139
-</td>
-<td>^undefined|
-1.871^4.9874x
-2.8056^4.9874x
-2.8056^5.155x
-1.871^5.155
-</td>
-<td>^undefined|
-2.8056^4.9874x
-3.8761^4.9874x
-3.8761^5.155x
-2.8056^5.155
-</td>
-<td>^undefined|
-3.8761^4.9874x
-4.8347^4.9874x
-4.8347^5.155x
-3.8761^5.155
-</td>
-<td>^undefined|
-4.8347^4.9874x
-5.9051^4.9874x
-5.9051^5.155x
-4.8347^5.155
-</td>
-<td>^undefined|
-5.9051^4.9874x
-7.0554^4.9954x
-7.0554^5.163x
-5.9051^5.155
-</td>
-<td>-$442.00^undefined|
-7.0554^4.9954x
-8.022^4.9954x
-8.022^5.163x
-7.0554^5.163
-</td>
-<tr>
-<td>Freight Charge - S388294^undefined|
-0.1855^5.139x
-1.871^5.155x
-1.871^5.4024x
-0.1775^5.4024
-</td>
-<td>^undefined|
-1.871^5.155x
-2.8056^5.155x
-2.8056^5.4024x
-1.871^5.4024
-</td>
-<td>^undefined|
-2.8056^5.155x
-3.8761^5.155x
-3.8761^5.4104x
-2.8056^5.4024
-</td>
-<td>^undefined|
-3.8761^5.155x
-4.8347^5.155x
-4.8347^5.4104x
-3.8761^5.4104
-</td>
-<td>^undefined|
-4.8347^5.155x
-5.9051^5.155x
-5.9051^5.4104x
-4.8347^5.4104
-</td>
-<td>^undefined|
-5.9051^5.155x
-7.0554^5.163x
-7.0554^5.4184x
-5.9051^5.4104
-</td>
-<td>-$442.00^undefined|
-7.0554^5.163x
-8.022^5.163x
-8.022^5.4184x
-7.0554^5.4184
-</td>
-</table><br>";
+									//$ocr_file = "Noosa_Republic_service_inv_sample.pdf";
 									?>
 
 									<hr>
@@ -3785,6 +1042,7 @@ GALI^undefined|
 
 										<div class="col-md-12 p-0 table-responsive mt-3 secondary_array_table">
 										</div>
+
 										<div class="text-center d-flex justify-content-center">
 											<div id="save-ocr-data-loader" class="d-none spinner spinner-border text-primary" role="status">
 												<span class="sr-only">Loading...</span>
@@ -3806,13 +1064,14 @@ GALI^undefined|
 									<? if (isset($_FILES['ocr_file']) && $_FILES['ocr_file'] != "") { ?>
 										<p class="mb-1"><span id="pdf_file_name_pdf_lib"></span><span class="">&nbsp;&nbsp;<a target="_blank" id="pdf_file_href_pdf_lib" href="<?php echo "water_inv_files_PW/" . $ocr_file; ?>" class="text-dark fa fa-share-square-o fa-1x"></a></span></p>
 										<div class="embed-responsive embed-responsive-21by9" style="height:800px">
-											<iframe id="pdf_frame" src="<?php echo "water_inv_files_PW/" . $ocr_file; ?>"></iframe>
+											<iframe  id="pdf_frame" src="<?php echo "water_inv_files_PW/" . $ocr_file; ?>"></iframe>
 											<!--<iframe class="embed-responsive-item" src="https://loops.usedcardboardboxes.com/water_email_inbox_inv_files/2024_01/173/2024-01---Brand-Aromatics---WM--15-13198-32007--3335354-0515-8.pdf"></iframe>-->
 										</div>
 										<script>
 											load_pdf_first_time();
 											async function load_pdf_first_time() {
 												const url = `<?= $ocr_file; ?>`;
+												
 												const existingPdfBytes = await fetch(url).then(res => res.arrayBuffer())
 												var bytes = new Uint8Array(existingPdfBytes);
 												const pdfDoc = await PDFDocument.load(existingPdfBytes)
@@ -3866,15 +1125,15 @@ GALI^undefined|
 			}
 		}
 
-
+		
 		if ($mainstr != "") {
 			$mainstr = str_replace("`", "", $mainstr);
 				?>
 				<script>
+					//alert("Data extracted successfully");
 					var data = `<?= $mainstr; ?>`;
+					//console.log(data);
 					var primary_array = data.replace(/\s+/g, ' ').replace().split("|Delimiter|")[0].split("|Keypair|<br> ");
-					//console.log(primary_array);
-
 					var all_generic_fields_array = [];
 					var select_options = "<option></option>";
 					for (var count = 0; count < primary_array.length; count++) {
@@ -3892,6 +1151,7 @@ GALI^undefined|
 
 						if (first_option[1]) {
 							var position_data_array = first_option[1].split(" ");
+							//console.log(position_data_array);
 							if (position_data_array[1]) {
 								var cor_x = position_data_array[1].split('^')[0];
 							}
@@ -3906,12 +1166,14 @@ GALI^undefined|
 								var cor_y2 = position_data_array[1].split('^')[1];
 								cor_y2 = cor_y2.replace("x", "");
 							}
+							var pageNo = typeof position_data_array[5] !== 'undefined' ? position_data_array[5] : 1;
+							//console.log("PageNo "+pageNo);
 							var w = (cor_x2 - cor_x).toFixed(4);
 							var h = (cor_y - cor_y2).toFixed(4);
 
 							//console.log(`${option_name} : ${cor_x} ${cor_y}  ${w}  ${h}`);
-							select_options += `<option value="${option_name}" cor_x="${cor_x}" cor_y="${cor_y}", w="${w}" h="${h}" option_val="${option_val}">${option_name}</option>`;
-							all_generic_fields_array.push(`${option_name}||${option_val}||${cor_x}|${cor_y}|${w}|${h}`);
+							select_options += `<option value="${option_name}" cor_x="${cor_x}" cor_y="${cor_y}", w="${w}" h="${h}" pageNo="${pageNo}" option_val="${option_val}">${option_name}</option>`;
+							all_generic_fields_array.push(`${option_name}||${option_val}||${cor_x}|${cor_y}|${w}|${h}|${pageNo}`);
 						}
 					}
 
@@ -3939,6 +1201,7 @@ GALI^undefined|
 
 								let datalength = val.length;
 								var total_cols = 0;
+								var table_mapping_field_cnt = 1;
 								while ((tdMatch = tdRegex.exec(val)) !== null) {
 
 									const val = tdMatch[1].trim(); // Extracted name						
@@ -3949,7 +1212,7 @@ GALI^undefined|
 									<td><span class="nowrap_word">${val}</span>
 										<input type="hidden" name="tbl_column_no-${count}[]" value="${total_cols_head}">
 										<input type="hidden" name="tbl_column_text-${count}[]" value="${val}">
-										<select id="col_head${count}${total_cols_head}" name="table_mapping_field${count}${uniq_count2}[]" class="form-control form-control-sm mt-1">
+										<select name="table_mapping_field${count}${uniq_count2}[]" class="form-control form-control-sm mt-1 table_mapping_field_head_dp" table_id="${count}">
 											<option></option>
 											<option>Material/Fee column</option>
 											<option>Quantity</option>
@@ -3958,6 +1221,7 @@ GALI^undefined|
 										</select>
 									</td>
 								`;
+								table_mapping_field_cnt++;
 								}
 							}
 
@@ -3980,23 +1244,17 @@ GALI^undefined|
 
 								}
 
-								/*if (colspan_cnt < total_cols_head) {
-									colspan_val = "colspan=" + (total_cols_head - colspan_cnt + 1);
-								} else if (colspan_cnt == 1) {
-									colspan_val = "colspan=" + colspan_val;
-								} else {
-									colspan_val = "";
-								}
-								*/
-								/*if (colspan_cnt < total_cols_head) {
+								if (colspan_cnt < total_cols_head) {
 									colspan_val = total_cols_head - colspan_cnt + 1;
 								}
+
 								if (colspan_cnt == 1) {
 									colspan_val = "colspan=" + colspan_val;
-								}*/
+								}
 
 								var tdcnt = 0;
 								//while ((tdMatch = tdRegex.exec(val)) !== null) {
+								var text_area_uniq_cnt = 1;
 								while ((tdMatch = tdRegex.exec(val))) {
 									const val = tdMatch[1].trim(); // Extracted name
 									const value = tdMatch[2].trim(); // Extracted cordinates
@@ -4005,7 +1263,7 @@ GALI^undefined|
 									var option_name, option_val, cor_x, cor_y, w, h;
 									//if (val) {
 									tdcnt = tdcnt + 1;
-
+									//console.log(position_data_array);
 									var position_data_array = value.split(" ");
 									if (position_data_array[0]) {
 										var cor_x = position_data_array[0].split('^')[0];
@@ -4023,19 +1281,19 @@ GALI^undefined|
 									}
 									var w = (cor_x2 - cor_x).toFixed(4);
 									var h = (cor_y - cor_y2).toFixed(4);
+									//console.log(position_data_array[5] + "Pos 5");
+									var pageNo = typeof position_data_array[4] !== 'undefined' ? position_data_array[4] : 1;
 									table_td_Data_flg = 1;
 
 									//${colspan_val}
-									
+
 									table_td_Data += `
-									<td ${colspan_val} class="text-center">
-										<div>
+									<td>
 										<textarea style="resize: both; padding:0px" name="table_mapping_field${count}${uniq_count2}[]" id="row_txt${count}" class="form-control form-control-sm" 
-										onclick="updateCursorPosition(this, ${uniq_count1}, ${uniq_count2})" onfocus="modifyPdf(${cor_x ?? ''}, ${cor_y ?? ''}, ${w ?? ''},${h ?? ''})" >${val ?? ''}</textarea>
+										onclick="updateCursorPosition(this, ${uniq_count1}, ${uniq_count2},${count})" onfocus="modifyPdf(${cor_x ?? ''}, ${cor_y ?? ''}, ${w ?? ''},${h ?? ''}, ${pageNo})" >${val ?? ''}</textarea>
 										
-										<input class="table_mapping_field_cord" type="hidden" name="table_mapping_field_cord${count}${uniq_count2}[]" value="${cor_x}|${cor_y}|${w}|${h}"/>
-										</div>
-										</td>
+										<input class="table_mapping_field_cord" type="hidden" name="table_mapping_field_cord${count}${uniq_count2}[]" value="${cor_x}|${cor_y}|${w}|${h}|${pageNo}"/>
+									</td>
 									`;
 
 									//console.log(`${cor_x} ${cor_x2} ${cor_y} ${cor_y2}  ${w}  ${h}`);
@@ -4052,7 +1310,7 @@ GALI^undefined|
 								}
 
 								tableData += `
-							<tr class="list_item_tr">
+							<tr>
 								<td> 
 									<div class="d-flex water_material_div">
 										<select class="form-control form-control-sm mr-1 water_material_select" name='water_material${count}[]'>
@@ -4086,11 +1344,10 @@ GALI^undefined|
 									<input type="hidden" name="text_end_position${count}[]" id="row_txt_end_position${uniq_count1}${uniq_count2}" class="form-control form-control-sm row_txt_end_position" value="" size="5">
 									<input class="row_no_text" type="hidden" name="row_no${count}[]" value="${uniq_count2}">
 									
-									<div id='divrow_txt-${uniq_count1}-${uniq_count2}' style="display:none;" class="divrow_txt"></div>
+									<div id='divrow_txt-${uniq_count1}-${uniq_count2}-${count}' style="display:none;" class="divrow_txt"></div>
 									<input class="input_row_txt" id='input_row_txt-${uniq_count1}-${uniq_count2}' type="hidden" name="ocr_selected_text${count}[]" value="">
 								</td>
 								${table_td_Data}
-								
 							</tr>
 							`;
 							}
@@ -4124,7 +1381,6 @@ GALI^undefined|
 							<input type="hidden" name="ocr_selected_text${count}[]" >
 							</td>
 							${tableData_top_tds}
-
 							</tr>
 						</thead>
 					`;
@@ -4178,6 +1434,7 @@ GALI^undefined|
 					var cor_y = $('option:selected', this).attr('cor_y');
 					var w = $('option:selected', this).attr('w');
 					var h = $('option:selected', this).attr('h');
+					var pageNo = $('option:selected', this).attr('pageNo');
 					$(this).parents(".form-group").find('.generic_field_input ').val(option_val);
 					$(this).parents(".form-group").find('.generic_field_input ').attr({
 						'selected_op': selected_op,
@@ -4185,9 +1442,11 @@ GALI^undefined|
 						'cor_x': cor_x,
 						'cor_y': cor_y,
 						'w': w,
-						h
+						h,
+						pageNo,
 					});
-					modifyPdf(cor_x, cor_y, w, h);
+					console.log("Page No 3538 "+pageNo);
+					modifyPdf(cor_x, cor_y, w, h, pageNo);
 				});
 
 				$('body').on("focus", ".generic_field_input", function() {
@@ -4200,28 +1459,14 @@ GALI^undefined|
 						var cor_y = $(this).attr('cor_y');
 						var w = $(this).attr('w');
 						var h = $(this).attr('h');
+						var pageNo = $(this).attr('pageNo');
 						var option_val = $(this).attr('option_val');
 						var selected_op = $(this).attr('selected_op');
-						modifyPdf(cor_x, cor_y, w, h);
+						modifyPdf(cor_x, cor_y, w, h, pageNo);
 					}
 				});
 
-				function updateCursorPosition(ctrltextbox, uniq_count1, uniq_count2) {
-					// Get the current cursor position
-					var selectionStart = ctrltextbox.selectionStart;
-					var selectionEnd = ctrltextbox.selectionEnd;
-					var txtval = ctrltextbox.value;
-					var seltxtval = txtval.substring(selectionStart, selectionEnd);
-					$("#row_txt_start_position" + uniq_count1 + "" + uniq_count2).val(selectionStart + 1);
-					$("#row_txt_end_position" + uniq_count1 + "" + uniq_count2).val(selectionEnd);
-					$("#divrow_txt-" + uniq_count1 + "-" + uniq_count2).css("display", "inline");
-					$("#divrow_txt-" + uniq_count1 + "-" + uniq_count2).html("<small>" + seltxtval + "</small>");
-
-					// Update the display
-					//document.getElementById("row_txt_position"+tbl_head_cnt+ctrl_cnt).innerText = cursorPosition;
-
-					$("#input_row_txt-" + uniq_count1 + "-" + uniq_count2).val(seltxtval);
-				}
+				
 
 				$('body').on("click", '.add_tbl_row', function() {
 					let parentTable = $(this).closest('table');
@@ -4241,13 +1486,14 @@ GALI^undefined|
 					var unque_keys = clonedRow.find('.divrow_txt').attr('id').split('-');
 					let unque_number1 = unque_keys[1];
 					let unque_number2 = parseInt(unque_keys[2]) + 1;
+					let unque_count = parseInt(unque_keys[3]);
 					console.log(unque_number1 + "- " + unque_number2);
-					clonedRow.find('.divrow_txt').attr('id', 'divrow_txt-' + unque_number1 + '-' + unque_number2);
+					clonedRow.find('.divrow_txt').attr('id', 'divrow_txt-' + unque_number1 + '-' + unque_number2+'-'+unque_count);
 					clonedRow.find('.row_txt_start_position').attr('id', 'row_txt_start_position' + unque_number1 + unque_number2);
 					clonedRow.find('.row_txt_end_position').attr('id', 'row_txt_end_position' + unque_number1 + unque_number2);
 					clonedRow.find('.row_txt_start_position').val("");
 					clonedRow.find('.row_txt_end_position').val("");
-					clonedRow.find('textarea').attr('onclick', 'updateCursorPosition(this, ' + unque_number1 + ', ' + unque_number2 + ')');
+					clonedRow.find('textarea').attr('onclick', 'updateCursorPosition(this, ' + unque_number1 + ', ' + unque_number2 + ','+unque_count+')');
 					clonedRow.find('textarea').attr('onfocus', 'modifyPdf(0,0,0,0,0)');
 					clonedRow.find('textarea').attr('name', 'table_mapping_field' + (unque_number1 - 2) + unque_number2 + '[]');
 					clonedRow.find('.table_mapping_field_cord').attr('name', 'table_mapping_field_cord' + (unque_number1 - 2) + unque_number2 + '[]');
@@ -4257,7 +1503,7 @@ GALI^undefined|
 					clonedRow.find('.divrow_txt').text("");
 					clonedRow.find('select').val('');
 					clonedRow.find('input[type="checkbox"]').prop('checked', false);
-					clonedRow.find('.table_mapping_field_cord').val("0|0|0|0");
+					clonedRow.find('.table_mapping_field_cord').val("0|0|0|0|1");
 					if (clonedRow.find('.water_list_item_body_id').length) {
 						clonedRow.find('.water_list_item_body_id').val('');
 					}
@@ -4286,38 +1532,43 @@ GALI^undefined|
 					colorRgb
 				} = PDFLib
 
-				const renderInIframe = (pdfBytes) => {
+				const renderInIframe = (pdfBytes, pageNumber) => {
 					const blob = new Blob([pdfBytes], {
 						type: 'application/pdf'
 					});
+					//const url = URL.createObjectURL(blob);
 					const blobUrl = URL.createObjectURL(blob);
 					//document.getElementById('iframe').src = blobUrl;
 					document.getElementById('pdf_frame').src = blobUrl;
 				};
-				async function modifyPdf(cor_x = "", cor_y = "", w = "", h = "") {
-					const url = `water_inv_files_PW/<?= $ocr_file; ?>`;
+				
+				async function modifyPdf(cor_x = "", cor_y = "", w = "", h = "", pageNumber = 1) {
+					//console.log("pageNumber "+pageNumber);
+					const url = `<?= $ocr_file; ?>`;
 					const existingPdfBytes = await fetch(url).then(res => res.arrayBuffer())
 					cor_y = cor_y - 0.026;
 
 					var bytes = new Uint8Array(existingPdfBytes);
 					const pdfDoc = await PDFDocument.load(existingPdfBytes)
 					const pages = pdfDoc.getPages();
-					var firstPage = pages[0];
-					var pgheight = firstPage.getHeight();
+					//console.log(pages);
+					const page = pdfDoc.getPage(pageNumber - 1);
+					//var firstPage = pages[0];
+					var pgheight = page.getHeight();
 					pgheight = pgheight - 2;
 
 					if (cor_x != "") {
 						const {
 							pg_width,
 							pg_height
-						} = firstPage.getSize();
+						} = page.getSize();
 						var x = cor_x * 72;
 						var y = pgheight - (cor_y * 72);
 						var width = w * 72;
 						var height = h * 72;
 
 						try {
-							firstPage.drawRectangle({
+							page.drawRectangle({
 								x,
 								y,
 								width,
@@ -4331,7 +1582,7 @@ GALI^undefined|
 						}
 					}
 					pdfBytes = await pdfDoc.save()
-					renderInIframe(pdfBytes);
+					renderInIframe(pdfBytes,pageNumber);
 				}
 
 				function check_template_name() {
@@ -4527,177 +1778,39 @@ GALI^undefined|
 					}
 				});
 
-				$(document).ready(function() {
-					$('.mapping_table tbody').on("contextmenu", "tr", function(e) {
-						e.preventDefault();
-						$('#settings').parents('td').remove();
-						$('#item_list_tbl_row').removeAttr('id');
-						$(this).append(`<td style="position:relative"><button class="context-menu btn btn-success btn-sm" type="button" data-toggle="modal" data-target="#settingModal" id="settings"><i class="fa fa-cog"></i></button></td>`);
-						$(this).css('position', 'relative');
-						$(this).find('.context-menu').css({
-							'display': 'block'
-						});
-
-						$(this).attr('id', "item_list_tbl_row");
-					});
-
-					$(document).on("click", '#settings', function() {
-						//alert($(this).parents('tr').html());
-						var tablerow = $(this).parents('tr').html();
-						var tablehead = $(this).parents('table').find('.thead-dark').html();
-						//alert(tablehead);
-
-						$('#settingModal .modal-body table').html(`<tr>${tablehead}</tr><tr id="modal_tbl_row">${tablerow}</tr>`);
-						$("#settingModal").modal('show');
-						addMergeArrows();
-						$('#settingModal').find('#settings').parents('td').remove();
-					});
+				$(document).on('change', '.table_mapping_field_head_dp', function() {
+					var table_id = $(this).attr('table_id');
+					var selected_val = $(this).val();
+					if (selected_val == "Material/Fee column") {
+						$(this).attr('id', 'mapping_field_head_' + table_id);
+					}
 				});
 
-				function addMergeArrows() {
-					const rows = $('#modal_tbl_row');
+				function updateCursorPosition(ctrltextbox, uniq_count1, uniq_count2, uniq_count) {
+					if ($("#mapping_field_head_" + uniq_count).length > 0) {
+						var material_selected = $("#mapping_field_head_" + uniq_count).val();
+						var column_no_head = $("#mapping_field_head_" + uniq_count).closest('td').index();
+						//console.log("Column number db is:", column_no_head);
+						var column_no_text_area = ctrltextbox.closest('td').cellIndex; // Find the closest parent <td>
+						//console.log("Column number Textarea is:", column_no_text_area);
+						if (material_selected == "Material/Fee column" && column_no_head == column_no_text_area) {
+							var selectionStart = ctrltextbox.selectionStart;
+							var selectionEnd = ctrltextbox.selectionEnd;
+							var txtval = ctrltextbox.value;
+							var seltxtval = txtval.substring(selectionStart, selectionEnd);
+							$("#row_txt_start_position" + uniq_count1 + "" + uniq_count2).val(selectionStart + 1);
+							$("#row_txt_end_position" + uniq_count1 + "" + uniq_count2).val(selectionEnd);
+							$("#divrow_txt-" + uniq_count1 + "-" + uniq_count2+'-'+uniq_count).css("display", "inline");
+							$("#divrow_txt-" + uniq_count1 + "-" + uniq_count2+'-'+uniq_count).html("<small>" + seltxtval + "</small>");
 
-					// Add merge arrows after the 4th column of each row
-					rows.each(function() {
-						const cells = $(this).find('td');
+							// Update the display
+							//document.getElementById("row_txt_position"+tbl_head_cnt+ctrl_cnt).innerText = cursorPosition;
 
-						// Start adding arrows after the 4th <td>
-						cells.each(function(index) {
-							if (index >= 5 && index < cells.length - 1) {
-								const merge_arrow = $('<span class="arrow-button fa fa-arrow-right" data-toggle="tooltip" data-placement="bottom" title="Merge With Next Column"></span>');
-								const split_arrow = $('<span class="arrow-button fa fa-arrows-h" data-toggle="tooltip" data-placement="bottom" title="Split Current Column"> </span>');
-								merge_arrow.on('click', function() {
-									mergeColumns(index);
-								});
-								split_arrow.on('click', function() {
-									splitColumns(index);
-								});
-
-								$(this).find('div').append(merge_arrow);
-								$(this).append(split_arrow);
-								$(this).find('div').css({
-									'display': 'flex',
-									'align-items': 'center'
-								});
-							}
-						});
-					});
-				}
-
-				function mergeColumns(index) {
-					$('#modal_tbl_row').each(function() {
-						const tds = $(this).find('td');
-						const targetCell = $(tds[index]);
-						const nextCell = $(tds[index + 1]);
-						const merged_text = targetCell.find('textarea').val() + " " + nextCell.find("textarea").val();
-						var conf = confirm(`Merged Text will be "${merged_text}", Do you want to merge?`);
-						if (conf) {
-							targetCell.find('textarea').val(merged_text);
-							targetCell.find('textarea').html(merged_text);
-							nextCell.remove();
+							$("#input_row_txt-" + uniq_count1 + "-" + uniq_count2).val(seltxtval);
 						}
-						//targetCell.remove(".arrow_button")
-						nextCell.remove();
-					});
-
-					// Remove all arrow buttons
-					$('.arrow-button').remove();
-
-					// Re-add arrow buttons to reflect the new structure
-					addMergeArrows();
-				}
-
-				function splitColumns(index) {
-					$("#current_target_index").val(index);
-					$("#split_inputs").removeClass('d-none');
-					$("#split_input1").focus();
-					/*$('#modal_tbl_row').each(function() {
-						const tds = $(this).find('td');
-						const targetCell = $(tds[index]);
-						const split_text_arr = (targetCell.find('textarea').val()).split(" ");
-						var conf = confirm(`Split Text will be "${existing_cell_val}" & "${new_cell_val}", Do you want to split?`);
-						if (conf) {
-							targetCell.find('textarea').val(existing_cell_val);
-							targetCell.find('textarea').html(existing_cell_val);
-							let newCell = targetCell.clone();
-							newCell.find('textarea').val(existing_cell_val);
-							newCell.find('textarea').html(existing_cell_val);
-							targetCell.after(newCell);
-
-						}
-					});
-					// Remove all arrow buttons
-					//$('.arrow-button').remove();
-					// Re-add arrow buttons to reflect the new structure
-					addMergeArrows();
-					
-					*/
-				}
-
-				function split_cols_value(){
-					var index = $("#current_target_index").val();
-					$('#modal_tbl_row').each(function() {
-						const tds = $(this).find('td');
-						const targetCell = $(tds[index]);
-						const existing_cell_val = $("#split_input1").val();
-						const new_cell_val = $("#split_input2").val();
-						var conf = confirm(`Split Text will be "${existing_cell_val}" & "${new_cell_val}", Do you want to split?`);
-						if (conf) {
-							targetCell.find('textarea').val(existing_cell_val);
-							targetCell.find('textarea').html(existing_cell_val);
-							let newCell = targetCell.clone();
-							newCell.find('textarea').val(new_cell_val);
-							newCell.find('textarea').html(new_cell_val);
-							targetCell.after(newCell);
-
-						}
-					});
-					// Remove all arrow buttons
-					$("#split_inputs").addClass('d-none');
-					$('.arrow-button').remove();
-					// Re-add arrow buttons to reflect the new structure
-					addMergeArrows();
-				}
-
-				function row_setting() {
-					//alert($("#modal_tbl_row").html());
-					$("#modal_tbl_row").find('.arrow-button').remove();
-					$("#item_list_tbl_row").html($("#modal_tbl_row").html());
-					$("#settingModal").modal('hide')
+					} else {
+						alert("For OCR Text, Please select the Material/Fee column from the Above dropdown!");
+					}
 				}
 			</script>
-			<!-- Modal -->
-			<div class="modal fade" id="settingModal" tabindex="-1" aria-labelledby="settingModalLabel" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered modal-xl">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="settingModalLabel">Setting</h5>
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-						</div>
-						<div class="modal-body">
-							<table class="table"></table>
-							<div id="split_inputs" class="d-none">
-							<div class="form-row align-items-end">
-								<div class="form-group col-md-4 mb-0">
-									<label><b>Value of Existing Column</b></label>
-									<input type="text" id="split_input1" class="form-control form-control-sm"/>
-								</div>
-								<div class="form-group col-md-4 mb-0">
-									<label><b>Value of New Column</b></label>
-									<input type="text" id="split_input2" class="form-control form-control-sm"/>
-									<input type="hidden" id="current_target_index"/>
-								</div> 
-								<button onclick="split_cols_value()" class="btn btn-primary btn-sm" style="height: max-content">Ok</button>
-							</div>
-							</div>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
-							<button type="button" class="btn btn-primary btn-sm" onclick="row_setting()">Apply changes</button>
-						</div>
-					</div>
-				</div>
-			</div>
 </body>

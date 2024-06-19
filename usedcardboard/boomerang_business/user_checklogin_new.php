@@ -12,6 +12,10 @@ Date           By            Description
 								now change to email. 
 ======================================================================================================
 */
+
+ini_set("display_errors", "1");
+error_reporting(E_ALL);
+
 require("mainfunctions/database.php");
 require("mainfunctions/general-functions.php");
 
@@ -66,12 +70,14 @@ $loginid = 0;
 
 while ($rq = array_shift($result)) {
 	$email_found = "yes";
+	
 	if ($mypassword == base64_decode($rq["password"])) {
 		$rec_found = "yes";
 		$loginid = $rq["loginid"];
 		$reccnt = $reccnt + 1;
 	}
 }
+
 if ($rec_found == "yes") {
 
 	$sql = "UPDATE boomerang_user_log_attempt SET attempt = 1 WHERE user_name = '" . $myusername . "'";

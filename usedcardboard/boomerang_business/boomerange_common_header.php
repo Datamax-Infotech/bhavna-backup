@@ -6,7 +6,8 @@
 
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
   <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
-  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;300;400;500;600;700&display=swap" rel="stylesheet"> 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   
   <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -15,9 +16,9 @@
   <script src="assets/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         var timerStart = Date.now();
-       
-        // Collapse navbar when clicking outside
-        $(document).click(function(event) {
+ 
+// Collapse navbar when clicking outside
+$(document).click(function(event) {
             var clickover = $(event.target);
             var _opened = $("#navbarNavTop").hasClass("show");
             if (_opened === true && !clickover.closest('.navbar-collapse').length) {
@@ -52,7 +53,7 @@
     </button>
     
   
-    <a class="" href="home.php"><img class="header_logo" src="images/ucb-logo.png" /></a>
+    <a class="" href="home.php"><img src="images/ucb-logo.jpg" /></a>
 
     </div>
     <!-- Navbar links -->
@@ -103,7 +104,7 @@
                     $select_user = db_query("SELECT user_name FROM boomerang_usermaster WHERE loginid = '".$_COOKIE['loginid']."'");
                     if(tep_db_num_rows($select_user)>0){
                       $user = array_shift($select_user);
-                      echo '<a href="user_profile.php" class="mr-4 company_text_header">'.$user['user_name'].'</a>';
+                      echo '<a href="user_profile.php" class="company_text_header">'.$user['user_name'].'</a>';
                     }
                   }
                   else{
@@ -113,7 +114,7 @@
         </div>
 		
         <?php } ?>
-    </div>
+        </div>
   </nav>
   <div class="nav-top-2">
     <p class="pl-5 mb-0">

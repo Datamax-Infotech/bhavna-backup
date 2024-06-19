@@ -1,23 +1,18 @@
 <?php
 session_start();
-require ("mainfunctions/database.php");
-require ("mainfunctions/general-functions.php");
 if (isset($_SESSION['loginid']) && $_SESSION['loginid'] > 0) {
-	if (isset($_SESSION['waterUserLoginId']) && $_SESSION['waterUserLoginId'] > 0) {
-		waterUserVisitedTo($_SESSION['waterUserLoginId'], 'dashboard');
-	}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>UCBZeroWaste</title>
+  <title>UCB Zero Waste</title>
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i|Montserrat:300,400,500,700" rel="stylesheet">
 
   <link rel="shortcut icon" href="images/logo.jpg" type="image/jpg">
-  <link href="css/homenew.css" rel="stylesheet">
+  <link href="css/home.css" rel="stylesheet">
   <link href="css/header-footer.css" rel="stylesheet">	
   <link href="css/home-table.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
@@ -51,39 +46,6 @@ if (isset($_SESSION['loginid']) && $_SESSION['loginid'] > 0) {
 			document.getElementById('repsummarytype').value = "";
 			document.frmrepsummary.submit();
 		}
-
-		function welcomescreen(){ 
-			//var modal = document.getElementById("myModal");
-			//modal.style.display = "block";
-		}
-		
-		function closeModal(){
-			var modal = document.getElementById("myModal");
-			modal.style.display = "none";
-			
-			if (document.getElementById("alertmsg_chk").checked)
-			{
-					
-				if (window.XMLHttpRequest)
-				{
-				  xmlhttp=new XMLHttpRequest();
-				}
-				else
-				{
-				  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-				}
-				  xmlhttp.onreadystatechange=function()
-				{
-					if (xmlhttp.readyState==4 && xmlhttp.status==200)
-					{
-						alert("Welcome message will not be shown again.");
-					}
-				}
-				
-				xmlhttp.open("GET","update_alert_msg.php", true);
-				xmlhttp.send();			
-			}
-		}
 		
 	</script>
 	
@@ -106,79 +68,9 @@ if (isset($_SESSION['loginid']) && $_SESSION['loginid'] > 0) {
 	&noscript=1"/>
 	</noscript>
 	<!-- End Facebook Pixel Code -->
-	<style type="text/css">
-	    /* The Modal (background) */
-	    .modal {
-	      display: none; /* Hidden by default */
-	      position: fixed; /* Stay in place */
-	      z-index: 1; /* Sit on top */
-	      padding-top: 250px; /* Location of the box */
-	      left: 0;
-	      top: 0;
-	      width: 100%; /* Full width */
-	      height: 100%; /* Full height */
-	      overflow: auto; /* Enable scroll if needed */
-	      background-color: rgb(0,0,0); /* Fallback color */
-	      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-	    }
-
-	    /* Modal Content */
-	    .modal-content {
-	      background-color: #fefefe;
-	      margin: auto;
-	      padding: 20px;
-	      border: 1px solid #888;
-	      width: 30%;
-	      font-size: 16px;
-	      font-weight: normal;
-	      font-family: 'Fira Sans Condensed', sans-serif;
-	    }
-
-	    .lnkLetsgo {
-	      background-color: #199319;
-	      color: white;
-	      padding: 5px 15px;
-	    }
-	    .smallerFont{
-	    	font-size: 12px;
-	    	font-weight: normal;
-	    	padding-top: 8px;
-	    	font-family: 'Fira Sans Condensed', sans-serif;
-	    }
-  	</style>
-      
+			
 </head>
-<?
 
-?>
-<!-- The welcome screen Modal start-->
-<?  if ($_COOKIE['donotshowmsg'] == "yes"){
-	
-	}else{
-	?>
-		<!-- <div id="myModal" class="modal">
-			<div class="modal-content">
-				<table width="100%" border="0">
-					<tbody>
-						<tr>
-							<td>Welcome to W.A.T.E.R., UCBZeroWaste's Proprietary Softaware!</td>
-						</tr>
-						<tr>
-							<td class="smallerFont">Warning: WATER updated version is in beta. Report any bug you may encounter through the "Contact Us" page</td>
-						</tr>
-						<tr><td align="right">&nbsp;</td></tr>
-						<tr>
-							<td align="right">
-							Do not show again<input type="checkbox" name="alertmsg_chk" id="alertmsg_chk"/>
-							&nbsp;&nbsp;
-							<a href="#" id="lnkLetsgo" class="lnkLetsgo" onclick="closeModal()">Let's Go!</a></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div> -->
-<? }?>	
-<!-- The welcome screen Modal start onload="welcomescreen()"-->
 <body>
 
 
@@ -186,7 +78,8 @@ if (isset($_SESSION['loginid']) && $_SESSION['loginid'] > 0) {
 //	require ("../../securedata/config_prod_mysqli.php");
 	//require("../securedata/main-enc-class.php");
 	
-	
+	require ("mainfunctions/database.php");
+	require ("mainfunctions/general-functions.php");
 
 	db();
 error_reporting(0);
@@ -303,7 +196,7 @@ error_reporting(0);
 	}
 	
 	if ($high_pay_vendor == 0 && $high_pay_vendor_val != 0){
-		$high_pay_vendor_img = "ucb-logo.png"; $high_pay_vendor_nm = "UsedCardboardBoxes";
+		$high_pay_vendor_img = "ucb-logo.png"; $high_pay_vendor_nm = "Used Cardboard Boxes Inc";
 	}else{
 		$high_pay_vendor_img = ""; $high_pay_vendor_nm = "";
 		$sql1 = "SELECT * FROM water_vendors WHERE id = ?";
@@ -319,7 +212,7 @@ error_reporting(0);
 	}	
 
 	if ($costly_vendor == 0 && $costly_vendor_val != 0){
-		$costly_vendor_img = "ucb-logo.png"; $costly_vendor_nm = "UsedCardboardBoxes";
+		$costly_vendor_img = "ucb-logo.png"; $costly_vendor_nm = "Used Cardboard Boxes Inc";
 	}else{	
 		$costly_vendor_img = ""; $costly_vendor_nm = "";
 		$sql1 = "SELECT * FROM water_vendors WHERE id = ?";
@@ -336,14 +229,13 @@ error_reporting(0);
 	$_SESSION['pgname'] = "home";
 ?>  
 <? 	require ("mainfunctions/top-header.php");	?>
-
 <div class="year-container">
 	<div class="sub-year-container">
 	<form name="frmselyear" id="frmselyear" action="dashboard.php" method="post">
 		<h4>Viewing:  
-			<select id="inv_rep_yr" name="inv_rep_yr">
+			<select id="inv_rep_yr" name="inv_rep_yr" class="form-select1">
 				<?
-				for ($i=Date("Y")-3, $n=Date("Y")+1; $i<$n; $i++) 
+				for ($i=Date("Y")-2, $n=Date("Y")+1; $i<$n; $i++) 
 				{
 					?>
 					<option value="<?=$i?>" <? if ($selected_yr == $i) { echo " selected "; }?>><?=$i?></option>	
@@ -356,21 +248,6 @@ error_reporting(0);
 	</form>
 	</div>
 </div>
-
-<?
-//For Summary of Waste Processing(YTD)
-		$res1 = db_query("Select * from water_cron_summary_rep where warehouse_id = '" . $warehouse_id_cronjobs . "' and data_year = '$selected_yr'");
-		while($row_mtd1 = array_shift($res1))
-		{
-			$outlet_tot[] = array('outlet' => $row_mtd1["outlet"], 'tot' => $row_mtd1["weight_tot"], 'perc' => $row_mtd1["perc_val"] . "%", 'totval' => $row_mtd1["amount_tot"]);
-			
-			$sumtot = $row_mtd1["sumtot_weight"];
-			$totalval_tot = $row_mtd1["sumtot_amount"];
-			$othar_charges = $row_mtd1["other_charges"];
-    	}	
-		
-		$total_cost = $totalval_tot+$othar_charges;
-?>
 <div class="slider-container">
 		<div class="banner-image">
         <div class="counter-container">
@@ -383,45 +260,34 @@ error_reporting(0);
 		<? } else {?>
 			<div class="counter-number-text numberred"><? echo number_format($total_cost,2);?></div>
 		<? }?>
-			<div class="counter-title-text">Net Financial Spend (YTD)
-				<div class="tooltip">
-					<i class="fa fa-info-circle" aria-hidden="true"></i>
-					<span class="tooltiptext">
-						Net Financial Spend refers to the year-to-date net financial spend from your waste stream. <br>
-						Net Financial Spend = (Revenue from waste and recycling vendors rebates - Transportation and additional fees) - (costs waste and recycling vendors disposal charges - Transportation and additional fees).<br>
-						If the Net Financial Spend is a positive and a green number, this represents a net credit or net rebate to your company. <br>
-						If the Net Financial Spend is a negative and a red number, this represents a net cost or expense to your company.<br>
-					</span>
-				</div>
+			<div class="counter-title-text tooltip">Net Financial Impact (YTD)* 
+				<span class="tooltiptext"><img src="images/financial-icon.jpg" alt=""/>
+					Waste Financial Impact refers to the Year-To-Date net financial impacted created from your waste stream. <br>
+					Waste Financial Impact (YTD) = (Net financial revenue YTD – Additional Costs YTD) <br>– (Net financial costs YTD + Additional Fees).
+				</span>
 			</div>
         </li>
         
         <li class="landfill-circle">
-			<div id="divlandfilldiversion" class="counter-number-text per"></div>
-			<div class="counter-title-text tooltip">Current Landfill Diversion (YTD)
-				<div class="tooltip">
-					<i class="fa fa-info-circle" aria-hidden="true"></i>
-					<span class="tooltiptext">
-						Landfill diversion is the process of diverting waste from landfills. UCB's definition of landfill diversion includes the following methods:<br>
-						<span class="reuse">REUSE</span><br>
-						<span class="recycling">RECYCLING (INCLUDING COMPOSTING, ANIMAL FEED, AND ANAEROBIC DIGESTION)</span><br>
-						<span class="waste">WASTE TO ENERGY</span>
-					</span>
-				</div>
+        <div id="divlandfilldiversion" class="counter-number-text per"></div>
+		<div class="counter-title-text tooltip">Current Landfill Diversion (YTD)*
+			<span class="tooltiptext"><img src="images/landfill-icon.jpg" alt=""/>"UCB's definition of landfill diversion is 
+including the  following diversion methods:<br>
+				<span class="reuse">Reuse</span><br>
+				<span class="recycling">Recycling (Including Composting)</span><br>
+				<span class="waste">Waste to Energy</span>
+</span>
 			</div>
         </li>
         
         <li class="trees-circle">
         <div id="divtreesaved" class="counter-number-text number1"><? echo $tree_saved;?></div>
 		<div class="counter-title-text tooltip">Estimated Trees Saved (YTD)
-			<div class="tooltip">
-				<i class="fa fa-info-circle" aria-hidden="true"></i>
-				<span class="tooltiptext">
-					Preventing 1 ton of paper waste saves between 15 and 17 mature trees. The estimate is based on the amount of fiber based materials, such as office paper and cardboard boxes, directed to the reuse and recycling waste streams.
-					Source for the calculation can be found at: <a href="https://archive.epa.gov/epawaste/conserve/smm/wastewise/web/html/factoid.html" target="_blank">Link</a> 				
-				</span>
+			<span class="tooltiptext"><img src="images/trees-saved-icon.jpg" alt=""/>
+				This estimate is based on the amount of reused and recycled products that come from trees. <br>
+				Source for the calculation can be found at: <a href="https://archive.epa.gov/epawaste/conserve/smm/wastewise/web/html/factoid.html" target="_blank">Link</a>
+			</span>
 			</div>
-		</div>
         </li>
         </ul>
         </div>
@@ -458,6 +324,16 @@ error_reporting(0);
 	</div>
 
 <?
+//For Summary of Waste Processing(YTD)
+		$res1 = db_query("Select * from water_cron_summary_rep where warehouse_id = " . $warehouse_id_cronjobs . " and data_year = $selected_yr");
+		while($row_mtd1 = array_shift($res1))
+		{
+			$outlet_tot[] = array('outlet' => $row_mtd1["outlet"], 'tot' => $row_mtd1["weight_tot"], 'perc' => $row_mtd1["perc_val"] . "%", 'totval' => $row_mtd1["amount_tot"]);
+			
+			$$sumtot = $row_mtd1["sumtot_weight"];
+			$totalval_tot = $row_mtd1["sumtot_amount"];
+			$othar_charges = $row_mtd1["other_charges"];
+    	}	
 
 				
 		 $weight_str = "(Ib)";
@@ -578,7 +454,7 @@ error_reporting(0);
       </div>
 	  
 	  <form name="frmrepsummary" id="frmrepsummary" action="dashboard.php" method="post">
-		  <input type="hidden" value="<? echo $selected_yr;?>" name="inv_rep_yr" id="inv_rep_yr" />		
+		  <input type="hidden" value="<? echo $_REQUEST["inv_rep_yr"];?>" name="inv_rep_yr" id="inv_rep_yr" />		
 		  <? if ($_REQUEST["repsummarytype"] == "yes"){ ?>
 			  <div class="column-white"><input type="submit" class="logout-button1" value="Display Summary in Pounds" name="btnsummaryton" id="btnsummaryton" onclick="repsummaryinlbs()"></div>	  
 			  <div class="column-white"><input type="button" class="logout-button1" value="See Full Detailed Report" onclick="showdetailrep(<? echo $warehouse_id; ?>, <? echo $companyid; ?>, '<? echo date("01/01" . $selected_yr);?>', '<? echo date("12/31/" . $selected_yr); ?>')"></div>
@@ -662,7 +538,7 @@ error_reporting(0);
 					<? if ($high_pay_vendor_nm != "" && $high_pay_vendor_val > 0) { 
 						echo $high_pay_vendor_nm; ?><br>
                     <div class="img_vendor">
-						<img src="https://loops.usedcardboardboxes.com/vendor_logo_images/<? echo $high_pay_vendor_img; ?>" width="100" height="100" style="object-fit: contain;"  alt=""/>
+						<img src="https://loops.usedcardboardboxes.com/vendor_logo_images/<? echo $high_pay_vendor_img; ?>" width="100" height="100"  alt=""/>
                     </div>
 						<div class="Highestpayfig">$<? echo $high_pay_vendor_val; ?></div>
 					<? } ?>
@@ -676,7 +552,7 @@ error_reporting(0);
 					<? if ($costly_vendor_nm != "") { 
 						echo $costly_vendor_nm; ?><br>
                     <div class="img_vendor">
-						<img src="https://loops.usedcardboardboxes.com/vendor_logo_images/<? echo $costly_vendor_img; ?>" width="100" height="100" style="object-fit: contain;" alt=""/>
+						<img src="https://loops.usedcardboardboxes.com/vendor_logo_images/<? echo $costly_vendor_img; ?>" width="100" height="100" alt=""/>
                     </div>
 						<div class="Costlyvendorfig">$<? echo $costly_vendor_val; ?></div>		
 					<? } ?>
@@ -688,7 +564,8 @@ error_reporting(0);
 	</div>
 </div>	
 <div class="footer">
-	<? 	require ("mainfunctions/footerContent.php");	?>
+	<div class="footer-logo"><img src="images/logo5.png" alt=""/></div>
+	<div class="footer-text">© 2020 Used Cardboard Boxes, Inc.</div>
 </div>
 
 	
@@ -711,7 +588,6 @@ error_reporting(0);
 		//alert($(document).width());		
     });
 </script>
-
 </body>
 </html>
 <?php 

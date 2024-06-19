@@ -55,7 +55,7 @@ if (isset($_POST['form_action']) && $_POST['form_action'] == "add") {
                 $tbl_column_text = implode('&&', $_POST['tbl_column_text-' . $index]);
                 $table_mapping_field = implode('&&', $_POST['table_mapping_field' . $index . "0"]);
                 $insert_tbl_head_data = "INSERT INTO water_ocr_mapping_item_list_table_header (`template_id`,`table_no`,`tbl_column_no`,`column_text`,`selected_value`)
-            VALUES($template_id,$index,'" . $tbl_column_no . "','" . $tbl_column_text . "','" . $table_mapping_field . "')";
+            VALUES($template_id,$index,'" . $tbl_column_no . "','" . preg_replace("/'/", "\'",$tbl_column_text) . "','" . preg_replace("/'/", "\'",$table_mapping_field) . "')";
                 //echo $insert_tbl_head_data."<br>";
                 db_query(($insert_tbl_head_data));
                 if ($table_consideration == 1) {
@@ -84,7 +84,7 @@ if (isset($_POST['form_action']) && $_POST['form_action'] == "add") {
 				$ocr_selected_text = $_POST['ocr_selected_text' . $index][$index2];
 				
                 $insert_table_data = "INSERT INTO water_ocr_mapping_item_list_table_data (`table_no`,`template_id`,`row_no`,`water_material`,`add_fee`,`line_item`,`group_text`,`start_position`,`end_position`,`field_data`,`coordinates`, ocr_selected_text)
-				VALUES($index,$template_id,$row_no,$water_material,$add_fee,$line_item,$group_text,$start_position, $end_position,'" . $table_mapping_field_data . "','" . $field_coordinates_data . "','" . $ocr_selected_text . "')";
+				VALUES($index,$template_id,$row_no,$water_material,$add_fee,$line_item,$group_text,$start_position, $end_position,'" . preg_replace("/'/", "\'",$table_mapping_field_data) . "','" . $field_coordinates_data . "','" . preg_replace("/'/", "\'",$ocr_selected_text) . "')";
                 db_query($insert_table_data);
 				
                 if ($table_consideration == 1) {
@@ -195,7 +195,7 @@ if (isset($_POST['form_action']) && $_POST['form_action'] == "update") {
                 $select_tbl_head_data = db_query("SELECT * FROM water_ocr_mapping_item_list_table_header where id = $water_list_item_header_id");
                 $tbl_head_data = array_shift($select_tbl_head_data);
                 if ($tbl_head_data['tbl_column_no'] != $tbl_column_no || $tbl_head_data['column_text'] != $tbl_column_text || $tbl_head_data['selected_value'] != $table_mapping_field) {
-                    $update_tbl_head_data = "UPDATE water_ocr_mapping_item_list_table_header set tbl_column_no = '" . $tbl_column_no . "', column_text = '" . $tbl_column_text . "', selected_value = '" . $table_mapping_field . "' where id = $water_list_item_header_id";
+                    $update_tbl_head_data = "UPDATE water_ocr_mapping_item_list_table_header set tbl_column_no = '" . $tbl_column_no . "', column_text = '" . preg_replace("/'/", "\'",$tbl_column_text) . "', selected_value = '" . preg_replace("/'/", "\'",$table_mapping_field) . "' where id = $water_list_item_header_id";
                     db_query($update_tbl_head_data);
                 }
                     if ($table_consideration == 1) {
@@ -228,12 +228,12 @@ if (isset($_POST['form_action']) && $_POST['form_action'] == "update") {
                 $select_water_list_items_data = db_query("SELECT * FROM water_ocr_mapping_item_list_table_data where id = $water_list_item_data_id");
                 $water_list_item_data = array_shift($select_water_list_items_data);
                 if ($water_list_item_data['water_material'] != $water_material || $water_list_item_data['add_fee'] != $add_fee || $water_list_item_data['line_item'] != $line_item || $water_list_item_data['group_text'] != $group_text || $water_list_item_data['start_position'] != $start_position || $water_list_item_data['end_position'] != $end_position || $water_list_item_data['field_data'] != $table_mapping_field_data || $water_list_item_data['coordinates'] != $field_coordinates_data) {
-                    $update_table_data = "UPDATE water_ocr_mapping_item_list_table_data set water_material = $water_material, add_fee = $add_fee, line_item = $line_item, group_text = $group_text, start_position = $start_position, end_position = $end_position, field_data = '" . $table_mapping_field_data . "', coordinates = '" . $field_coordinates_data . "', ocr_selected_text = '".$ocr_selected_text."' where id = $water_list_item_data_id";
+                    $update_table_data = "UPDATE water_ocr_mapping_item_list_table_data set water_material = $water_material, add_fee = $add_fee, line_item = $line_item, group_text = $group_text, start_position = $start_position, end_position = $end_position, field_data = '" . preg_replace("/'/", "\'",$table_mapping_field_data) . "', coordinates = '" . $field_coordinates_data . "', ocr_selected_text = '".preg_replace("/'/", "\'",$ocr_selected_text)."' where id = $water_list_item_data_id";
                     db_query($update_table_data);
                 }
             }else{
                 $insert_table_data = "INSERT INTO water_ocr_mapping_item_list_table_data (`table_no`,`template_id`,`row_no`,`water_material`,`add_fee`,`line_item`,`group_text`,`start_position`,`end_position`,`field_data`,`coordinates`, ocr_selected_text)
-				VALUES($index,$template_id,$row_no,$water_material,$add_fee,$line_item,$group_text,$start_position, $end_position,'" . $table_mapping_field_data . "','" . $field_coordinates_data . "','" . $ocr_selected_text . "')";
+				VALUES($index,$template_id,$row_no,$water_material,$add_fee,$line_item,$group_text,$start_position, $end_position,'" . preg_replace("/'/", "\'",$table_mapping_field_data) . "','" . $field_coordinates_data . "','" . preg_replace("/'/", "\'",$ocr_selected_text) . "')";
                 db_query($insert_table_data); 
             }
                 if ($table_consideration == 1) {
