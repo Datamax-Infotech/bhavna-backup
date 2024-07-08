@@ -98,11 +98,27 @@ body {
 .nav-top-2 {
 	background-color: #5CB726;
 	color: #FFF;
-	font-weight: 500;
+        font-weight: 500;
 	font-size: 0.9rem;
 	padding: 5px;
 }
-
+.nav-top-3 {
+	background-color: #f29e00;
+	color: #FFF;
+	font-size: 13px;
+	padding: 5px;
+	text-align: right;
+}
+.bold-text{
+	font-weight: bold;
+}
+.early_access_link{
+	color: #8A2D9C;
+	text-decoration: underline;
+}
+.early_access_link:hover{
+	color: #8A2D9C;
+}
 .gaylord_link {
 	color: #FFF;
 	margin-left: 10px;
@@ -137,7 +153,7 @@ body {
 	font-size: 12px;
 	border: solid 2px #000000;
 	color: #000000;
-	font-family: Montserrat, sans-serif;
+	font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
 }
 
 .footer_l {

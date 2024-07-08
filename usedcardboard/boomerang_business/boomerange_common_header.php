@@ -62,24 +62,6 @@ $(document).click(function(event) {
         <li class="nav-item active">
           <a class="nav-link" href="home.php" onclick="show_loading()">Home</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="client_dashboard_new.php?show=closed_loop_inv<?= $repchk_str ?>" onclick="show_loading()">Closed Loop Inventory</a>
-        </li>
-        <li class="nav-item d-flex align-items-center">
-          <a class="nav-link" href="client_dashboard_new.php?show=sales_quotes<?= $repchk_str ?>" onclick="show_loading()">Sales quotes</a>
-        </li>
-        <li class="nav-item d-flex align-items-center">
-          <a class="nav-link" href="client_dashboard_new.php?show=favorites<?= $repchk_str ?>" onclick="show_loading()">Favorites/Re-order</a>
-        </li>
-        <li class="nav-item d-flex align-items-center">
-          <a class="nav-link" href="client_dashboard_new.php?show=history<?= $repchk_str ?>" onclick="show_loading()">Current orders/history</a>
-        </li>
-        <li class="nav-item d-flex align-items-center">
-          <a class="nav-link" href="client_dashboard_new.php?show=accounting<?= $repchk_str ?>" onclick="show_loading()">Accounting</a>
-        </li>
-        <li class="nav-item d-flex align-items-center">
-          <a class="nav-link" href="client_dashboard_new.php?show=reports<?= $repchk_str ?>" onclick="show_loading()">Reports</a>
-        </li>
         <li class="nav-item d-flex align-items-center">
           <a class="nav-link" href="client_dashboard_new.php?show=tutorials<?= $repchk_str ?>" onclick="show_loading()">Tutorials</a>
         </li>
@@ -101,10 +83,10 @@ $(document).click(function(event) {
               if(isset($_COOKIE['loginid']) && $_COOKIE['loginid']!= "" ){ ?>
                     <?php 
                     db();
-                    $select_user = db_query("SELECT user_name FROM boomerang_usermaster WHERE loginid = '".$_COOKIE['loginid']."'");
+                    $select_user = db_query("SELECT user_name, user_last_name FROM boomerang_usermaster WHERE loginid = '".$_COOKIE['loginid']."'");
                     if(tep_db_num_rows($select_user)>0){
                       $user = array_shift($select_user);
-                      echo '<a href="user_profile.php" class="company_text_header">'.$user['user_name'].'</a>';
+                      echo '<a href="user_profile.php" class="company_text_header">'.$user['user_name'] . ' ' . $user['user_last_name'] .'</a>';
                     }
                   }
                   else{
@@ -122,3 +104,11 @@ $(document).click(function(event) {
     <a class="gaylord_link"  href="client_dashboard_new.php?show=inventory<?= $repchk_str ?>" onclick="show_loading()">Browse Gaylords</a>
   </p>
   </div>
+
+  <div class="nav-top-3">
+    <p class="px-5 mb-0">
+    Welcome to the <span class="bold-text">early access, invite only prototype of Boomerang by UsedCardboardBoxes.</span>
+    <a class="early_access_link"  href="<?php echo $boomerang_url; ?>boomerang_prototype.php" onclick="show_loading()">Learn More</a>
+  </p>
+  </div>
+

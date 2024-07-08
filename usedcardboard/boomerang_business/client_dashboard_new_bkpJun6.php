@@ -191,30 +191,7 @@ while($fetch_data =array_shift($res))
 			font-weight: normal; 
 		}
 
-		body
-		{
-			font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif !important;
-			font-size: 13px;
-			color: black !important;
-		}
-		.fav-added{
-			color: #5CB726;
-		}
-		.fav-removed{
-			color: #FFF;
-		}
-
 	</style>
-	
-	<link rel='stylesheet' type='text/css' href='css/bomerang_style.css'>
-	
-	<Script LANGUAGE="JavaScript" SRC="inc/CalendarPopup.js"></Script>
-	<script LANGUAGE="JavaScript">document.write(getCalendarStyles());</script>
-	<script LANGUAGE="JavaScript">
-		var cal2xx = new CalendarPopup("listdiv");
-		cal2xx.showNavigationDropdowns();
-	</script>
-	
 	<script language="javascript">
 		function f_getPosition (e_elemRef, s_coord) {
 			var n_pos = 0, n_offset,
@@ -238,236 +215,6 @@ while($fetch_data =array_shift($res))
 			return n_pos;
 			
 		}
-
-		function change_fav_status(currentEle, companyID, b2b_id, fav_status, user_id) {
-			$.ajax({
-				url: 'https://loops.usedcardboardboxes.com/product_result_new.php',
-				type: 'get',
-				data: {
-					companyID,
-					b2b_id,
-					fav_status,
-					user_id: `<?php echo $user_id ?>`,
-					change_fav_status: 1
-				},
-				datatype: 'json',
-				success: function(response) {
-					//console.log(response);
-
-					if (response == 1) {
-						$(currentEle).html('<i class="fa fa-heart fav-added"></i>');
-					} else if (response == 0) {
-						$(currentEle).html('<i class="fa fa-heart fav-removed"></i>');
-					} else {
-						alert('Something went wrong, try again');
-					}
-				}
-			})
-		}
-
-
-		function get_fav_inv_data(user_id, div_id, prev_order_str ="", comp_name =""){
-			
-			if (div_id == 0){
-				var datastr = "fav_inv=1&shown_in_client_flg=1&min_price=0&max_price=500&fav_user_id="+user_id;
-			}
-
-			if (div_id == 1){
-				var datastr = "fav_prev_order=1&shown_in_client_flg=1&min_price=0&max_price=500&fav_user_id="+user_id+"&prev_order_str="+prev_order_str;
-			}
-			
-			$.ajax({
-				url:'https://loops.usedcardboardboxes.com/product_result_new.php',
-				type:'get',
-				data: datastr,
-				datatype:'json',
-				success:function(response){
-					//console.log(response);
-					
-					result_str="";
-                    var sub_table_total_value = 0;
-                    var sub_table_truckload = 0;
-                    var sub_table_frequency = 0;
-                    var sub_table_frequency_ftl = 0;
-					var show_urgent_box = 1;
-					var default_img="images/boomerang/default_product.jpg";
-					
-					var all_data = JSON.parse(response);
-					var result = all_data.data;
-					var no_of_pages = all_data.no_of_pages;
-					numberOfItems = all_data.total_items;
-					limitPerPage = 15;
-					totalPages = Math.ceil(numberOfItems / limitPerPage);
-
-					var shown_in_client_flg_width = "width:100%;";
-					var shown_in_client_flg = 1;
-					var shown_in_client_user_id = user_id;
-					var shown_in_client_user_id_hide = "no";
-					
-					var address_details = "";
-
-					result_str +='<div id="products-table-view" class="mt-3">';
-					result_str +='<table style="' + shown_in_client_flg_width + '" cellSpacing="1" cellPadding="1" border="0">';
-					if (div_id == 0){
-						//result_str += '<thead><tr><th colspan="14" style="background-color: white; font-size: larger;">Favorite</th>';
-					}	
-
-					if (div_id == 1){
-					//	result_str += '<thead><tr><th colspan="14" style="background-color: white; font-size: larger;">' + comp_name + '</th>';
-					}	
-					
-					result_str += `<tr><th style="background: #abc5df; width:5%;">Favorite</th>`;
-					result_str += `
-						<th style="background: #abc5df;">B2B ID</th>
-						<th style="background: #abc5df;">Height</th>
-						<th style="background: #abc5df;">Walls</th>
-						<th style="background: #abc5df;">Bottom</th>
-						<th style='background-color: white;'>&nbsp;</th>
-						<th style="background: #abc5df;">Qty Avail <br>NOW</th>
-						<th style="background: #abc5df;">% of FTL</th>
-						<th style="background: #abc5df;">Lead Time</th>
-						<th style="background: #abc5df;">FTL Qty</th>`;
-						
-						if (shown_in_client_flg == 1) {
-							if (shown_in_client_user_id_hide == "no"){
-								result_str += `<th style="background: #abc5df;">Price</th>`;
-							}
-						}else{
-							result_str += `<th style="background: #abc5df;">Price</th>`;
-						}
-						
-						if (shown_in_client_flg == 1) {
-							if (shown_in_client_user_id_hide == "no"){
-								result_str += `<th style="background: #abc5df;">View Item</th>`;
-							}
-						}else{
-							result_str += `<th style="background: #abc5df;">View Item</th>`;
-						}
-					result_str += `</tr>
-					</thead>
-					<tbody>`;
-					
-				sub_table_total_value = 0; row_alternate_cnt = 0;
-				$.each(result,function(index,res){
-					perofftl = "";
-					if (res['percent_per_load'] > 0){
-						perofftl = res['percent_per_load'];
-					}
-					
-					sub_table_total_value = sub_table_total_value + parseFloat(res['qtynumbervalue']);
-					
-					sub_table_truckload += parseFloat(res['percent_per_load']);
-					sub_table_frequency += parseFloat(res['frequency_sort']);
-					sub_table_frequency_ftl += parseFloat(res['frequency_ftl']);
-					var delivery_cal_para = res['b2b_id']+" , '"+res['txtaddress']+"' , '"+res['txtaddress2']+"' , '"+res['txtcity']+"' , '"+res['txtstate']+"' , '"+res['txtcountry']+"' , '"+res['txtzipcode']+"' , "+res['minfob'];
-					
-					if (row_alternate_cnt == 0){
-						row_alternate_color = "#e4e4e4";
-						row_alternate_cnt = 1;
-					}else{
-						row_alternate_color = "#f4f4f4";
-						row_alternate_cnt = 0;
-					}
-					
-					td_bg_color = "";
-					if (res["td_bg"] == "green"){
-						td_bg_color = " color: green;";
-					}
-					if (shown_in_client_flg == 0) {
-						if (res["td_bg"] != ""){
-							row_alternate_color = "yellow";
-						}
-					}
-
-					var minfobtxt = "";
-					if ((res["minfob"] == 0)){
-						minfobtxt = "Inquire";
-					}else{
-						minfobtxt = "$" + res["minfob"];
-					}
-					
-					//Check for Favorites report in buyer portal, when item is not available (doesn't show on the PLP, same conditions), replace the "Price" and "View Item" values as "Sold Out" with no links (don't let user get to the item page.
-					var notinplp_list_flg = 0;
-					if ((res["inv_Active"] == 'A') && (res["inv_box_type"] == 'Gaylord' || res["inv_box_type"] == 'GaylordUCB') && 
-					(res["inv_b2b_status"] == '1.0' || res["inv_b2b_status"] == '1.1' || res["inv_b2b_status"] == '1.2') && (parseFloat(res["colorvalueQty"]) >0) ){
-						notinplp_list_flg = 1;
-					}
-					
-					var favorite = res['favorite'];
-					result_str +=`<tr>`;	
-									if (shown_in_client_flg == 1) {
-					result_str += `		<td style="background-color:${row_alternate_color}" width="5%" bgColor="${res['td_bg']}">
-									<span onclick="change_fav_status(this, ${res['companyID']},${res['b2b_id']},${favorite},<?php echo $user_id; ?>)">`;	
-					result_str += favorite == 1 ? '<i class="fa fa-heart fav-added"></i>' : '<i class="fa fa-heart fav-removed"></i>';
-					result_str +=`</span></td>`;
-									}
-					
-					result_str += `
-									<td style="background-color:${row_alternate_color}" width="5%" bgColor="${res['td_bg']}">${res['b2b_id']}</td>
-									<td style="background-color:${row_alternate_color}" width="5%" bgColor="${res['td_bg']}">${res['boxheight']}</td>
-									<td style="background-color:${row_alternate_color}" width="5%" bgColor="${res['td_bg']}">${res['boxwall']}</td>
-									<td style="background-color:${row_alternate_color}" width="15%" bgColor="${res['td_bg']}">${res['box_desc_bottom']}</td>
-									
-									<td style="background-color:white;" width="2%">&nbsp;</td>`;
-									
-									if (shown_in_client_flg == 1) {
-					result_str += `		<td style="background-color:${row_alternate_color}; ${td_bg_color}" width="5%" bgColor="${res['td_bg']}" id="after_po${index}">${res['colorvalueQty']}</td>`;
-									}else{
-					result_str += `		<td style="background-color:${row_alternate_color}; ${td_bg_color}" width="5%" bgColor="${res['td_bg']}" id="after_po${index}"><a href="javascript:void(0)" onclick="display_preoder_sel(${index}, ${res['qtynumbervalue']}, ${res['loop_id']}, ${res['box_warehouse_id']})"><u>${res['colorvalueQty']}</u></a></td>`;
-									}
-									
-					result_str += `	<td style="background-color:${row_alternate_color}; ${td_bg_color}" width="5%" bgColor="${res['td_bg']}">${perofftl}</td>
-									<td style="background-color:${row_alternate_color}; ${res['td_leadtime_bg_color']}" width="5%" bgColor="${res['td_bg']}">${res['box_lead_time']}</td>
-									<td style="background-color:${row_alternate_color}" width="5%" bgColor="${res['td_bg']}">${res["ftl_qty"].toLocaleString('en-US')}</td>`;
-
-									if (shown_in_client_flg == 0) {
-					result_str += `		<td style="background-color:${row_alternate_color}" width="5%" bgColor="${res['td_bg']}">${res['lead_time_of_FTL']}</td>`;
-									}
-									
-									if (shown_in_client_flg == 1) {
-										if (shown_in_client_user_id_hide == "no" && notinplp_list_flg == 1){
-					result_str += `   <td style="background-color:${row_alternate_color}" width="5%" bgColor="${res['td_bg']}">${minfobtxt}</td>`;
-										}
-
-										if (notinplp_list_flg == 0){
-					result_str += `   <td style="background-color:${row_alternate_color}" width="5%" bgColor="${res['td_bg']}">Sold Out</td>`;
-										}
-
-									}else{
-					result_str += `   <td style="background-color:${row_alternate_color}" width="5%" bgColor="${res['td_bg']}">${minfobtxt}</td>`;
-									}
-									
-
-									if (shown_in_client_flg == 1) {
-										if (shown_in_client_user_id_hide == "no" && notinplp_list_flg == 1){
-					result_str += `		<td style="background-color:${row_alternate_color}" width="10%" class="text-center" bgColor="${res['td_bg']}"><a class="text-primary" href="https://b2b.usedcardboardboxes.com/index_new.php?id=${res['loop_id_encrypt_str']}&uid=<?php echo urlencode(encrypt_password($user_id));?>&${address_details}" target="_blank"><u>View Item</u></a></td>`;
-										}
-
-										if (notinplp_list_flg == 0){
-					result_str += `		<td style="background-color:${row_alternate_color}" width="10%" class="text-center" bgColor="${res['td_bg']}">Sold Out</td>`;
-										}
-									}else{
-					result_str += `		<td style="background-color:${row_alternate_color}" width="10%" class="text-center" bgColor="${res['td_bg']}"><a class="text-primary" onmouseover="Tip('${res['description_hover_notes']}')"  onmouseout="UnTip()" target="_blank" href="manage_box_b2bloop_new.php?id=${res['loop_id']}&proc=View&"><u>View Item</u></a></td>`;
-									}
-					result_str += `</tr>`;
-
-				});
-				result_str +='</tbody>';
-				result_str +='</div>';
-
-				if (div_id == 0){
-					$('#div_fav_inventory').html(result_str);
-				}
-				
-				if (div_id == 1){
-					$('#div_prev_order_inventory').append(result_str);
-				}
-			  }				
-
-			})
-
-		}
-
 
 		function setTwoNumberDecimal(e) {
 			if (e.value != ""){
@@ -636,11 +383,9 @@ while($fetch_data =array_shift($res))
 			document.frmchgpwd.submit();
 		}
 		
-		function boxreport(repchk, user_id){
+		function boxreport(repchk, compnewid, client_loopid){
 			var start_date = document.getElementById("start_date").value;
 			var end_date = document.getElementById("end_date").value;
-			var compnewid = document.getElementById("rep_comp_list").value;
-			
 			if (document.getElementById("dView")){
 				var dView = document.getElementById("dView").value;
 			}else{
@@ -674,7 +419,7 @@ while($fetch_data =array_shift($res))
 				}
 			}
 			
-			xmlhttp.open("GET","client_dashboard_boxreport.php?repchk=" + repchk + "&compnewid=" +compnewid + "&dView=" + dView + "&start_date=" + start_date + "&end_date=" + end_date + "&user_id=" + user_id, true);
+			xmlhttp.open("GET","client_dashboard_boxreport.php?repchk=" + repchk + "&compnewid=" +compnewid + "&dView=" + dView + "&start_date=" + start_date + "&end_date=" + end_date + "&client_loopid="+ client_loopid, true);
 			xmlhttp.send();
 		}
 		
@@ -6705,7 +6450,7 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 	                      <div class="tooltip"><i class="fa fa-info-circle" aria-hidden="true"></i> <span class="tooltiptext">Describe what you put in this item, how much weight is going in it?</span> </div></td>
 	                    <td colspan=5><input type="text" id="g_what_used_for"></td>
 	                </tr>
-	          		<div id="listdiv" style="position:fixed;visibility:hidden;background-color:white;layer-background-color:white;"></div>
+	          		<div id="listdiv" style="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></div>
 	          		<!--<tr bgcolor="<? echo $rowcolor1; ?>">
 	                		<td> Also Need Pallets?
 	                  	<div class="tooltip"><i class="fa fa-info-circle" aria-hidden="true"></i> <span class="tooltiptext">Do they also order pallets</span> </div></td>
@@ -8618,230 +8363,539 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 	?>
 	<table width="100%">
 		<tr >
-		<td align="center"><h3>Favorites</h3></td>
+		<td align="center"><h3>Favorites/Re-order</h3></td>
 		</tr>
 		<tr >
 		<td align="left">
-		
-		<div id='div_fav_inventory'></div>
-
-		<script>
-			get_fav_inv_data(<? echo $user_id;?>,0, '');
-		</script>
-
-		</td>
-		</tr>
-	</table>
-	<?php 
-	}else{
-		echo "<div class='alert alert-danger'><span>Need to Login, to access this page</span></div>";
-	}
-} else if($_REQUEST['show'] == 'prev_order'){ ?>
-	<?
-	if(isset($_COOKIE['loginid']) && $_COOKIE['loginid']!=""){
-	?>
-		<table width="100%">
-		<tr >
-		<td align="left">
-
-			<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10">
-
-				<tr >
-					<td>&nbsp;</td>
-				</tr>
-				
-				<tr >
-					<td align="center"><h3>Previously Ordered</h3></td>
-				</tr>
-
-				<tr >
-					<td align="center"><div id='div_prev_order_inventory'></div></td>
-				</tr>
-		
-				<?php 
-					
-					db(); 
-					$user_companies = db_query("SELECT company_id FROM boomerang_user_companies where user_id = '".$user_id."'");
-					if(tep_db_num_rows($user_companies) > 0){
-						$prev_order_str = "";
-						while($row = array_shift($user_companies)){
-							$usr_company_id =  $row['company_id'];
-							
-							$client_loopid = 0;
-							$user_companies1 = db_query("SELECT id FROM loop_warehouse where b2bid = '". $usr_company_id ."'");
-							while($row2 = array_shift($user_companies1)){
-								$client_loopid =  $row2['id'];
-							}
-							$client_companyid = $usr_company_id;
-							
-							db_b2b();
-							$company_nm_qry = db_query("SELECT nickname FROM companyInfo where ID = $usr_company_id ORDER BY company");
-							$company_nm = array_shift($company_nm_qry);
-
-							$selPrevDt = db_query("SELECT box_id from loop_bol_tracking inner join loop_boxes on loop_bol_tracking.box_id = loop_boxes.id where trans_rec_id in 
-							(SELECT id FROM loop_transaction_buyer WHERE loop_transaction_buyer.warehouse_id = '".$client_loopid."' and `ignore` = 0) 
-							GROUP BY loop_bol_tracking.box_id order by loop_boxes.bdescription", db());
-							//echo "<pre>";print_r($selPrevDt);echo "</pre>";
-							
-							$i = 0;
-							while ($rowsPrevDt = array_shift($selPrevDt)) {
-								if($rowsPrevDt['box_id'] > 0){
-									$selBoxDt = db_query("SELECT * FROM loop_boxes WHERE id = ".$rowsPrevDt['box_id'], db());
-									$rowBoxDt = array_shift($selBoxDt);
-
-									if($rowBoxDt['b2b_id'] > 0){
-										$prev_order_str .= $rowBoxDt['b2b_id'] . ",";
-									}
-								}
-								$i++;
-							}
-						}
-						
-						if ($prev_order_str != ""){		
-							$prev_order_str = substr($prev_order_str, 0, strlen($prev_order_str)-1);			
-							
-						?>
-							<script>
-								get_fav_inv_data(<? echo $user_id;?>,1, '<? echo $prev_order_str?>', '<? echo $company_nm['nickname'];?>');
-							</script>
-						<? }
-					}
-				?>				
-		</table>
-		</td>
-		</tr>
-	</table>
-	<?php 
-}else{
-	echo "<div class='alert alert-danger'><span>Need to Login, to access this page</span></div>";
-}
-
-} else if($_REQUEST['show'] == 'closed_loop_inv' && $closed_loop_inv_flg == 'yes'){ ?>
-	<?
-	?>
-	<table width="100%">
-		<tr valign="top">
-		<td align="center"><h3>Closed Loop Inventory</h3></td>
-		</tr>
-		<tr >
-		<td align="left">
-		<table width="100%" cellspacing="1" cellpadding="1" border="0" >
+		<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10">
 		<tbody>
+		<tr class="headrow"><td>Favorites</td></tr>
 		<tr>
 			<td>
-				<div id="products-table-view" class="mt-3">
-					<table width="100%" cellspacing="1" cellpadding="1"border="0" >
-						<?
-						$client_companyid = 0;
-						$selFavDt = db_query("SELECT * FROM clientdash_closed_loop_items WHERE compid = '".$client_companyid."' and favItems = 1 ORDER BY fav_bl asc", db());
-						//echo "<pre>";print_r($selFavDt);echo "</pre>";
-						$selFavDtCnt = tep_db_num_rows($selFavDt);
-						?>
-						<thead>
-							<tr >
-								<th >Actual qty</th><!-- Qty Avail -->	
-								<th >After PO qty</th>
-								<th align="center" >L x W x H</th>	
-								<th >Description</th>
-								<th >Per pallet</th>
-								<th >Per truckload</th>			
-								<th >ID</th><!-- B2B ID -->
-								<th >Ship from</th>
-							</tr>
-						</thead>	
-						<?			
-						
-						if($selFavDtCnt > 0 ){
-							$i = 0;
-							while ($rowsFavDt = array_shift($selFavDt)) {
-								if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
+				<form name="frmFavItems" method="post" action="client_dashboard_new.php?show=favorites<?=$repchk_str?>">
+				<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10 tableBorder">
+				<tr class="headrow2">
+					<? if ($hide_bu_now == 0) {?>					
+						<td class='display_title'>View Item</td>
+					<? } ?>					
+					<td class='display_title'>Qty Avail</td>		
+					<td class='display_title'>Lead Time</td>			
+					<td class='display_title'>Expected # of Loads/Mo</td>			
+					<td class='display_title'>Per Truckload</td>			
+					<? if($show_boxprofile_inv == 'yes'){ ?> 
+						<td class='display_title'>FOB Origin Price/Unit</td>
+					<? } ?> 	
+					<td class='display_title'>B2B ID</td>
+					<td class='display_title'>Miles Away
+						<div class="tooltip"><i class="fa fa-info-circle" aria-hidden="true"></i>
+							<span class="tooltiptext">Green Color - miles away <= 250, 
+							<br>Orange Color - miles away <= 550 and > 250, 
+							<br>Red Color - miles away > 550</span>
+						</div>		
+					</td>				
+					<td align="center" class='display_title'>L x W x H</td>		
+					<td class='display_title'>Walls</td>		
+					<td class='display_title'>Description</td>		
+					<td class='display_title'>Ship From</td>
+					<td class=''>Box Type</td>
+					<td class='display_title'>Remove?</td>
+				</tr>
+				<?
+				$selFavData = db_query("SELECT * FROM boomerange_inventory_gaylords_favorite WHERE user_id = '".$user_id."' and fav_status = 1 ORDER BY id ASC", db());
+				//echo "<pre>";print_r($selFavData);echo "</pre>";
+				$selFavDataCnt = tep_db_num_rows($selFavData);
+				if($selFavDataCnt > 0 ){
+					$i = 0; $rowcolor = 0;
+					while ($rowsFavData = array_shift($selFavData)) {
+						//echo "<pre> rowsFavData ->";print_r($rowsFavData);echo "</pre>";
+						$after_po_val_tmp = 0; $after_po_val = 0; 
+						$pallet_val_afterpo = $preorder_txt2 = "";
+						$rec_found_box = "n";
+						$boxes_per_trailer= 0;
+						$next_load_available_date = "";
+						if($rowsFavData['fav_b2bid'] > 0){
+							$selBoxDt = db_query("SELECT * FROM loop_boxes WHERE b2b_id = ".$rowsFavData['fav_b2bid'], db());
+							//echo "<pre> selBoxDt ->";print_r($selBoxDt);echo "</pre>";
+							$rowBoxDt = array_shift($selBoxDt);
 
-								//Get After PO quantity
-								$selBoxDt = db_query("SELECT * FROM loop_boxes WHERE b2b_id = ".$rowsFavDt['fav_b2bid'], db());
-								//echo "<pre> selBoxDt ->";print_r($selBoxDt);echo "</pre>";
-								$rowBoxDt = array_shift($selBoxDt);
-								if($rowBoxDt['b2b_id'] > 0){
-									$selInvDt = db_query("SELECT * FROM inventory WHERE ID = ".$rowBoxDt['b2b_id'], db_b2b());
-									$rowInvDt = array_shift($selInvDt);
+							if($rowBoxDt['b2b_id'] > 0){
+								$selInvDt = db_query("SELECT * FROM inventory WHERE ID = ".$rowBoxDt['b2b_id'], db_b2b());
+								$rowInvDt = array_shift($selInvDt);
+
+								$box_type = $rowInvDt['box_type'];
+								$box_warehouse_id = $rowBoxDt["box_warehouse_id"];
+								$next_load_available_date = $rowBoxDt["next_load_available_date"];
+								$boxes_per_trailer= $rowBoxDt['boxes_per_trailer'];
+								if($rowInvDt["loops_id"] > 0){
+									$dt_view_qry = "SELECT * FROM tmp_inventory_list_set2 WHERE trans_id = " . $rowInvDt["loops_id"] . " ORDER BY warehouse, type_ofbox, Description";
+									$dt_view_res_box = db_query($dt_view_qry,db_b2b() );
+									while ($dt_view_res_box_data = array_shift($dt_view_res_box)) {
+										$rec_found_box = "y";
+										$actual_val = $dt_view_res_box_data["actual"];
+										$after_po_val_tmp = $dt_view_res_box_data["afterpo"];
+										$last_month_qty = $dt_view_res_box_data["lastmonthqty"];
+									}
+									if ($rec_found_box == "n"){
+										$actual_val = $rowInvDt["actual_inventory"];
+										$after_po_val =$rowInvDt["after_actual_inventory"];
+										$last_month_qty = $rowInvDt["lastmonthqty"];
+									}
+									if ($box_warehouse_id == 238){
+										$after_po_val =$rowInvDt["after_actual_inventory"];
+									}else{
+										$after_po_val = $after_po_val_tmp;
+									}
+
+
+									if ($after_po_val < 0) { 
+										$qty = number_format($after_po_val,0) . $pallet_val_afterpo . $preorder_txt2;
+									}else if ($after_po_val >= $boxes_per_trailer) { 
+										$qty = number_format($after_po_val,0) . $pallet_val_afterpo . $preorder_txt2;
+									} else {  
+										$qty = number_format($after_po_val,0) . $pallet_val_afterpo . $preorder_txt2;
+									}
+
+
+									$estimated_next_load = ""; $b2bstatuscolor="";
+									if ($box_warehouse_id == 238 && ($next_load_available_date != "" && $next_load_available_date != "0000-00-00")){
+										$now_date = time(); // or your date as well
+										$next_load_date = strtotime($next_load_available_date);
+										$datediff = $next_load_date - $now_date;
+										$no_of_loaddays=round($datediff / (60 * 60 * 24));
+										//echo $no_of_loaddays;
+										if($no_of_loaddays<$lead_time){
+											if($rowInvDt["lead_time"]>1){
+												$estimated_next_load= "<font color=green> " . $rowInvDt["lead_time"] . " Days </font>";
+											}else{
+												$estimated_next_load= "<font color=green> " . $rowInvDt["lead_time"] . " Day </font>";
+											}
+										}else{
+											$estimated_next_load= "<font color=green> " .$no_of_loaddays. " Days </font>";
+										}
+									}else{
+										if ($after_po_val >= $boxes_per_trailer) {
+											if ($rowInvDt["lead_time"] == 0){
+												$estimated_next_load= "<font color=green> Now </font>";
+											}	
+											if ($rowInvDt["lead_time"] == 1){
+												$estimated_next_load= "<font color=green> " . $rowInvDt["lead_time"] . " Day </font>";
+											}							
+											if ($rowInvDt["lead_time"] > 1){
+												$estimated_next_load= "<font color=green> " . $rowInvDt["lead_time"] . " Days </font>";
+											}							
+										}else{
+											if (($rowInvDt["expected_loads_per_mo"] <= 0) && ($after_po_val < $boxes_per_trailer)){
+												$estimated_next_load= "<font color=red> Never (sell the " . $after_po_val . ") </font>";
+											}else{	
+												// logic changed by Zac
+												//$estimated_next_load=round((((($after_po_val/$boxes_per_trailer)*-1)+1)/$inv["expected_loads_per_mo"])*4)." weeks";;
+												//echo "next_load_available_date - " . $inv["I"] . " " . $after_po_val . " " . $boxes_per_trailer . " " . $inv["expected_loads_per_mo"] .  "<br>";
+												$estimated_next_load=ceil((((($after_po_val/$boxes_per_trailer)*-1)+1)/$rowInvDt["expected_loads_per_mo"])*4)." Weeks";
+											}
+										}
+
+										if ($after_po_val == 0 && $rowInvDt["expected_loads_per_mo"] == 0 ) {
+											$estimated_next_load= "<font color=red> Ask Rep </font>";
+										}
+
+										if ($rowInvDt["expected_loads_per_mo"] == 0 ) {
+											$expected_loads_per_mo= "<font color=red>0</font>";
+										}else{
+											$expected_loads_per_mo= $rowInvDt["expected_loads_per_mo"];
+										}
+									}
+
+									$b2b_status=$rowInvDt["b2b_status"];
+									$b2bstatuscolor="";
+									$st_query="SELECT * FROM b2b_box_status WHERE status_key='".$b2b_status."'";
+									$st_res = db_query($st_query, db() );
+									$st_row = array_shift($st_res);
+									$b2bstatus_name=$st_row["box_status"];
+									if($st_row["status_key"]=="1.0" || $st_row["status_key"]=="1.1" || $st_row["status_key"]=="1.2"){
+										$b2bstatuscolor="green";
+									}elseif($st_row["status_key"]=="2.0" || $st_row["status_key"]=="2.1" || $st_row["status_key"]=="2.2"){
+										$b2bstatuscolor="orange";
+										$estimated_next_load= "<font color=red> Ask Rep </font>";
+									}
+									
+									$estimated_next_load = $rowInvDt["buy_now_load_can_ship_in"];
+									
+									$b2b_onlineDollar = round($rowInvDt["onlineDollar"]);
+									$b2b_onlineCents = $rowInvDt["onlineCents"];
+									$b2b_online_fob = $b2b_onlineDollar + $b2b_onlineCents;
+									$b2b_online_fob = "$" . number_format($b2b_online_fob,2);
+
+									if($rowInvDt["location_country"] == "Canada" ){ 	
+										$tmp_zipval = str_replace(" ", "", $rowInvDt["location_zip"] );
+										$zipStr= "SELECT * FROM zipcodes_canada WHERE zip = '" . $tmp_zipval . "'";
+									}elseif(($rowInvDt["location_country"]) == "Mexico" ){
+										$zipStr= "SELECT * FROM zipcodes_mexico LIMIT 1";
+									}else {
+										$zipStr= "SELECT * FROM ZipCodes WHERE zip = '" .intval($rowInvDt["location_zip"]). "'";
+									}
+
+									$dt_view_res3 = db_query($zipStr,db_b2b() );
+									while ($ziploc = array_shift($dt_view_res3)) {
+										$locLat = $ziploc["latitude"];		
+										$locLong = $ziploc["longitude"];		
+									}
+									//	echo $locLong;
+									$distLat = ($shipLat - $locLat) * 3.141592653 / 180;
+									$distLong = ($shipLong - $locLong) * 3.141592653 / 180;
+
+									$distA = Sin($distLat/2) * Sin($distLat/2) + Cos($shipLat * 3.14159 / 180) * Cos($locLat * 3.14159 / 180) * Sin($distLong/2) * Sin($distLong/2);
+									//echo $inv["I"] . " " . $distA . "p <br/>"; 
+									$distC = 2 * atan2(sqrt($distA),sqrt(1-$distA));
+
+									$miles_from = (int) (6371 * $distC * .621371192);							
+									if ($miles_from <= 250){	//echo "chk gr <br/>";
+										$miles_away_color = "green";
+									}
+									if ( ($miles_from <= 550) && ($miles_from > 250)){	
+										$miles_away_color = "#FF9933";
+									}
+									if (($miles_from > 550) ){	
+										$miles_away_color = "red";
+									}
+
+
+									if($rowInvDt["uniform_mixed_load"]=="Mixed"){
+										$blength=$rowInvDt["blength_min"]. " - ". $rowInvDt["blength_max"];
+										$bwidth=$rowInvDt["bwidth_min"]. " - ". $rowInvDt["bwidth_max"];
+										$bdepth=$rowInvDt["bheight_min"]. " - ". $rowInvDt["bheight_max"];
+									}else{
+										$blength = $rowInvDt["lengthInch"];
+										$bwidth = $rowInvDt["widthInch"];
+										$bdepth = $rowInvDt["depthInch"];
+									}
+									$blength_frac = 0; $bwidth_frac = 0; $bdepth_frac = 0;
+									$length = $blength;
+									$width = $bwidth;
+									$depth = $bdepth;		
+									if ($rowInvDt["lengthFraction"] != "") {
+										$arr_length = explode("/", $rowInvDt["lengthFraction"]);
+										if (count($arr_length) > 0 ) {
+											$blength_frac = intval($arr_length[0])/intval($arr_length[1]);
+											$length = floatval($blength + $blength_frac);
+										}
+									}
+									if ($rowInvDt["widthFraction"] != "") {
+										$arr_width = explode("/", $rowInvDt["widthFraction"]);
+										if (count($arr_width) > 0) {
+											$bwidth_frac = intval($arr_width[0])/intval($arr_width[1]);
+											$width = floatval($bwidth + $bwidth_frac);
+										}
+									}
+									if ($rowInvDt["depthFraction"] != "") {
+										$arr_depth = explode("/", $rowInvDt["depthFraction"]);
+										if (count($arr_depth) > 0) {
+											$bdepth_frac = intval($arr_depth[0])/intval($arr_depth[1]);
+											$depth = floatval($bdepth + $bdepth_frac);
+										}
+									}
+
+
+									if($rowBoxDt["box_warehouse_id"]=="238"){ 
+										$vendor_b2b_rescue_id = $rowBoxDt["vendor_b2b_rescue"];
+										$get_loc_qry = "SELECT * FROM companyInfo WHERE loopid = '" . $vendor_b2b_rescue_id . "'";
+										$get_loc_res = db_query($get_loc_qry,db_b2b() );
+										$loc_row = array_shift($get_loc_res);
+										$shipfrom_city = $loc_row["shipCity"]; 
+										$shipfrom_state = $loc_row["shipState"]; 
+										$shipfrom_zip = $loc_row["shipZip"]; 
+									}else{									
+										$vendor_b2b_rescue_id = $rowBoxDt["box_warehouse_id"];	
+										$get_loc_qry = "SELECT * FROM loop_warehouse WHERE id ='".$vendor_b2b_rescue_id."'";
+										$get_loc_res = db_query($get_loc_qry,db() );
+										$loc_row = array_shift($get_loc_res);
+											$shipfrom_city = $loc_row["company_city"]; 
+											$shipfrom_state = $loc_row["company_state"]; 
+											$shipfrom_zip = $loc_row["company_zip"]; 
+									}
+									$ship_from  = $shipfrom_city . ", " . $shipfrom_state . " " . $shipfrom_zip;
+									$ship_from2 = get_territory($shipfrom_state);	
+
+
+									if ($rowcolor % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
+									$rowcolor = $rowcolor + 1;
+									?>
+									<tr class="<?=$rowclr?>">				
+										<? if ($hide_bu_now == 0) { ?>
+											<td class='' width="10%"><a href='https://b2b.usedcardboardboxes.com/?id=<? echo urlencode(encrypt_password(get_loop_box_id($rowBoxDt['b2b_id'])));?>&compnewid=<? echo urlencode(encrypt_password($client_companyid))?>&miles=<? echo urlencode(encrypt_password($miles_from));?>' target='_blank' >View Item</a></td>
+										<? } ?>
+											
+										<td class='' width="5%"><?=$qty?></td>		
+										<td class='' width="8%"><?=$estimated_next_load?></td>			
+										<td class='' width="5%"><?=$expected_loads_per_mo?></td>			
+										<td class='' width="5%"><?=$boxes_per_trailer?></td>			
+										<? if($show_boxprofile_inv == 'yes'){ ?> 
+											<td class='' width="5%"><?=$b2b_online_fob?></td>
+										<? } ?> 	
+										<td class='' width="5%"><?=$rowInvDt['ID']?></td>
+										<td class='' width="5%"><font color='<?=$miles_away_color;?>'><?=$miles_from?></font></td>				
+										<td align="center" width="15%" class=''><? echo $length . " x " . $width . " x " . $depth;?> </td>		
+										<td class='' width="5%"><?=$rowInvDt["bwall"]?></td>		
+										<td class='' width="20%"><?=$rowInvDt["description"]?></td>		
+										<td class='' width="5%"><?=$ship_from2?></td>
+										<td class='' width="7%">
+											<? 
+											$arrG = array("Gaylord", "GaylordUCB", "Loop", "PresoldGaylord" );
+											$arrSb = array("Medium", "Large", "Xlarge", "LoopShipping", "Box", "Boxnonucb", "Presold" );
+											$arrSup = array("SupersackUCB", "SupersacknonUCB" );
+											$arrPal = array("PalletsUCB", "PalletsnonUCB");
+											$arrOther = array("Recycling", "DrumBarrelUCB", "DrumBarrelnonUCB", "Waste-to-Energy", "Other", " ");
+											if (in_array($box_type, $arrG) ){
+												$boxtype		= "Gaylord"; 
+											}elseif (in_array($box_type, $arrSb)){
+												$boxtype		= "Shipping"; 
+											}elseif (in_array($box_type, $arrSup)){ 
+												$boxtype		= "SuperSack"; 
+											}elseif (in_array($box_type, $arrPal)){ 
+												$boxtype		= "Pallet";
+											}elseif (in_array($box_type, $arrOther)) { 
+												$boxtype		= "Other";
+											}
+											echo $boxtype;
+											?>
+										</td>
+										<td class='' width="5%">
+											<a id='btnremove' href='javascript:void(0);' onClick='Remove_favorites(<?=$rowsFavData['id'];?>, <? echo $user_id;?>)' >Remove</a>
+											<input type="hidden" name="hdnFavItemsAction" id="hdnFavItemsAction" value="1">		
+											<input type="hidden" name="hdnCompanyId" id="hdnCompanyId" value="<?=$_REQUEST['compnewid'];?>">
+											<input type="hidden" name="repchk_str" id="repchk_str" value="<?=$repchk_str;?>">
+										</td>
+									</tr>
+									<?
 								}
+							}
+						}
+						$i++;
 
-								$loop_id = $rowBoxDt['id'];
-								$bpallet_qty= $rowBoxDt['bpallet_qty']; 
-								$boxes_per_trailer= $rowBoxDt['boxes_per_trailer']; 
-								$box_warehouse_id = $rowBoxDt["box_warehouse_id"];								
-								
-								//Get ship from
-								if($loc_res["box_warehouse_id"]=="238")	{
-									$vendor_b2b_rescue_id = $rowBoxDt["vendor_b2b_rescue"];
-									$get_loc_qry = "SELECT * FROM companyInfo WHERE loopid = '" . $vendor_b2b_rescue_id . "'";
-									$get_loc_res = db_query($get_loc_qry,db_b2b() );
-									$loc_row = array_shift($get_loc_res);
-									$shipfrom_city = $loc_row["shipCity"]; 
-									$shipfrom_state = $loc_row["shipState"]; 
-									$shipfrom_zip = $loc_row["shipZip"]; 
-								} else{
-									$vendor_b2b_rescue_id = $rowBoxDt["box_warehouse_id"];	
-									$get_loc_qry = "SELECT * FROM loop_warehouse WHERE id ='".$vendor_b2b_rescue_id."'";
-									$get_loc_res = db_query($get_loc_qry,db() );
-									$loc_row = array_shift($get_loc_res);
-									$shipfrom_city = $loc_row["company_city"]; 
-									$shipfrom_state = $loc_row["company_state"]; 
-									$shipfrom_zip = $loc_row["company_zip"]; 
-								}
 
-								$ship_from  = $shipfrom_city . ", " . $shipfrom_state;
-								
-								$after_po_val_tmp = 0; $actual_val = 0;
-								$dt_view_qry = "SELECT * from tmp_inventory_list_set2 where trans_id = " . $loop_id . " order by warehouse, type_ofbox, Description";
+					}
+				}else{
+					?>
+					<tr><td colspan="18">No record found</td></tr>
+					<?
+				}
+				?>
+				</table>
+				</form>
+			</td>
+		</tr>
+
+		<tr class="headrow"><td>Previously Ordered</td></tr>
+		<tr>
+			<td>
+			<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10 tableBorder">
+
+				<input type="hidden" name="fav_match_id" id="fav_match_id" value="<?=$client_companyid?>">
+				<input type="hidden" name="fav_match_boxid" id="fav_match_boxid" value="0">
+				<input type="hidden" name="fav_match_display-allrec" id="fav_match_display-allrec" value="">
+				<input type="hidden" name="fav_match_viewflg" id="fav_match_viewflg" value="">
+				<input type="hidden" name="fav_match_flg" id="fav_match_flg" value="">
+				<input type="hidden" name="fav_match_load_all" id="fav_match_load_all" value="">
+				<input type="hidden" name="fav_match_client_flg" id="fav_match_client_flg" value="">
+				<input type="hidden" name="fav_match_inboxprofile" id="fav_match_inboxprofile" value="">
+				<input type="hidden" name="fav_boxtype" id="fav_boxtype" value="preorder">
+			
+				<tr class="headrow2">
+					<? if ($hide_bu_now == 0) { ?>
+						<td class='display_title'>View Item</td>
+					<? } ?>														
+					<td class='display_title'>Qty Avail</td>		
+					<td class='display_title'>Lead Time</td>			
+					<td class='display_title'>Expected # of Loads/Mo</td>			
+					<td class='display_title'>Per Truckload</td>			
+					<? if($show_boxprofile_inv == 'yes'){ ?> 
+						<td class='display_title'>FOB Origin Price/Unit</td>
+					<? } ?> 	
+					<td class='display_title'>B2B ID</td>
+					<td class='display_title'>Miles Away
+						<div class="tooltip"><i class="fa fa-info-circle" aria-hidden="true"></i>
+							<span class="tooltiptext">Green Color - miles away <= 250, 
+							<br>Orange Color - miles away <= 550 and > 250, 
+							<br>Red Color - miles away > 550</span>
+						</div>		
+					</td>				
+					<td align="center" class='display_title'>L x W x H</td>		
+					<td class='display_title'>Walls</td>		
+					<td class='display_title'>Description</td>		
+					<td class='display_title'>Ship From</td>
+					<td class=''>Box Type</td>
+					<td class=''>Favorites</td>
+					
+				</tr>
+				<?
+				//$selPrevDt = db_query("SELECT loop_bol_tracking.box_id FROM loop_transaction_buyer INNER JOIN loop_bol_files ON loop_bol_files.trans_rec_id = loop_transaction_buyer.id INNER JOIN loop_bol_tracking ON loop_bol_tracking.trans_rec_id = loop_transaction_buyer.id WHERE loop_transaction_buyer.warehouse_id = ".$client_loopid." AND loop_bol_files.bol_shipment_received = 1 GROUP BY loop_bol_tracking.box_id ORDER BY loop_transaction_buyer.id DESC", db());
+				$selPrevDt = db_query("SELECT box_id from loop_bol_tracking inner join loop_boxes on loop_bol_tracking.box_id = loop_boxes.id where trans_rec_id in (SELECT id FROM loop_transaction_buyer WHERE loop_transaction_buyer.warehouse_id = '".$client_loopid."' and `ignore` = 0) GROUP BY loop_bol_tracking.box_id order by loop_boxes.bdescription", db());
+				//echo "<pre>";print_r($selPrevDt);echo "</pre>";
+				$arr_previously_ordered = array();
+				$i = 0;
+				while ($rowsPrevDt = array_shift($selPrevDt)) {
+					$after_po_val_tmp = 0; $after_po_val = 0; 
+					$pallet_val_afterpo = $preorder_txt2 = "";
+					$rec_found_box = "n";
+					$boxes_per_trailer= 0;
+					$next_load_available_date = "";
+					if($rowsPrevDt['box_id'] > 0){
+						$selBoxDt = db_query("SELECT * FROM loop_boxes WHERE id = ".$rowsPrevDt['box_id'], db());
+						$rowBoxDt = array_shift($selBoxDt);
+
+						//echo "<br /> i -> ".$i." / b2b_id -> ".$rowBoxDt['b2b_id']." / box_id -> ".$rowsPrevDt['box_id'];
+						if($rowBoxDt['b2b_id'] > 0){
+							$selInvDt = db_query("SELECT * FROM inventory WHERE ID = ".$rowBoxDt['b2b_id'], db_b2b());
+							$rowInvDt = array_shift($selInvDt);
+
+							$box_type = $rowInvDt['box_type'];
+							$box_warehouse_id = $rowBoxDt["box_warehouse_id"];
+							$next_load_available_date = $rowBoxDt["next_load_available_date"];
+							$boxes_per_trailer= $rowBoxDt['boxes_per_trailer'];
+							if($rowInvDt["loops_id"] > 0){
+								$dt_view_qry = "SELECT * FROM tmp_inventory_list_set2 WHERE trans_id = " . $rowInvDt["loops_id"] . " ORDER BY warehouse, type_ofbox, Description";
 								$dt_view_res_box = db_query($dt_view_qry,db_b2b() );
 								while ($dt_view_res_box_data = array_shift($dt_view_res_box)) {
 									$rec_found_box = "y";
 									$actual_val = $dt_view_res_box_data["actual"];
 									$after_po_val_tmp = $dt_view_res_box_data["afterpo"];
 									$last_month_qty = $dt_view_res_box_data["lastmonthqty"];
-									$sales_order_qty = $dt_view_res_box_data["sales_order_qty"];
-									//
 								}
-
 								if ($rec_found_box == "n"){
-									$after_po_val = $rowInvDt["after_actual_inventory"];
+									$actual_val = $rowInvDt["actual_inventory"];
+									$after_po_val =$rowInvDt["after_actual_inventory"];
 									$last_month_qty = $rowInvDt["lastmonthqty"];
-
-									//$actual_val = $rowInvDt["actual_inventory"];
-									
-									$dt_view_qry = "SELECT loop_boxes.bpallet_qty, loop_boxes.work_as_kit_box, loop_boxes.flyer, loop_boxes.boxes_per_trailer, loop_boxes.id AS I, loop_boxes.b2b_id AS B2BID, SUM(loop_inventory.boxgood) AS A, loop_warehouse.company_name AS B, loop_boxes.bdescription AS C, loop_boxes.blength AS L, loop_boxes.blength_frac AS LF, loop_boxes.bwidth AS W, loop_boxes.bwidth_frac AS WF, loop_boxes.bdepth AS D, loop_boxes.bdepth_frac as DF, loop_boxes.work_as_kit_box as kb, loop_boxes.bwall AS WALL, loop_boxes.bstrength AS ST, loop_boxes.isbox as ISBOX, loop_boxes.type as TYPE, loop_warehouse.id AS wid, loop_warehouse.pallet_space, loop_boxes.sku as SKU FROM loop_inventory INNER JOIN loop_warehouse 
-									ON loop_inventory.warehouse_id = loop_warehouse.id INNER JOIN loop_boxes ON loop_inventory.box_id = loop_boxes.id where loop_boxes.id = '" . $loop_id . "'
-									GROUP BY loop_warehouse.warehouse_name, loop_inventory.box_id ORDER BY loop_warehouse.warehouse_name, loop_boxes.type, loop_boxes.blength, loop_boxes.bwidth, loop_boxes.bdepth,loop_boxes.bdescription";
-									$dt_view_res = db_query($dt_view_qry,db() );
-									while ($dt_view_row = array_shift($dt_view_res)) {
-										$actual_val = $dt_view_row["A"];
-									}
-									
+								}
+								if ($box_warehouse_id == 238){
+									$after_po_val =$rowInvDt["after_actual_inventory"];
+								}else{
+									$after_po_val = $after_po_val_tmp;
 								}
 
-								if ($box_warehouse_id == 238){
-									$after_po_val = $rowInvDt["after_actual_inventory"];
-								}else{	
-									$after_po_val = $after_po_val_tmp;						
-								}								
-								
+
+								if ($after_po_val < 0) { 
+									$qty = number_format($after_po_val,0) . $pallet_val_afterpo . $preorder_txt2;
+								}else if ($after_po_val >= $boxes_per_trailer) { 
+									$qty = number_format($after_po_val,0) . $pallet_val_afterpo . $preorder_txt2;
+								} else {  
+									$qty = number_format($after_po_val,0) . $pallet_val_afterpo . $preorder_txt2;
+								}
+
+
+								$estimated_next_load = ""; $b2bstatuscolor="";
+								if ($box_warehouse_id == 238 && ($next_load_available_date != "" && $next_load_available_date != "0000-00-00")){
+									$now_date = time(); // or your date as well
+									$next_load_date = strtotime($next_load_available_date);
+									$datediff = $next_load_date - $now_date;
+									$no_of_loaddays=round($datediff / (60 * 60 * 24));
+									//echo $no_of_loaddays;
+									if($no_of_loaddays<$lead_time){
+										if($rowInvDt["lead_time"]>1){
+											$estimated_next_load= "<font color=green> " . $rowInvDt["lead_time"] . " Days </font>";
+										}else{
+											$estimated_next_load= "<font color=green> " . $rowInvDt["lead_time"] . " Day </font>";
+										}
+									}else{
+										$estimated_next_load= "<font color=green> " .$no_of_loaddays. " Days </font>";
+									}
+								}else{
+									if ($after_po_val >= $boxes_per_trailer) {
+										if ($rowInvDt["lead_time"] == 0){
+											$estimated_next_load= "<font color=green> Now </font>";
+										}	
+										if ($rowInvDt["lead_time"] == 1){
+											$estimated_next_load= "<font color=green> " . $rowInvDt["lead_time"] . " Day </font>";
+										}							
+										if ($rowInvDt["lead_time"] > 1){
+											$estimated_next_load= "<font color=green> " . $rowInvDt["lead_time"] . " Days </font>";
+										}							
+									}else{
+										if (($rowInvDt["expected_loads_per_mo"] <= 0) && ($after_po_val < $boxes_per_trailer)){
+											$estimated_next_load= "<font color=red> Never (sell the " . $after_po_val . ") </font>";
+										}else{	
+											// logic changed by Zac
+											//$estimated_next_load=round((((($after_po_val/$boxes_per_trailer)*-1)+1)/$inv["expected_loads_per_mo"])*4)." weeks";;
+											//echo "next_load_available_date - " . $inv["I"] . " " . $after_po_val . " " . $boxes_per_trailer . " " . $inv["expected_loads_per_mo"] .  "<br>";
+											$estimated_next_load=ceil((((($after_po_val/$boxes_per_trailer)*-1)+1)/$rowInvDt["expected_loads_per_mo"])*4)." Weeks";
+										}
+									}
+
+									if ($after_po_val == 0 && $rowInvDt["expected_loads_per_mo"] == 0 ) {
+										$estimated_next_load= "<font color=red> Ask Rep </font>";
+									}
+
+									if ($rowInvDt["expected_loads_per_mo"] == 0 ) {
+										$expected_loads_per_mo= "<font color=red>0</font>";
+									}else{
+										$expected_loads_per_mo= $rowInvDt["expected_loads_per_mo"];
+									}
+								}
+
+								$b2b_status=$rowInvDt["b2b_status"];
+								$b2bstatuscolor="";
+								$st_query="SELECT * FROM b2b_box_status WHERE status_key='".$b2b_status."'";
+								$st_res = db_query($st_query, db() );
+								$st_row = array_shift($st_res);
+								$b2bstatus_name=$st_row["box_status"];
+								if($st_row["status_key"]=="1.0" || $st_row["status_key"]=="1.1" || $st_row["status_key"]=="1.2"){
+									$b2bstatuscolor="green";
+								}elseif($st_row["status_key"]=="2.0" || $st_row["status_key"]=="2.1" || $st_row["status_key"]=="2.2"){
+									$b2bstatuscolor="orange";
+									$estimated_next_load= "<font color=red> Ask Rep </font>";
+								}
+
+								$estimated_next_load = $rowInvDt["buy_now_load_can_ship_in"];
+
+								$b2b_onlineDollar = round($rowInvDt["onlineDollar"]);
+								$b2b_onlineCents = $rowInvDt["onlineCents"];
+								$b2b_online_fob = $b2b_onlineDollar + $b2b_onlineCents;
+								$b2b_online_fob = "$" . number_format($b2b_online_fob,2);
+
+								if($rowInvDt["location_country"] == "Canada" ){ 	
+									$tmp_zipval = str_replace(" ", "", $rowInvDt["location_zip"]);
+									$zipStr= "SELECT * FROM zipcodes_canada WHERE zip = '" . $tmp_zipval . "'";
+								}elseif(($rowInvDt["location_country"]) == "Mexico" ){
+									$zipStr= "SELECT * FROM zipcodes_mexico LIMIT 1";
+								}else {
+									$zipStr= "SELECT * FROM ZipCodes WHERE zip = '" .intval($rowInvDt["location_zip"]). "'";
+								}
+								$dt_view_res3 = db_query($zipStr,db_b2b() );
+								while ($ziploc = array_shift($dt_view_res3)) {
+									$locLat = $ziploc["latitude"];		
+									$locLong = $ziploc["longitude"];		
+								}
+								//	echo $locLong;
+								$distLat = ($shipLat - $locLat) * 3.141592653 / 180;
+								$distLong = ($shipLong - $locLong) * 3.141592653 / 180;
+
+								$distA = Sin($distLat/2) * Sin($distLat/2) + Cos($shipLat * 3.14159 / 180) * Cos($locLat * 3.14159 / 180) * Sin($distLong/2) * Sin($distLong/2);
+								//echo $inv["I"] . " " . $distA . "p <br/>"; 
+								$distC = 2 * atan2(sqrt($distA),sqrt(1-$distA));
+
+								$miles_from = (int) (6371 * $distC * .621371192);							
+								if ($miles_from <= 250){	//echo "chk gr <br/>";
+									$miles_away_color = "green";
+								}
+								if ( ($miles_from <= 550) && ($miles_from > 250)){	
+									$miles_away_color = "#FF9933";
+								}
+								if (($miles_from > 550) ){	
+									$miles_away_color = "red";
+								}
+
+
 								if($rowInvDt["uniform_mixed_load"]=="Mixed"){
 									$blength=$rowInvDt["blength_min"]. " - ". $rowInvDt["blength_max"];
 									$bwidth=$rowInvDt["bwidth_min"]. " - ". $rowInvDt["bwidth_max"];
 									$bdepth=$rowInvDt["bheight_min"]. " - ". $rowInvDt["bheight_max"];
-								} else{
+								}else{
 									$blength = $rowInvDt["lengthInch"];
 									$bwidth = $rowInvDt["widthInch"];
 									$bdepth = $rowInvDt["depthInch"];
-								}	
-								$blength_frac = 0;
-								$bwidth_frac = 0;
-								$bdepth_frac = 0;
-
+								}
+								$blength_frac = 0; $bwidth_frac = 0; $bdepth_frac = 0;
 								$length = $blength;
 								$width = $bwidth;
-								$depth = $bdepth;
-								
+								$depth = $bdepth;		
 								if ($rowInvDt["lengthFraction"] != "") {
 									$arr_length = explode("/", $rowInvDt["lengthFraction"]);
 									if (count($arr_length) > 0 ) {
@@ -8855,42 +8909,311 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 										$bwidth_frac = intval($arr_width[0])/intval($arr_width[1]);
 										$width = floatval($bwidth + $bwidth_frac);
 									}
-								}	
-
+								}
 								if ($rowInvDt["depthFraction"] != "") {
 									$arr_depth = explode("/", $rowInvDt["depthFraction"]);
 									if (count($arr_depth) > 0) {
 										$bdepth_frac = intval($arr_depth[0])/intval($arr_depth[1]);
 										$depth = floatval($bdepth + $bdepth_frac);
 									}
-								}	
+								}
 
-								$fav_bl = $length;
-								$fav_bw = $width;
-								$fav_bh = $depth;		
+
+								if($rowBoxDt["box_warehouse_id"]=="238"){ 
+									$vendor_b2b_rescue_id = $rowBoxDt["vendor_b2b_rescue"];
+									$get_loc_qry = "SELECT * FROM companyInfo WHERE loopid = '" . $vendor_b2b_rescue_id . "'";
+									$get_loc_res = db_query($get_loc_qry,db_b2b() );
+									$loc_row = array_shift($get_loc_res);
+									$shipfrom_city = $loc_row["shipCity"]; 
+									$shipfrom_state = $loc_row["shipState"]; 
+									$shipfrom_zip = $loc_row["shipZip"]; 
+								}else{									
+									$vendor_b2b_rescue_id = $rowBoxDt["box_warehouse_id"];	
+									$get_loc_qry = "SELECT * FROM loop_warehouse WHERE id ='".$vendor_b2b_rescue_id."'";
+									$get_loc_res = db_query($get_loc_qry,db() );
+									$loc_row = array_shift($get_loc_res);
+										$shipfrom_city = $loc_row["company_city"]; 
+										$shipfrom_state = $loc_row["company_state"]; 
+										$shipfrom_zip = $loc_row["company_zip"]; 
+								}
+								$ship_from  = $shipfrom_city . ", " . $shipfrom_state . " " . $shipfrom_zip;
+								$ship_from2 = get_territory($shipfrom_state);	
+
+
+								if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
+								$loop_box_id = get_loop_box_id($rowBoxDt['b2b_id']);
+
 								
-								?>
-								<tr class="<?=$rowclr?>" >	
-									<td width="5%"><?=$actual_val?></td>
-									<td width="5%"><?=$after_po_val?></td>			
-									<td align="center" width="15%" class=''><? echo $fav_bl . " x " . $fav_bw . " x " . $fav_bh;?> </td>	
-									<td width="20%"><?=$rowInvDt["description"]?></td>
-									<td width="5%"><?=$bpallet_qty;?></td>			
-									<td width="5%"><?=$boxes_per_trailer?></td>			
-									<td width="5%"><?=$rowsFavDt['fav_b2bid']?></td>
-									<td width="5%"><?=$ship_from;?></td>
-								</tr>
-								<?
-								$i++;
+								$arr_previously_ordered[] = array('loop_box_id' => $loop_box_id, 'client_companyid' => $client_companyid,
+								'qty' => $qty, 'estimated_next_load' => $estimated_next_load, 'expected_loads_per_mo' => $expected_loads_per_mo, 'boxes_per_trailer' => $boxes_per_trailer, 
+								'b2b_online_fob' => $b2b_online_fob, 'ID' => $rowInvDt['ID'], 'miles_away_color' => $miles_away_color,
+								'miles_from' => $miles_from, 'length' => $length, 'width' => $width, 'depth' => $depth, 'bwall' => $rowInvDt["bwall"], 
+								'description' => $rowInvDt["description"], 'ship_from2' => $ship_from2,
+								'boxtype' => $boxtype);
+								
 							}
-						}else{
-							?>
-							<tr><td colspan="18">No record found</td></tr>
-							<?
 						}
+					}
+					$i++;
+				}
+				
+			/*	$MGArraysort = array();
+		 
+				foreach ($arr_previously_ordered as $MGArraytmp) {
+					$MGArraysort[] = $MGArraytmp['miles_from'];
+				}
+				array_multisort($MGArraysort, SORT_NUMERIC, $arr_previously_ordered);	
+			*/
+				foreach ($arr_previously_ordered as $MGArraytmp2) {
+					
+					$selFavouriteDt = db_query("SELECT id FROM boomerange_inventory_gaylords_favorite WHERE fav_status = 1 AND fav_b2bid = '".$MGArraytmp2["ID"]."' AND compid = '".$MGArraytmp2["client_companyid"]."'", db());
+					//echo "SELECT id FROM boomerange_inventory_gaylords_favorite WHERE fav_status = 1 AND fav_b2bid = '".$MGArraytmp2["ID"]."' AND compid = '".$MGArraytmp2["client_companyid"]."'";
+					?>
+					<tr class="<?=$rowclr?>">		
+						<? if ($hide_bu_now == 0) { ?>
+							<td class='' width="10%"><a href='https://b2b.usedcardboardboxes.com/?id=<? echo urlencode(encrypt_password($MGArraytmp2["loop_box_id"]));?>&compnewid=<? echo urlencode(encrypt_password($MGArraytmp2["client_companyid"]));?>&miles=<? echo urlencode(encrypt_password($MGArraytmp2["miles_from"]));?>' target='_blank' >View Item</a></td>
+						<? } ?>														
+					
+						<td class='' width="5%"><?=$MGArraytmp2["qty"]?></td>		
+						<td class='' width="8%"><?=$MGArraytmp2["estimated_next_load"]?></td>			
+						<td class='' width="5%"><?=$MGArraytmp2["expected_loads_per_mo"]?></td>		
+						
+						<td class='' width="5%"><?=$MGArraytmp2["boxes_per_trailer"]?></td>			
+						<? if($show_boxprofile_inv == 'yes'){ ?> 
+							<td class='' width="5%"><?=$MGArraytmp2["b2b_online_fob"]?></td>
+						<? } ?> 	
+						<td class='' width="5%"><?=$MGArraytmp2["ID"]?></td>
+						<td class='' width="5%"><font color='<?=$MGArraytmp2["miles_away_color"]?>'><?=$MGArraytmp2["miles_from"]?></font></td>				
+						<td align="center" width="15%" class=''><? echo $MGArraytmp2["length"] . " x " . $MGArraytmp2["width"] . " x " . $MGArraytmp2["depth"];?> </td>		
+						<td class='' width="5%"><?=$MGArraytmp2["bwall"]?></td>		
+						<td class='' width="20%"><?=$MGArraytmp2["description"]?></td>		
+						<td class='' width="5%"><?=$MGArraytmp2["ship_from2"]?></td>
+						<td class='' width="7%">
+							<? 
+							echo $MGArraytmp2["boxtype"];
+							?>
+						</td>
+						<td class='' width="7%">
+							<input type="hidden" name="fav_qty_avail" id="fav_qty_avail<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["qty"]?>">
+							<input type="hidden" name="fav_estimated_next_load" id="fav_estimated_next_load<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["estimated_next_load"]?>">
+							<input type="hidden" name="fav_expected_loads_per_mo" id="fav_expected_loads_per_mo<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["expected_loads_per_mo"]?>">
+							<input type="hidden" name="fav_boxes_per_trailer" id="fav_boxes_per_trailer<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["boxes_per_trailer"]?>">
+							<input type="hidden" name="fav_fob" id="fav_fob<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["b2b_online_fob"]?>">
+							<input type="hidden" name="fav_b2bid" id="fav_b2bid<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["ID"]?>">
+							<input type="hidden" name="fav_miles" id="fav_miles<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["miles_from"]?>">
+
+							<input type="hidden" name="fav_bl" id="fav_bl<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["length"]?>">
+							<input type="hidden" name="fav_bw" id="fav_bw<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["width"]?>">
+							<input type="hidden" name="fav_bh" id="fav_bh<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["depth"]?>">
+							<input type="hidden" name="fav_walls" id="fav_walls<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["bwall"]?>">
+							<input type="hidden" name="fav_desc" id="fav_desc<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["description"]?>">
+							<input type="hidden" name="fav_shipfrom" id="fav_shipfrom<?php echo $MGArraytmp2["ID"]; ?>" value="<?=$MGArraytmp2["ship_from2"]?>">
+						
+							<div id="fav_div_display<? echo $MGArraytmp2["ID"];?>">
+							
+								<? 
+								if(!empty($selFavouriteDt)){	
+								?>
+									<a id="div_favourite<? echo $MGArraytmp2["ID"];?>" href='javascript:void(0);' onClick='remove_item_as_favorite("<? echo $MGArraytmp2["ID"];?>",1)'><img src='images/fav.png' width='10px' height='10px'></a>
+								<?
+								}
+								else{
+								?>
+									<a id='div_favourite<? echo $MGArraytmp2["ID"];?>' href='javascript:void(0);' onClick='add_item_as_favorite("<? echo $MGArraytmp2["ID"];?>",1)' ><img src='images/non_fav.png' width='12px' height='12px'> </a>
+								<?
+								}
+								?>
+							</div>	
+						</td>
+						
+					</tr>
+					<?				
+				}
+				?>
+			</table>				
+			</td>
+		</tr>
+		</tbody>	
+		</table>
+		</td>
+		</tr>
+	</table>
+	<?php 
+}else{
+	echo "<div class='alert alert-danger'><span>Need to Login, to access this page</span></div>";
+}
+} else if($_REQUEST['show'] == 'closed_loop_inv' && $closed_loop_inv_flg == 'yes'){ ?>
+	<?
+	?>
+	<table width="100%">
+		<tr valign="top">
+		<td align="center"><h3>Closed Loop Inventory</h3></td>
+		</tr>
+		<tr >
+		<td align="left">
+		<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10">
+		<tbody>
+		<tr class="headrow"><td>Closed Loop Inventory</td></tr>
+		<tr>
+			<td>
+				<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10 tableBorder">
+					<?
+					$client_companyid = 0;
+					$selFavDt = db_query("SELECT * FROM clientdash_closed_loop_items WHERE compid = '".$client_companyid."' and favItems = 1 ORDER BY fav_bl asc", db());
+					//echo "<pre>";print_r($selFavDt);echo "</pre>";
+					$selFavDtCnt = tep_db_num_rows($selFavDt);
+					?>
+					<tr class="headrow2" >
+						<td class='display_title'>Actual qty</td><!-- Qty Avail -->	
+						<td class='display_title'>After PO qty</td>
+						<td align="center" class='display_title'>L x W x H</td>	
+						<td class='display_title'>Description</td>
+						<td class='display_title'>Per pallet</td>
+						<td class='display_title'>Per truckload</td>			
+						<td class='display_title'>ID</td><!-- B2B ID -->
+						<td class='display_title'>Ship from</td>
+					</tr>
+					<?			
+					
+					if($selFavDtCnt > 0 ){
+						$i = 0;
+						while ($rowsFavDt = array_shift($selFavDt)) {
+							if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
+
+							//Get After PO quantity
+							$selBoxDt = db_query("SELECT * FROM loop_boxes WHERE b2b_id = ".$rowsFavDt['fav_b2bid'], db());
+							//echo "<pre> selBoxDt ->";print_r($selBoxDt);echo "</pre>";
+							$rowBoxDt = array_shift($selBoxDt);
+							if($rowBoxDt['b2b_id'] > 0){
+								$selInvDt = db_query("SELECT * FROM inventory WHERE ID = ".$rowBoxDt['b2b_id'], db_b2b());
+								$rowInvDt = array_shift($selInvDt);
+							}
+
+							$loop_id = $rowBoxDt['id'];
+							$bpallet_qty= $rowBoxDt['bpallet_qty']; 
+							$boxes_per_trailer= $rowBoxDt['boxes_per_trailer']; 
+							$box_warehouse_id = $rowBoxDt["box_warehouse_id"];								
+							
+							//Get ship from
+							if($loc_res["box_warehouse_id"]=="238")	{
+								$vendor_b2b_rescue_id = $rowBoxDt["vendor_b2b_rescue"];
+								$get_loc_qry = "SELECT * FROM companyInfo WHERE loopid = '" . $vendor_b2b_rescue_id . "'";
+								$get_loc_res = db_query($get_loc_qry,db_b2b() );
+								$loc_row = array_shift($get_loc_res);
+								$shipfrom_city = $loc_row["shipCity"]; 
+								$shipfrom_state = $loc_row["shipState"]; 
+								$shipfrom_zip = $loc_row["shipZip"]; 
+							} else{
+								$vendor_b2b_rescue_id = $rowBoxDt["box_warehouse_id"];	
+								$get_loc_qry = "SELECT * FROM loop_warehouse WHERE id ='".$vendor_b2b_rescue_id."'";
+								$get_loc_res = db_query($get_loc_qry,db() );
+								$loc_row = array_shift($get_loc_res);
+								$shipfrom_city = $loc_row["company_city"]; 
+								$shipfrom_state = $loc_row["company_state"]; 
+								$shipfrom_zip = $loc_row["company_zip"]; 
+							}
+
+							$ship_from  = $shipfrom_city . ", " . $shipfrom_state;
+							
+							$after_po_val_tmp = 0; $actual_val = 0;
+							$dt_view_qry = "SELECT * from tmp_inventory_list_set2 where trans_id = " . $loop_id . " order by warehouse, type_ofbox, Description";
+							$dt_view_res_box = db_query($dt_view_qry,db_b2b() );
+							while ($dt_view_res_box_data = array_shift($dt_view_res_box)) {
+								$rec_found_box = "y";
+								$actual_val = $dt_view_res_box_data["actual"];
+								$after_po_val_tmp = $dt_view_res_box_data["afterpo"];
+								$last_month_qty = $dt_view_res_box_data["lastmonthqty"];
+								$sales_order_qty = $dt_view_res_box_data["sales_order_qty"];
+								//
+							}
+
+							if ($rec_found_box == "n"){
+								$after_po_val = $rowInvDt["after_actual_inventory"];
+								$last_month_qty = $rowInvDt["lastmonthqty"];
+
+								//$actual_val = $rowInvDt["actual_inventory"];
+								
+								$dt_view_qry = "SELECT loop_boxes.bpallet_qty, loop_boxes.work_as_kit_box, loop_boxes.flyer, loop_boxes.boxes_per_trailer, loop_boxes.id AS I, loop_boxes.b2b_id AS B2BID, SUM(loop_inventory.boxgood) AS A, loop_warehouse.company_name AS B, loop_boxes.bdescription AS C, loop_boxes.blength AS L, loop_boxes.blength_frac AS LF, loop_boxes.bwidth AS W, loop_boxes.bwidth_frac AS WF, loop_boxes.bdepth AS D, loop_boxes.bdepth_frac as DF, loop_boxes.work_as_kit_box as kb, loop_boxes.bwall AS WALL, loop_boxes.bstrength AS ST, loop_boxes.isbox as ISBOX, loop_boxes.type as TYPE, loop_warehouse.id AS wid, loop_warehouse.pallet_space, loop_boxes.sku as SKU FROM loop_inventory INNER JOIN loop_warehouse 
+								ON loop_inventory.warehouse_id = loop_warehouse.id INNER JOIN loop_boxes ON loop_inventory.box_id = loop_boxes.id where loop_boxes.id = '" . $loop_id . "'
+								GROUP BY loop_warehouse.warehouse_name, loop_inventory.box_id ORDER BY loop_warehouse.warehouse_name, loop_boxes.type, loop_boxes.blength, loop_boxes.bwidth, loop_boxes.bdepth,loop_boxes.bdescription";
+								$dt_view_res = db_query($dt_view_qry,db() );
+								while ($dt_view_row = array_shift($dt_view_res)) {
+									$actual_val = $dt_view_row["A"];
+								}
+								
+							}
+
+							if ($box_warehouse_id == 238){
+								$after_po_val = $rowInvDt["after_actual_inventory"];
+							}else{	
+								$after_po_val = $after_po_val_tmp;						
+							}								
+							
+							if($rowInvDt["uniform_mixed_load"]=="Mixed"){
+								$blength=$rowInvDt["blength_min"]. " - ". $rowInvDt["blength_max"];
+								$bwidth=$rowInvDt["bwidth_min"]. " - ". $rowInvDt["bwidth_max"];
+								$bdepth=$rowInvDt["bheight_min"]. " - ". $rowInvDt["bheight_max"];
+							} else{
+								$blength = $rowInvDt["lengthInch"];
+								$bwidth = $rowInvDt["widthInch"];
+								$bdepth = $rowInvDt["depthInch"];
+							}	
+							$blength_frac = 0;
+							$bwidth_frac = 0;
+							$bdepth_frac = 0;
+
+							$length = $blength;
+							$width = $bwidth;
+							$depth = $bdepth;
+							
+							if ($rowInvDt["lengthFraction"] != "") {
+								$arr_length = explode("/", $rowInvDt["lengthFraction"]);
+								if (count($arr_length) > 0 ) {
+									$blength_frac = intval($arr_length[0])/intval($arr_length[1]);
+									$length = floatval($blength + $blength_frac);
+								}
+							}
+							if ($rowInvDt["widthFraction"] != "") {
+								$arr_width = explode("/", $rowInvDt["widthFraction"]);
+								if (count($arr_width) > 0) {
+									$bwidth_frac = intval($arr_width[0])/intval($arr_width[1]);
+									$width = floatval($bwidth + $bwidth_frac);
+								}
+							}	
+
+							if ($rowInvDt["depthFraction"] != "") {
+								$arr_depth = explode("/", $rowInvDt["depthFraction"]);
+								if (count($arr_depth) > 0) {
+									$bdepth_frac = intval($arr_depth[0])/intval($arr_depth[1]);
+									$depth = floatval($bdepth + $bdepth_frac);
+								}
+							}	
+
+							$fav_bl = $length;
+							$fav_bw = $width;
+							$fav_bh = $depth;		
+							
+							?>
+							<tr class="<?=$rowclr?>" >	
+								<td class='' width="5%"><?=$actual_val?></td>
+								<td class='' width="5%"><?=$after_po_val?></td>			
+								<td align="center" width="15%" class=''><? echo $fav_bl . " x " . $fav_bw . " x " . $fav_bh;?> </td>	
+								<td class='' width="20%"><?=$rowInvDt["description"]?></td>
+								<td class='' width="5%"><?=$bpallet_qty;?></td>			
+								<td class='' width="5%"><?=$boxes_per_trailer?></td>			
+								<td class='' width="5%"><?=$rowsFavDt['fav_b2bid']?></td>
+								<td class='' width="5%"><?=$ship_from;?></td>
+							</tr>
+							<?
+							$i++;
+						}
+					}else{
 						?>
-					</table>
-				</div>
+						<tr><td colspan="18">No record found</td></tr>
+						<?
+					}
+					?>
+				</table>
 			</td>
 		</tr>
 		</tbody>	
@@ -8917,83 +9240,50 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 		</tr>
 		<tr >
 			<td align="left">
-				<div id="products-table-view" class="mt-3">
-				<table width="100%" cellspacing="1" cellpadding="1" border="0" >
-					<thead>
-						<tr ><th colspan="3" >Boxes ordered report:</th></tr>
-					</thead>
-	
+				<table width="100%" cellspacing="1" cellpadding="1" border="0" class="mb-10">
+				<tbody>
+					<tr class="headrow"><td colspan="3" >Boxes ordered report:</td></tr>
 					<tr>
 						<td colspan="3">
 						<form action="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=reports<?=$repchk_str?>" name="rptboxreport" method="post" >
-							<table cellSpacing="1" cellPadding="1" border="0" style="width:70%">
-							<tr>
-								<th align="left" bgColor="#e4e4e4">From Date: 
-									<input type="text" name="start_date" id="start_date" size="10" value="<?php echo isset($_REQUEST['start_date']) ? $_REQUEST['start_date'] : $yearStartDt; ?>" > 
-									<a href="#" onclick="cal2xx.select(document.rptboxreport.start_date,'start_date','MM/dd/yyyy'); return false;" name="start_date_a" id="start_date_a" ><img border="0" src="images/calendar.jpg"></a>
-									<div ID="listdiv" STYLE="position:fixed;visibility:hidden;background-color:white;layer-background-color:white;"></div>		
-								</th>	
-								<th bgColor="#e4e4e4">To: 
-									<input type="text" name="end_date" id="end_date" size="10" value="<?php echo isset($_REQUEST['end_date']) ? $_REQUEST['end_date'] : $yearTodaysDt; ?>" > 
-									<a href="#" onclick="cal2xx.select(document.rptboxreport.end_date,'end_date','MM/dd/yyyy'); return false;" name="end_date_a" id="end_date_a" ><img border="0" src="images/calendar.jpg"></a>
-								</th>
-								
-								<? if ($parent_child == "Parent" && $setup_family_tree == 0) { ?>
-									<th bgColor="#e4e4e4">
-										<b>WHICH VIEW:</b> 
-										<select name="dView" id="dView" >
-											<option value="1" <?=(($_REQUEST['dView'] == 1)? "Selected" : "");?>>This Location Only</option>
-											<option value="2" <?=(($_REQUEST['dView'] == 2)? "Selected" : "");?>>Corporate View</option>
-										</select>	
-									</th>
-								<? } ?>
-
-								<th bgColor="#e4e4e4">
-									<select name="rep_comp_list" id="rep_comp_list">
-										<option value="1" <?=(($_REQUEST['dView'] == 1)? "Selected" : "");?>>All</option>
-										<?php 
-											db();
-											$user_companies = db_query("SELECT company_id FROM boomerang_user_companies where user_id = '".$user_id."'");
-											if(tep_db_num_rows($user_companies) > 0){
-												$first_company_id = null;
-												while($row = array_shift($user_companies)){
-												$usr_company_id =  $row['company_id'];
-												if ($first_company_id === null) {
-													$first_company_id = $usr_company_id;
-												}
-												if (!isset($_REQUEST['rep_comp_list'])) {
-													$client_companyid = $first_company_id;
-												}
-												db_b2b();
-												$company_nm_qry = db_query("SELECT nickname FROM companyInfo where ID = $usr_company_id ORDER BY company");
-												$company_nm = array_shift($company_nm_qry);
-												$selected_str = $_REQUEST['rep_comp_list'] == $row['company_id'] ? "Selected" : "";
-												echo "<option $selected_str value='". $row['company_id']."'>".$company_nm['nickname']."</option>"; 
-													
-											}
-											db();
-										}
-										?>
-										<!-- <<option value="corp_view" <?=(($_REQUEST['rep_comp_list'] == "corp_view")? "Selected" : "");?>>Corporate View</option> -->
+						<table cellSpacing="1" cellPadding="1" border="0" style="width:70%">
+						<tr>
+							<td align="left" bgColor="#e4e4e4">From Date: 
+								<input type="text" name="start_date" id="start_date" size="10" value="<?php echo isset($_REQUEST['start_date']) ? $_REQUEST['start_date'] : $yearStartDt; ?>" > 
+								<a href="#" onclick="cal2xx.select(document.rptboxreport.start_date,'start_date','MM/dd/yyyy'); return false;" name="start_date_a" id="start_date_a" ><img border="0" src="images/calendar.jpg"></a>
+								<div ID="listdiv" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></div>		
+							</td>	
+							<td bgColor="#e4e4e4">To: 
+								<input type="text" name="end_date" id="end_date" size="10" value="<?php echo isset($_REQUEST['end_date']) ? $_REQUEST['end_date'] : $yearTodaysDt; ?>" > 
+								<a href="#" onclick="cal2xx.select(document.rptboxreport.end_date,'end_date','MM/dd/yyyy'); return false;" name="end_date_a" id="end_date_a" ><img border="0" src="images/calendar.jpg"></a>
+								<div ID="listdiv" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></div>		
+							</td>
+							
+							<? if ($parent_child == "Parent" && $setup_family_tree == 0) { ?>
+								<td bgColor="#e4e4e4">
+									<b>WHICH VIEW:</b> 
+									<select name="dView" id="dView" >
+										<option value="1" <?=(($_REQUEST['dView'] == 1)? "Selected" : "");?>>This Location Only</option>
+										<option value="2" <?=(($_REQUEST['dView'] == 2)? "Selected" : "");?>>Corporate View</option>
 									</select>	
-								</th>
-								
-								<th bgColor="#e4e4e4" align="left" colspan="2">
-									<input type="button" name="btnboxrep" value="Run Box Order Report" onclick="boxreport('<? echo $sales_rep_login; ?>', '<? echo $user_id; ?>')"/>
-								</th>
-							</tr>											
-							</table>
+								</td>
+							<? } ?>
+							
+							<td bgColor="#e4e4e4" align="left" colspan="2">
+								<input type="button" name="btnboxrep" value="Run Box Order Report" onclick="boxreport('<? echo $sales_rep_login; ?>',<? echo $client_companyid; ?>, <? echo $client_loopid; ?>)"/>
+							</td>
+						</tr>											
+						</table>
 						</form>														
 						</td>
 					</tr>
+					<tr>
+						<td colspan="3">
+							<div id="boxtrailer_rep_div"></div>
+						</td>
+					</tr>
 					
-					<tbody>
-						<tr>
-							<td colspan="3">
-								<div id="boxtrailer_rep_div"></div>
-							</td>
-						</tr>
-					</tbody>	
+				</tbody>	
 				</table>
 			</td>
 		</tr>
@@ -9002,876 +9292,8 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 
 <? }else{
 	echo "<div class='alert alert-danger'><span>Need to Login, to access this page</span></div>";
-	}
-}else if($_REQUEST['show'] == 'current_order'){ 
-	if(isset($_COOKIE['loginid']) && $_COOKIE['loginid'] !="" ){
-	?>
-	<?
-	$sort_order = "ASC";
-	if($_GET['sort_order'] == "ASC"){
-		$sort_order = "DESC";
-	}else{
-		$sort_order = "ASC";
-	}
-	$yearStartDt = date('01/01/Y');
-	$yearTodaysDt = date('m/d/Y');
-	?>
-	<table width="100%">
-		<tr >
-			<td align="center"><h3>Open orders</h3></td>
-		</tr>
-		<tr >
-			<td align="left">
-				<table width="100%" cellspacing="1" cellpadding="1" border="0" >
-				<tbody>
-					
-						<!-- Current order-->
-						<tr ><td colspan="13" style="background: #abc5df;">
-							Current orders
-						</td></tr>
-
-						<tr ><td colspan="13">
-					<?php 
-						db();
-						$user_companies = db_query("SELECT company_id FROM boomerang_user_companies where user_id = '".$user_id."'");
-						if(tep_db_num_rows($user_companies) > 0){
-							while($row_main = array_shift($user_companies)){
-								$usr_company_id =  $row_main['company_id'];
-								$client_companyid =  $row_main['company_id'];
-
-								db_b2b();
-								$company_nm_qry = db_query("SELECT nickname FROM companyInfo where ID = $usr_company_id ORDER BY company");
-								$company_nm = array_shift($company_nm_qry);
-								db();
-						?>
-							
-							<?
-							$todaysDate = date('Y-m-d');
-							$toDate 	= date("Y-m-d");
-							$fromDate 	= date("Y-m-01", strtotime("-12 months"));
-							if($_REQUEST['show']=="current_order" && $_REQUEST["sort"] != ""){
-									$sort_order_arrtxt = "SORT_ASC";
-									if ($_REQUEST["sort_order"] != "") {
-										if ($_REQUEST["sort_order"] == "ASC") {
-											$sort_order_arrtxt = "SORT_ASC";
-										} else {
-											$sort_order_arrtxt = "SORT_DESC";
-										}
-									} else {
-										$sort_order_arrtxt = "SORT_DESC";
-									}
-								
-									$MGArray = $_SESSION['sortarrayn_dsh_curr_ord'];
-									if($_REQUEST["sort"] == "order_id")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['order_id'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
-										}
-									}
-
-									if($_REQUEST["sort"] == "location")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['company'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
-										}
-									}
-									
-									if($_REQUEST["sort"] == "datesubmit")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['dt_submitted_sort'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
-											
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
-											
-										}
-									}
-									if($_REQUEST["sort"] == "accout_manager")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['accountowner'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
-										}
-									}
-									
-									if($_REQUEST["sort"] == "status")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['status'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
-										}
-									}
-									if($_REQUEST["sort"] == "dateshipped")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['dt_shipped_sort'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
-										}
-									}
-									if($_REQUEST["sort"] == "datedeliver")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['dt_delv_sort'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
-										}
-									}
-									if($_REQUEST["sort"] == "invamt")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['inv_amount'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_NUMERIC,$MGArray); 
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_NUMERIC,$MGArray); 
-										}
-									}
-									if($_REQUEST["sort"] == "boxes")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['boxes_sort'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
-										}
-									}
-									if($_REQUEST["sort"] == "invage")
-									{
-										foreach ($MGArray as $MGArraytmp) {
-											$MGArraysort[] = $MGArraytmp['invoice_age'];
-										}
-										if ($sort_order_arrtxt == "SORT_ASC") {
-											array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
-										}else{
-											array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
-										}
-									}
-								
-									$i = 0;
-									foreach ($MGArray as $MGArraytmp2) {
-										if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
-										$total_loc[] = $MGArraytmp2["comp_id"];
-										?>
-										<tr vAlign="center" class="<?=$rowclr?>">
-											<? if ($child_comp_new != "") { 
-												?>
-												<td class="style3"  align="center">	
-													<? echo $MGArraytmp2["company"]; ?>
-												</td>
-											<? } ?>
-											<td class="style3"  align="center">	
-												<? echo $MGArraytmp2["order_id"]; ?>
-											</td>
-											<? if ($section_lastship_col1_flg == "yes") { ?>
-											<td class="style3"  align="center">	
-												<? echo $MGArraytmp2["dt_submitted"]; ?>
-											</td>
-											<? } ?>
-											<? if ($section_lastship_col2_flg == "yes") { ?>
-											<td class="style3"  align="center">	
-												<? echo $MGArraytmp2["status"]; ?>
-											</td>
-											<? } ?>
-											<? 
-												if ($section_lastship_col3_flg == "yes") { ?>
-												<td class="style3"  align="center" id="po_order_show<?=$tmpcnt;?>">	
-													<? echo $MGArraytmp2["purchase_order"]; ?>
-												</td>
-											<? } ?>
-
-											<? if ($section_lastship_col7_flg == "yes") { ?>
-												<td class="style3" align="center" id="bol_show<?=$tmpcnt;?>">	
-													<? echo $MGArraytmp2["viewbol"]; ?>
-												</td>
-												<td class="style3"  align="center">
-													<? echo $MGArraytmp2["original_planned_delivery_dt"]; ?>
-												</td>
-												<td class="style3"  align="center">
-													<? echo $MGArraytmp2["po_delivery_dt"]; ?>
-												</td>
-											<? } ?>
-											
-											<? if ($section_lastship_col4_flg == "yes") { ?>
-												<td class="style3"  align="center">
-													<? echo $MGArraytmp2["dt_shipped"]; ?>
-												</td>
-											<? } ?>
-
-											<? if ($section_lastship_col4_flg == "yes") { ?>
-											<td class="style3"  align="center">
-												<? echo $MGArraytmp2["dt_delv"]; ?>
-											</td>
-											<? } ?>
-											<? if ($section_lastship_col5_flg == "yes") { ?>
-											<td class="style3"  align="center">	
-												<? echo $MGArraytmp2["boxes"]; ?>
-											</td>
-											<? } ?>
-
-											<? if ($section_lastship_col6_flg == "yes") { ?>
-											<td class="style3"  align="center" id="inv_file_show<?=$tmpcnt;?>">	
-												<? echo $MGArraytmp2["invoice"]; ?>
-											</td>
-											<td class="style3"  align="right">	
-												<? echo number_format($MGArraytmp2["inv_amount"],2); ?>
-											</td>
-											<? } ?>
-
-											<? if ($section_lastship_col8_flg == "yes") { ?>
-												<td bgColor="<? echo $MGArraytmp2["invoice_age_color"];?>" class="style3" align="center" >
-													<?  echo $invoice_age; ?>
-												</td>
-											 <?
-												}
-
-												$tot_inv_amount = $tot_inv_amount + $MGArraytmp2["inv_amount"];			
-												$total_trans=$total_trans +1;			
-											?>				
-											
-										</tr>
-										<?
-										$report_total_loc=count(array_unique($total_loc));
-										$tmpcnt = $tmpcnt + 1;
-										$i++;
-									}
-									
-								if ($section_lastship_col6_flg == "yes") {
-									if ($tot_inv_amount > 0 ){?>
-										<tr  class="rowdata" ><td bgColor="#e4e4e4" colspan="<? echo $col_cnt_tmp+1; ?>" class="style3" align="right"><b>Total Amount:</b>&nbsp;</td><td bgColor="#e4e4e4" class="style3" align="right"><strong><? echo "$" . number_format($tot_inv_amount,2); ?></strong></td><td bgColor="#e4e4e4">&nbsp;</td></tr>
-									<?	
-									}
-									if ($child_comp != "") { 
-										if($total_trans>0){
-										?>
-										<tr  class="rowdata">
-											<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
-											<?
-												echo "<font size='1'><b>Total Number of Locations: ".$report_total_loc."";
-											?>
-											</td>
-											<td bgColor="#e4e4e4">&nbsp;</td>
-										</tr>
-										<tr  class="rowdata">
-											<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
-												<?
-												echo "<font size='1'><b>Total Number of Transactions: ".$total_trans."";
-												?>
-											</td>
-											<td bgColor="#e4e4e4">&nbsp;</td>
-										</tr>
-										<?
-										}
-									}
-								}
-								
-							}else{
-								$query1 = "";
-								if($_REQUEST['dView'] == 'corp_view'){
-									
-								}
-								if ($_REQUEST['dView'] == 'corp_view' && $child_comp_new != "") {
-									$query1 = "SELECT loop_transaction_buyer.* FROM loop_transaction_buyer WHERE invoice_paid = 0 and loop_transaction_buyer.warehouse_id in ( " . $client_loopid . "," . $child_comp_new . ") AND loop_transaction_buyer.transaction_date BETWEEN '".$fromDate." 00:00:00' AND '".$toDate." 23:59:59' and loop_transaction_buyer.Leaderboard <> 'UCBZW' and loop_transaction_buyer.ignore = 0 ORDER BY warehouse_id asc, loop_transaction_buyer.id DESC";
-								}else{
-									//This is for New rep #962
-									$child_comp_new = ""; $child_comp_num_new =""; 
-									//$client_companyid = isset($_REQUEST['dView']) ? decrypt_password($_REQUEST['dView']) : $client_companyid;
-									$client_loopid = "";
-									if ($client_companyid > 0){
-										$sql = "SELECT id, warehouse_name FROM loop_warehouse where b2bid = '" . $client_companyid . "' ";
-										$result = db_query($sql );
-										while ($myrowsel = array_shift($result)) {
-											$client_loopid = $myrowsel["id"];
-										}
-									
-										db_b2b();
-										$sql="SELECT ID FROM companyInfo WHERE parent_comp_id = '" . $client_companyid . "'";
-										$result = db_query($sql);
-										while ($rq = array_shift($result)) {
-											db();
-											$sql1 = "SELECT id FROM loop_warehouse where b2bid = '" . $rq["ID"] . "' ";
-											$result1 = db_query($sql1 );
-											while ($myrowsel1 = array_shift($result1)) {
-												$child_comp_new = $child_comp_new . $myrowsel1["id"] . ",";
-												$child_comp_num_new=$child_comp_num_new+1;
-											}
-										}
-									
-										db();
-										if (trim($child_comp_new) != ""){
-											$child_comp_new = substr($child_comp_new, 0, strlen($child_comp_new) - 1);
-										}
-										//loop_transaction_buyer.invoice_paid = 0 
-										if ($child_comp_new != ""){
-											$query1 = "SELECT loop_transaction_buyer.* FROM loop_transaction_buyer 
-											WHERE loop_transaction_buyer.Leaderboard <> 'UCBZW' and loop_transaction_buyer.ignore = 0 and loop_transaction_buyer.invoice_paid = 0 and loop_transaction_buyer.warehouse_id in ( " . $client_loopid . "," . $child_comp_new . ") 
-											and loop_transaction_buyer.ignore = 0 GROUP BY loop_transaction_buyer.id ORDER BY loop_transaction_buyer.id DESC ";
-										}else{
-											$query1 = "SELECT loop_transaction_buyer.* FROM loop_transaction_buyer 
-											WHERE loop_transaction_buyer.Leaderboard <> 'UCBZW' and loop_transaction_buyer.ignore = 0 and loop_transaction_buyer.invoice_paid = 0 and loop_transaction_buyer.warehouse_id in ( " . $client_loopid . ") 
-											and loop_transaction_buyer.ignore = 0 GROUP BY loop_transaction_buyer.id ORDER BY loop_transaction_buyer.id DESC ";
-										}
-										//AND loop_transaction_buyer.transaction_date BETWEEN '".$fromDate." 00:00:00' AND '".$toDate." 23:59:59' 
-									}
-								}
-								
-								if ($query1 != ""){
-									$current_order_show_header_flg = "no";
-									$current_order_show_header_flg1 = "no";
-									//echo "<br /> query1 - ".$query1;
-									$res1 = db_query($query1, db());
-									//echo "<pre> res1 - ";  print_r($res1); echo "</pre>";
-									$tmpcnt=0; $tot_inv_amount = 0; $total_trans=0;
-									$i = 0;
-									while($row1 = array_shift($res1)) {
-										if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
-										
-										$query = "SELECT SUM( loop_bol_tracking.qty ) AS A, loop_bol_tracking.bol_pickupdate AS B, loop_bol_tracking.trans_rec_id AS C FROM loop_bol_tracking WHERE trans_rec_id = ". $row1["id"] . " AND (STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') >= '" . $fromDate . "' and STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') <= '" . $toDate . "') ORDER BY C  DESC";
-										//echo "<br /> query - ".$query;	
-										$res = db_query($query);
-										//echo "<pre> res - ";  print_r($res); echo "</pre>";
-										while($row = array_shift($res)){
-											//DATE SHIPPED FETCH START
-											$resShippedDate = db_query("SELECT bol_shipped, bol_shipped_date FROM loop_bol_files WHERE trans_rec_id = ".$row1["id"], db());
-											//DATE SHIPPED FETCH END
-											//This is the payment Info for the Customer paying UCB
-											$payments_sql = "SELECT SUM(loop_buyer_payments.amount) AS A FROM loop_buyer_payments WHERE trans_rec_id = " . $row1["id"];
-											$payment_qry = db_query($payments_sql );
-											$payment = array_shift($payment_qry);
-											
-											$tot_inv_amount = $tot_inv_amount + $row1["inv_amount"];
-											$total_trans=$total_trans +1;
-											//This is the payment info for UCB paying the related vendors
-											$vendor_sql = "SELECT COUNT(loop_transaction_buyer_payments.id) AS A, MIN(loop_transaction_buyer_payments.status) AS B, MAX(loop_transaction_buyer_payments.status) AS C FROM loop_transaction_buyer_payments WHERE loop_transaction_buyer_payments.transaction_buyer_id = " . $row1["id"];
-											$vendor_qry = db_query($vendor_sql );
-											$vendor = array_shift($vendor_qry);
-
-											//Info about Shipment
-											$bol_file_qry = "SELECT * FROM loop_bol_files WHERE trans_rec_id LIKE '" . $row1["id"] . "' ORDER BY id DESC";
-											//echo $bol_file_qry ;
-											$bol_file_res = db_query($bol_file_qry );
-											$bol_file_row = array_shift($bol_file_res);
-
-											/*GET UPLOAD PO TABLE INFO*/
-											$qryPOTable = "SELECT * FROM loop_transaction_buyer_poeml WHERE trans_rec_id LIKE '" . $row1["id"] . "' ORDER BY unqid DESC";
-											//echo $bol_file_qry ;
-											$resPOTable = db_query($qryPOTable);
-											$cntPOTable = tep_db_num_rows($resPOTable);
-											/*GET UPLOAD PO TABLE INFO*/
-
-											$fbooksql = "SELECT * FROM loop_transaction_freight WHERE trans_rec_id=" . $row1["id"];
-											$fbookresult = db_query($fbooksql );
-											$freightbooking = array_shift($fbookresult);
-
-											$vendors_paid = 0; //Are the vendors paid
-											$vendors_entered = 0; //Has a vendor transaction been entered?
-											$invoice_paid = 0; //Have they paid their invoice?
-											$invoice_entered=0; //Has the inovice been entered
-											$signed_customer_bol= 0; 	//Customer Signed BOL Uploaded
-											$courtesy_followup = 0; 	//Courtesy Follow Up Made
-											$delivered = 0; 	//Delivered
-											$signed_driver_bol = 0; 	//BOL Signed By Driver
-											$shipped = 0; 	//Shipped
-											$bol_received = 0; 	//BOL Received @ WH
-											$bol_sent = 0; 	//BOL Sent to WH"
-											$bol_created = 0; 	//BOL Created
-											$freight_booked = 0; //freight booked
-											$sales_order = 0;   // Sales Order entered
-											$po_uploaded = 0;  //po uploaded 
-							 
-											//Are all the vendors paid?
-											if ($vendor["B"] == 2 && $vendor["C"] == 2) 
-											{ 
-												$vendors_paid = 1; 
-											}
-											
-											//Have we entered a vendor transaction?
-											if ($vendor["A"] > 0) { 
-												$vendors_entered = 1; 
-											} 		
-
-											//Have they paid their invoice?
-											if (number_format($row1["inv_amount"],2) == number_format($payment["A"],2) && $row1["inv_amount"] != "") 
-											{ 
-												$invoice_paid = 1; 
-											} 
-											if ($row1["no_invoice"] == 1) {				$invoice_paid = 1; 			}
-
-											if ($invoice_paid == 0){
-												//Has an invoice amount been entered?
-												if ($row1["inv_amount"] > 0) { 
-													$invoice_entered=1; 
-												} 
-
-												if ($bol_file_row["bol_shipment_signed_customer_file_name"] != "") { $signed_customer_bol=1; }	//Customer Signed BOL Uploaded
-												if ($bol_file_row["bol_shipment_followup"] >0) { $courtesy_followup = 1; }	//Courtesy Follow Up Made
-												if ($bol_file_row["bol_shipment_received"] >0) { $delivered=1; }	//Delivered
-												if ($bol_file_row["bol_signed_file_name"]!= "") { $signed_driver_bol=1; }	//BOL Signed By Driver
-												if ($bol_file_row["bol_shipped"] >0) { $shipped = 1; }	//Shipped
-												if ($bol_file_row["bol_received"] >0) { $bol_received = 1; }	//BOL Received @ WH
-												if ($bol_file_row["bol_sent"] > 0) { $bol_sent = 1; }	//BOL Sent to WH"
-												if ($bol_file_row["id"] > 0) { $bol_created=1; }	//BOL Created
-
-												if ($freightbooking["id"] > 0 ) { $freight_booked = 1;} //freight booked
-												
-												$start_t = strtotime($row1["inv_date_of"]);
-												$end_time =  strtotime('now');
-												$invoice_age = number_format(($end_time-$start_t)/(3600*24),0);		
-												
-												if (($row1["so_entered"] == 1)) {	 $sales_order = 1; } //sales order created
-												if ($row1["po_date"] != "") { $po_uploaded = 1; } //po uploaded 			
-												
-												$nn =""; $dt_submitted = ""; $status = "";
-												$dt_submitted_sort = ""; $dt_shipped_sort = ""; $dt_delv_sort = "";
-												
-												$dt_submitted = date('m-d-Y', strtotime($row1["start_date"]));
-												$dt_submitted_sort = date('Y-m-d', strtotime($row1["start_date"]));
-												
-												$dt_shipped = ""; $dt_delv = ""; $boxes = ""; $inv_age = ""; $purchase_order = ""; $viewbol = ""; $invoice ="";
-												
-												if ($row["B"] > 0)  { $dt_shipped = date('m-d-Y', strtotime($row["B"])); $dt_shipped_sort = date('Y-m-d', strtotime($row["B"]));}
-												if ($bol_file_row['bol_shipment_received_date'] > 0)  { $dt_delv = date('m-d-Y', strtotime($bol_file_row['bol_shipment_received_date'])); $dt_delv_sort = date('Y-m-d', strtotime($bol_file_row['bol_shipment_received_date']));}
-												if ($row["A"] > 0)   { $boxes = number_format($row["A"],0); $boxes_sort = $row["A"]; } 
-												
-												$original_planned_delivery_dt = ""; $po_delivery_dt = "";
-												if ($row1["original_planned_delivery_dt"] != ""){
-													$original_planned_delivery_dt = date('m/d/Y', strtotime($row1["original_planned_delivery_dt"]));
-												}	
-												if ($row1["po_delivery_dt"] != ""){
-													$po_delivery_dt = date('m/d/Y', strtotime($row1["po_delivery_dt"]));
-												}	
-												
-												if ($current_order_show_header_flg == "no"){
-													$current_order_show_header_flg = "yes";
-													
-													$current_order_show_header_flg1 = "yes";
-												?>
-													<div id="products-table-view" class="mt-3">
-													<table width="100%" cellspacing="1" cellpadding="1" border="0" >
-													<thead>
-														<tr >
-															<th colspan="6" align="center"><?php echo $company_nm['nickname']; ?></th>
-														</tr>
-														
-														<tr >
-														<?  $col_cnt_tmp = 0; 	?>
-														<?
-														if($_REQUEST['dView'] == 'corp_view'){ 
-															$col_cnt_tmp = $col_cnt_tmp + 1;
-														?>
-															<th align="center">
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=location&sort_order=<?=$sort_order;?>&sorting_ship=yes">Location</a>
-															</th>
-														<? } ?>
-														<th align="center">
-															<!-- <a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=order_id&sort_order=<?=$sort_order;?>&sorting_ship=yes">Order ID</a> -->
-															Order ID
-														</th>
-
-														<? if ($section_lastship_col1_flg == "yes") { 
-															$col_cnt_tmp = $col_cnt_tmp + 1;
-														?>
-														<th align="center">
-															<!-- <a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=datesubmit&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Submitted</a> -->
-															Date Submitted
-														</th>
-														<? } ?>
-
-														<? if ($section_lastship_col2_flg == "yes") { 
-															$col_cnt_tmp = $col_cnt_tmp + 1;
-														?>
-														<th align="center">
-															<!-- <a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=status&sort_order=<?=$sort_order;?>&sorting_ship=yes">Status</a>
-															<div class="tooltip"><i class="fa fa-info-circle" aria-hidden="true"></i>
-																<span class="tooltiptext">
-																	Cancelled <br />Invoice sent<br />Customer Signed BOL<br />Courtesy Followup Made<br/>Delivered<br/>Shipped - Driver Signed<br/>Shipped</br/>BOL @ Warehouse<br/>BOL Sent to Warehouse<br />BOL Created<br />Freight Booked<br />Sales Order Entered<br />PO Uploaded<br/> Order Entered - UPLOAD PO TABLE <br /> Pre-order - UPLOAD PO + Marked as Preorder <br /> Accumulating Inventory - UPLOAD PO + Unmarked as Preorder <br /> Arranging Pickup - Ready to hand to freight manager
-																</span>
-															</div> -->
-															Status
-														</th>
-														<? } ?>
-
-														<? if ($section_lastship_col3_flg == "yes") { 
-															$col_cnt_tmp = $col_cnt_tmp + 1;
-														?>
-															<th class="blackFont" align="center">
-																Purchase Order
-															</th>
-														<? } ?>
-
-														<? if ($section_lastship_col7_flg == "yes") { 
-															$col_cnt_tmp = $col_cnt_tmp + 1;
-														?>
-															<th align="middle" style="width: 70px" class="blackFont" align="center">
-																View BOL
-															</th>
-															<th class="blackFont" align="center">
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&org_del_date=yes">Original Planned Delivery Date</a>
-															</th>
-															<th class="blackFont" align="center">
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&curr_planned_del=yes">Current Planned Delivery Date'</a>
-															</th>
-														<? } ?>
-
-														<? if ($section_lastship_col4_flg == "yes") { 
-															$col_cnt_tmp = $col_cnt_tmp + 3;
-														?>
-															<th class="blackFont" align="center">
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Shipped</a>
-															</th>
-														<? } ?>
-
-														<? if ($section_lastship_col4_flg == "yes") { 
-															$col_cnt_tmp = $col_cnt_tmp + 1;
-														?>
-															<th class="blackFont" align="center">
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=datedeliver&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Delivered</a>
-															</th>
-														<? } ?>
-
-														<? if ($section_lastship_col5_flg == "yes") { 
-															$col_cnt_tmp = $col_cnt_tmp + 1;
-														?>
-														<th class="blackFont" align="center">
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=boxes&sort_order=<?=$sort_order;?>&sorting_ship=yes">Quantity</a></b>
-														</th>
-														<? } ?>
-
-														<? if ($section_lastship_col6_flg == "yes") { 
-															$col_cnt_tmp = $col_cnt_tmp + 1;
-														?>
-														<th class="blackFont" align="center">
-															Invoice
-														</th>
-														<th class="blackFont" align="center">
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=invamt&sort_order=<?=$sort_order;?>&sorting_ship=yes">Amount</a>
-														</th>
-														<? } ?>
-														<? if ($section_lastship_col8_flg == "yes") {  ?>
-														<th class="blackFont" align="center">
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=invage&sort_order=<?=$sort_order;?>&sorting_ship=yes">Invoice Age</a>
-														</th>
-														<? } ?>
-													</tr>
-													</thead>
-												<?
-												}
-												?>
-												
-												<tbody>
-												<tr vAlign="center"  class="<?=$rowclr?>">
-													<? 
-													$nickname = "";
-													
-													if (($_REQUEST['dView'] == 'corp_view') && ($child_comp_new != "")) { 
-														db_b2b();
-														$sql1 = "SELECT ID,nickname,assignedto, company, shipCity, shipState FROM companyInfo where loopid = '" . $row1["warehouse_id"] . "'";
-														
-														$result_comp = db_query($sql1, db_b2b() );
-														while ($row_comp = array_shift($result_comp)) {
-															if ($row_comp["nickname"] != ""){
-																$nickname = $row_comp["nickname"];
-															}else{
-																$tmppos_1 = strpos($row_comp["company"], "-");
-																if ($tmppos_1 != false)
-																{
-																	$nickname = $row_comp["company"];
-																}else {
-																	if ($row_comp["shipCity"] <> "" || $row_comp["shipState"] <> "" ) 
-																	{
-																		$nickname = $row_comp["company"] . " - " . $row_comp["shipCity"] . ", " . $row_comp["shipState"] ;
-																	}else { $nickname = $row_comp["company"]; }
-																}
-															}
-															$comp_id=$row_comp["ID"];
-															$total_loc[] = $comp_id;
-															
-															$arr = explode(",", $row_comp["assignedto"]);
-																
-															db();
-														}
-														
-														?>
-														<td class="style3"  align="center">	
-															<? echo $nickname; ?>
-														</td>
-													<? } ?>
-													
-													<td class="style3"  align="center" width="33%">	
-														<? echo $row1["id"]; ?>
-													</td>
-													
-													<? if ($section_lastship_col1_flg == "yes") { 
-													?>
-													<td class="style3"  align="center" width="33%">	
-														<? echo date('m/d/Y', strtotime($row1["start_date"])); ?>
-													</td>
-													<? } ?>
-													<? if ($section_lastship_col2_flg == "yes") {
-													?>
-													<td class="style3"  align="center" width="33%">	
-														<?	
-															if (($row1["ignore"] == 1)) { Echo "Cancelled"; $status ="Cancelled";}
-															elseif ($invoice_paid == 1)
-															{		
-																echo "Paid"; $status ="Paid";
-															} elseif ($invoice_entered == 1) { Echo "Invoice sent"; $status ="Invoice sent";
-															} elseif ($signed_customer_bol == 1) { Echo "Customer Signed BOL"; $status ="Customer Signed BOL";
-															} elseif ($courtesy_followup == 1) { Echo "Courtesy Followup Made"; $status ="Courtesy Followup Made";
-															} elseif ($delivered == 1) { Echo "Delivered"; $status ="Delivered";
-															} elseif ($signed_driver_bol == 1) { Echo "Shipped - Driver Signed"; $status ="Shipped - Driver Signed";
-															} elseif ($shipped == 1) { Echo "Shipped"; $status ="Shipped";
-															} elseif ($bol_received == 1) { Echo "BOL @ Warehouse"; $status ="BOL @ Warehouse";
-															} elseif ($bol_sent == 1) { Echo "BOL Sent to Warehouse"; $status ="BOL Sent to Warehouse";
-															} elseif ($bol_created == 1) { Echo "BOL Created"; $status ="BOL Created";
-															} elseif ($freight_booked == 1) { Echo "Freight Booked"; $status ="Freight Booked";
-															} elseif ($sales_order == 1) { Echo "Sales Order Entered"; $status ="Sales Order Entered";
-															} elseif ($po_uploaded == 1) { Echo "PO Uploaded"; $status ="PO Uploaded";
-															} elseif ($cntPOTable > 0 ) { Echo "Order Entered"; $status ="Order Entered";
-															} elseif ($cntPOTable > 0 && $row1["Preorder"] == 1 ) { Echo "Pre-order"; $status ="Pre-order";
-															} elseif ($cntPOTable > 0 && $row1["Preorder"] == 0 ) { Echo "Accumulating Inventory"; $status ="Accumulating Inventory";
-															} elseif ($row1["good_to_ship"] == 1 ) { Echo "Arranging Pickup"; $status ="Arranging Pickup";
-															}
-														?>					
-													</td>
-													<? } ?>
-													<? 
-													if ($section_lastship_col3_flg == "yes") { 
-														?>
-														<td class="style3"  align="center" id="po_order_show<?=$tmpcnt;?>">	
-															<a href="javascript:void(0);" onclick="display_file('https://loops.usedcardboardboxes.com/po/<?=str_replace(" ", "%20", $row1["po_file"]);?>', 'Purchase order',<?=$tmpcnt;?>)"><font color="blue"><u><? echo "&nbsp;" . $row1["po_ponumber"]; ?></u></font></a>
-														</td>
-													<? $purchase_order = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_file('https://loops.usedcardboardboxes.com/po/" . str_replace(" ", "%20", $row1["po_file"]) . "', 'Purchase order'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>&nbsp;" . $row1["po_ponumber"] . "</u></font></a>";
-													} ?>
-
-													<? if ($section_lastship_col7_flg == "yes") { 
-													?>
-													<td class="style3" align="center" id="bol_show<?=$tmpcnt;?>">	
-														<? 
-															$bol_view_qry = "SELECT * from loop_bol_files WHERE trans_rec_id = '" . $row1["id"] . "' ORDER BY id DESC";
-															$bol_view_res = db_query($bol_view_qry, db() );
-															while ($bol_view_row = array_shift($bol_view_res)) {					
-																if ($bol_view_row["trans_rec_id"] != '') {
-																?>
-																	<a href="javascript:void(0);" onclick="display_bol_file('https://loops.usedcardboardboxes.com/bol/<?=str_replace(" ", "%20", $bol_view_row["file_name"]);?>', 'BOL',<?=$tmpcnt;?>)"><font color="blue"><u><? echo $bol_view_row["id"] . "-" . $bol_view_row["trans_rec_id"]; ?></u></font></a>
-																<? 
-																	$viewbol = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_bol_file('https://loops.usedcardboardboxes.com/bol/" . str_replace(" ", "%20", $bol_view_row["file_name"]) . "', 'BOL'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>" . $bol_view_row["id"] . "-" . $bol_view_row["trans_rec_id"] . "</u></font></a>";
-																} else {
-																?>
-																	<a href="javascript:void(0);" onclick="display_bol_file('https://loops.usedcardboardboxes.com/bol/<?=str_replace(" ", "%20", $bol_view_row["file_name"]);?>', 'BOL',<?=$tmpcnt;?>)"><font color="blue"><u>View BOL</u></font></a>
-																<?
-																	$viewbol = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_bol_file('https://loops.usedcardboardboxes.com/bol/" . str_replace(" ", "%20", $bol_view_row["file_name"]) . "', 'BOL'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>View BOL</u></font></a>";
-																}
-															} 
-														?>
-														</td>
-														
-														<td class="style3"  align="center">
-															<? echo $original_planned_delivery_dt; ?>
-														</td>
-														<td class="style3"  align="center">
-															<? echo $po_delivery_dt; ?>
-														</td>
-														
-													<? } ?>
-													
-													<? if ($section_lastship_col4_flg == "yes") { 
-													?>
-														<td class="style3"  align="center">
-															<? //if ($row["B"] > 0)  echo date('m-d-Y', strtotime($row["B"])); ?>
-															<? if ($bol_file_row["bol_shipped"] > 0)  echo date('m/d/Y', strtotime($bol_file_row["bol_shipped_date"])); ?>
-														</td>
-													<? } ?>
-
-													<? if ($section_lastship_col4_flg == "yes") { 
-													?>
-														<td class="style3"  align="center">
-															<? if ($bol_file_row['bol_shipment_received_date'] > 0)  echo date('m/d/Y', strtotime($bol_file_row['bol_shipment_received_date'])); ?>
-														</td>
-													<? } ?>
-													<? if ($section_lastship_col5_flg == "yes") { 
-													?>
-														<td class="style3"  align="center">	
-															<? if ($row["A"] > 0)   echo number_format($row["A"],0); ?>
-														</td>
-													<? } ?>
-
-													<? if ($section_lastship_col6_flg == "yes") { ?>
-														<td class="style3"  align="center" id="inv_file_show<?=$tmpcnt;?>">	
-															<? if ($row1["inv_file"] > 0)   { 
-																if ($row1["inv_number"] != '')   { 
-																?>
-																<a href="javascript:void(0);" onclick="display_inv_file('https://loops.usedcardboardboxes.com/files/<?=str_replace(" ", "%20", $row1["inv_file"]);?>', 'Invoice',<?=$tmpcnt;?>)"><font color="blue"><u><? echo $row1["inv_number"]; ?></u></font></a>
-															<? 
-																$invoice = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_inv_file('https://loops.usedcardboardboxes.com/files/" . str_replace(" ", "%20", $row1["inv_file"]) . "', 'Invoice'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>" . $row1["inv_number"] . "</u></font></a>";
-																} else {
-																?>
-																	<a href="javascript:void(0);"  onclick="display_inv_file('https://loops.usedcardboardboxes.com/files/<?=str_replace(" ", "%20", $row1["inv_file"]);?>', 'Invoice',<?=$tmpcnt;?>)"><font color="blue"><u>View Invoice</u></font></a>
-																<?
-																	$invoice = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_inv_file('https://loops.usedcardboardboxes.com/files/" . str_replace(" ", "%20", $row1["inv_file"]) . "', 'Invoice'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>View Invoice</u></font></a>";
-																}
-															} 
-															?>
-														</td>
-
-														<td class="style3"  align="right">	
-															<? if ($row1["inv_amount"] > 0) {
-																	echo "$" . number_format($row1["inv_amount"],2); 
-																}
-															?>
-														</td>
-													<? } ?>
-
-													<? 
-														$invoice_age_internal = ""; $invoice_age_color = "";
-														if ($section_lastship_col8_flg == "yes") {
-															if ($invoice_age > 30 && $invoice_age < 1000) 
-															{
-																if ($invoice_paid == 1) {
-																	$invoice_age_internal = "";
-																	$invoice_age_color = "#e4e4e4";
-														?>
-																<td class="style3" align="center" >&nbsp;
-																	
-																</td>
-														<?
-															 }else{ $invoice_age_internal = $invoice_age;
-																	$invoice_age_color = "#ff0000";
-																	?>
-																<td class="style3" align="center" bgcolor="<? echo $invoice_age_color?>">
-																	<?  echo $invoice_age; ?>
-																</td>
-															 <?}
-															} elseif (number_format(($end_time-$start_t)/(3600*24000),0) > 10)
-															{
-																$invoice_age_internal = "";
-																$invoice_age_color = "#e4e4e4";
-														?>
-																<td class="style3" align="center" >&nbsp;
-																	
-																</td>
-														<?
-															} else
-															{
-																if ($invoice_paid == 1) {
-																	$invoice_age_internal = "";
-																	$invoice_age_color = "#e4e4e4";
-														?>
-																<td class="style3" align="center" >&nbsp;
-																	
-																</td>
-															<? }else { 
-																$invoice_age_internal = $invoice_age;
-																$invoice_age_color = "#e4e4e4";
-																?>
-																<td class="style3" align="center">
-																	<?  echo $invoice_age; ?>
-																</td>
-														<?
-															  }
-															} 
-														}
-													?>				
-													
-												</tr>
-
-												<?
-												$report_total_loc=count(array_unique($total_loc));
-												$tmpcnt = $tmpcnt + 1;
-											
-												$MGArray_current_order[] = array( 'inv_amount' => $row1["inv_amount"], 'accountowner' => $accountowner, 
-												'dt_submitted_sort' => $dt_submitted_sort, 'dt_shipped_sort' => $dt_shipped_sort, 'dt_delv_sort' => $dt_delv_sort, 'purchase_order' => $purchase_order, 'viewbol' => $viewbol, 'invoice' => $invoice, 'company' => $nickname, 'dt_submitted' => $dt_submitted , 'status' => $status, 'dt_shipped' => $dt_shipped , 
-												'original_planned_delivery_dt' => $original_planned_delivery_dt, 'po_delivery_dt' => $po_delivery_dt,
-												'dt_delv' => $dt_delv , 'boxes' => $boxes, 'boxes_sort' => $boxes_sort, 'invoice_age' => $invoice_age_internal, 'invoice_age_color' => $invoice_age_color, 'total_trans' => $total_trans, 'report_total_loc' => $report_total_loc, 'comp_id' =>$comp_id, 'order_id' => $row1["id"]);
-												//print_r($MGArray)."<br>";
-											}
-										}
-										$i++;
-										
-									}
-									
-									if ($current_order_show_header_flg1 == "yes"){
-										echo "</table></div>";
-									}											
-								}
-								if ($section_lastship_col6_flg == "yes") {
-									if ($tot_inv_amount > 0 ){?>
-									<tr><td bgColor="#e4e4e4" colspan="<? echo $col_cnt_tmp+1; ?>" class="style3" align="right"><b>Total Amount:</b>&nbsp;</td><td bgColor="#e4e4e4" class="style3" align="right"><strong><? echo "$" . number_format($tot_inv_amount,2); ?></strong></td><td bgColor="#e4e4e4">&nbsp;</td></tr>
-									
-									<?	}
-									if ($child_comp != "") { 
-										if($total_trans>0)
-										{
-											?>
-											<tr>
-												<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
-												<?
-													echo "<font size='1'><b>Total Number of Locations: ".$report_total_loc."";
-												?>
-												</td>
-												<td bgColor="#e4e4e4">&nbsp;</td>
-											</tr>
-											<tr>
-												<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
-													<?
-													echo "<font size='1'><b>Total Number of Transactions: ".$total_trans."";
-													?>
-												</td>
-												<td bgColor="#e4e4e4">&nbsp;</td>
-											</tr>
-											<?
-										}
-									}
-								}
-								$_SESSION['sortarrayn_dsh_curr_ord'] = $MGArray_current_order; 
-							}
-						  }
-						}
-						?>					
-					<!-- Current Order-->
-					</td></tr>
-							
-				</tbody>	
-				</table>
-			</td>
-		</tr>
-
-	</table>
-	<?php }else{
-		echo "<div class='alert alert-danger'><span>Need to Login, to access this page</span></div>";	
-	}?>
-<? 
-}else if($_REQUEST['show'] == 'current_order_history'){ 
+}
+}else if($_REQUEST['show'] == 'history'){ 
 	if(isset($_COOKIE['loginid']) && $_COOKIE['loginid'] !="" ){
 	?>
 	<?
@@ -9890,32 +9312,33 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 		</tr>
 		<tr >
 			<td align="left">
-				<table width="100%" cellspacing="1" cellpadding="1" border="0" >
+				<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10 tableBorder">
 				<tbody>
-					<tr ><td colspan="14" style="background: #abc5df;">Search order history</td></tr>
+					<tr class="headrow"><td colspan="14" >Search order history</td></tr>
 					<tr>
 						<td colspan="13">
-						<form action="client_dashboard_new.php?show=current_order_history<?=$repchk_str?>" name="rptviewshipment" id="rptviewshipment" method="post" >
+						<form action="client_dashboard_new.php?show=history<?=$repchk_str?>" name="rptviewshipment" method="post" >
 							<input type="hidden" name="warehouse_id" value="<? echo $client_loopid; ?>"/>
 							<input type="hidden" name="rec_type" value="Supplier"/>		
 							<input type="hidden" name="repchk" value="<? echo $_REQUEST["repchk"]; ?>"/>	
 							
-							<table cellSpacing="1" cellPadding="1" border="0" style="width:1100px">
+							<table cellSpacing="1" cellPadding="1" border="0" style="width:700px">
 								<tr>
 									<td align="left" bgColor="#e4e4e4">Date shipped from: 
 										<input type="text" name="vs_start_date" id="vs_start_date" size="8" value="<?php echo isset($_REQUEST['vs_start_date']) ? $_REQUEST['vs_start_date'] : $yearStartDt; ?>" > 
 										<a href="#" onclick="cal2xx.select(document.rptviewshipment.vs_start_date,'vs_start_date','MM/dd/yyyy'); return false;" name="vs_start_date_a" id="vs_start_date_a" ><img border="0" src="images/calendar.jpg"></a>
-										<div ID="listdiv" STYLE="position:fixed;visibility:hidden;background-color:white;layer-background-color:white;"></div>		
+										<div ID="listdiv" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></div>		
 									</td>	
 									<td bgColor="#e4e4e4">To: 
 										<input type="text" name="vs_end_date" id="vs_end_date" size="8" value="<?php echo isset($_REQUEST['vs_end_date']) ? $_REQUEST['vs_end_date'] : $yearTodaysDt; ?>" > 
 										<a href="#" onclick="cal2xx.select(document.rptviewshipment.vs_end_date,'vs_end_date','MM/dd/yyyy'); return false;" name="vs_end_date_a" id="vs_end_date_a" ><img border="0" src="images/calendar.jpg"></a>
+										<div ID="listdiv" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></div>		
 									</td>
 									<? //if ($parent_child == "Parent" && $setup_family_tree == 0) { ?>
 										<td bgColor="#e4e4e4">
 											<b>WHICH VIEW:</b> 
-											<select name="dcurrent_order_comp" id="dcurrent_order_comp">
-												<option value="1" <?=(($_REQUEST['dView'] == 1)? "Selected" : "");?>>All</option>
+											<select name="dView" id="dView">
+												<!--<option value="1" <?=(($_REQUEST['dView'] == 1)? "Selected" : "");?>>This Location Only</option>-->
 												<?php 
 													db();
 													$user_companies = db_query("SELECT company_id FROM boomerang_user_companies where user_id = '".$user_id."'");
@@ -9926,20 +9349,20 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 														if ($first_company_id === null) {
 															$first_company_id = $usr_company_id;
 														}
-														if (!isset($_REQUEST['dcurrent_order_comp'])) {
+														if (!isset($_REQUEST['dView'])) {
 															$client_companyid = $first_company_id;
 														}
 														db_b2b();
 														$company_nm_qry = db_query("SELECT nickname FROM companyInfo where ID = $usr_company_id ORDER BY company");
 														$company_nm = array_shift($company_nm_qry);
-														$selected_str = $_REQUEST['dcurrent_order_comp'] == $row['company_id'] ? "Selected" : "";
-														echo "<option $selected_str value='". $row['company_id']."'>".$company_nm['nickname']."</option>"; 
+														$selected_str = decrypt_password($_REQUEST['dView']) == $row['company_id'] ? "Selected" : "";
+														echo "<option $selected_str value='".encrypt_password($row['company_id'])."'>".$company_nm['nickname']."</option>"; 
 															
 													}
 													db();
 												}
 												?>
-												<!-- <option value="corp_view" <?=(($_REQUEST['dcurrent_order_comp'] == "corp_view")? "Selected" : "");?>>Corporate View</option> -->
+												<option value="corp_view" <?=(($_REQUEST['dView'] == "corp_view")? "Selected" : "");?>>Corporate View</option>
 											</select>	
 										</td>
 									<? // } ?>									
@@ -9955,43 +9378,117 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 						</td>
 					</tr>
 					
-					<tr ><td colspan="14" style="background: #abc5df;">
-						<? if (isset($_REQUEST["vs_start_date"])){
-							?>
-							Order history (Showing for <? echo $_REQUEST["vs_start_date"];?> To <? echo $_REQUEST["vs_end_date"];?>)
-						<? } else{?>
-							Order history (Showing last 25 transaction)
-						<? }?>	
-					</td></tr>
-
-					<tr ><td colspan="13">
-					<?php 
-						$dcurrent_order_comp = "";
-						if (isset($_REQUEST["dcurrent_order_comp"])){
-							if ($_REQUEST["dcurrent_order_comp"] != 1){
-								$dcurrent_order_comp = " and company_id = '" . $_REQUEST["dcurrent_order_comp"] . "'";
-							}
-						}
-						
-						db();
-						$user_companies = db_query("SELECT company_id FROM boomerang_user_companies where user_id = '".$user_id."' $dcurrent_order_comp");
-						if(tep_db_num_rows($user_companies) > 0){
-							while($row_main = array_shift($user_companies)){
-								$usr_company_id =  $row_main['company_id'];
-								$client_companyid = $row_main['company_id'];
-								
-								db_b2b();
-								$company_nm_qry = db_query("SELECT nickname FROM companyInfo where ID = $usr_company_id ORDER BY company");
-								$company_nm = array_shift($company_nm_qry);
-								db();
-								$show_comp_flg = "yes";
+					<? //if (!isset($_REQUEST["vs_start_date"])){
 						?>
-							
+						<tr ><td colspan="13">&nbsp;</td></tr>
+						
+						<!-- Current order-->
+						<tr class="headrow"><td colspan="13">
+							Current orders
+						</td></tr>
+
+						<tr class="headrow">
+							<?  $col_cnt_tmp = 0; 	?>
 							<?
-							$todaysDate = date('Y-m-d');
-							$toDate 	= date("Y-m-d", strtotime('last day of previous month'));
-							$fromDate 	= date("Y-m-01", strtotime("-12 months"));
-							if($_REQUEST['sorting_ship']=="yes"){
+							if($_REQUEST['dView'] == 'corp_view'){ 
+								$col_cnt_tmp = $col_cnt_tmp + 1;
+							?>
+								<td class="blackFont" align="center">
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=location&sort_order=<?=$sort_order;?>&sorting_ship=yes">Location</a>
+								</td>
+							<? } ?>
+							<td class="blackFont" align="center">
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=order_id&sort_order=<?=$sort_order;?>&sorting_ship=yes">Order ID</a>
+							</td>
+
+							<? if ($section_lastship_col1_flg == "yes") { 
+								$col_cnt_tmp = $col_cnt_tmp + 1;
+							?>
+							<td class="blackFont" align="center">
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=datesubmit&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Submitted</a>
+							</td>
+							<? } ?>
+
+							<? if ($section_lastship_col2_flg == "yes") { 
+								$col_cnt_tmp = $col_cnt_tmp + 1;
+							?>
+							<td class="blackFont" align="center">
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=status&sort_order=<?=$sort_order;?>&sorting_ship=yes">Status</a>
+								<div class="tooltip"><i class="fa fa-info-circle" aria-hidden="true"></i>
+									<span class="tooltiptext">
+										Cancelled <br />Invoice sent<br />Customer Signed BOL<br />Courtesy Followup Made<br/>Delivered<br/>Shipped - Driver Signed<br/>Shipped</br/>BOL @ Warehouse<br/>BOL Sent to Warehouse<br />BOL Created<br />Freight Booked<br />Sales Order Entered<br />PO Uploaded<br/> Order Entered - UPLOAD PO TABLE <br /> Pre-order - UPLOAD PO + Marked as Preorder <br /> Accumulating Inventory - UPLOAD PO + Unmarked as Preorder <br /> Arranging Pickup - Ready to hand to freight manager
+									</span>
+								</div>
+							</td>
+							<? } ?>
+
+							<? if ($section_lastship_col3_flg == "yes") { 
+								$col_cnt_tmp = $col_cnt_tmp + 1;
+							?>
+								<td class="blackFont" align="center">
+									Purchase Order
+								</td>
+							<? } ?>
+
+							<? if ($section_lastship_col7_flg == "yes") { 
+								$col_cnt_tmp = $col_cnt_tmp + 1;
+							?>
+								<td align="middle" style="width: 70px" class="blackFont" align="center">
+									View BOL
+								</td>
+								<td class="blackFont" align="center">
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&org_del_date=yes">Original Planned Delivery Date</a>
+								</td>
+								<td class="blackFont" align="center">
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&curr_planned_del=yes">Current Planned Delivery Date'</a>
+								</td>
+							<? } ?>
+
+							<? if ($section_lastship_col4_flg == "yes") { 
+								$col_cnt_tmp = $col_cnt_tmp + 3;
+							?>
+								<td class="blackFont" align="center">
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Shipped</a>
+								</td>
+							<? } ?>
+
+							<? if ($section_lastship_col4_flg == "yes") { 
+								$col_cnt_tmp = $col_cnt_tmp + 1;
+							?>
+								<td class="blackFont" align="center">
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=datedeliver&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Delivered</a>
+								</td>
+							<? } ?>
+
+							<? if ($section_lastship_col5_flg == "yes") { 
+								$col_cnt_tmp = $col_cnt_tmp + 1;
+							?>
+							<td class="blackFont" align="center">
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=boxes&sort_order=<?=$sort_order;?>&sorting_ship=yes">Quantity</a></b>
+							</td>
+							<? } ?>
+
+							<? if ($section_lastship_col6_flg == "yes") { 
+								$col_cnt_tmp = $col_cnt_tmp + 1;
+							?>
+							<td class="blackFont" align="center">
+								Invoice
+							</td>
+							<td class="blackFont" align="center">
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=invamt&sort_order=<?=$sort_order;?>&sorting_ship=yes">Amount</a>
+							</td>
+							<? } ?>
+							<? if ($section_lastship_col8_flg == "yes") {  ?>
+							<td class="blackFont" align="center">
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=current_order&repchk=<?=$_REQUEST["repchk"];?>&sort=invage&sort_order=<?=$sort_order;?>&sorting_ship=yes">Invoice Age</a>
+							</td>
+							<? } ?>
+						</tr>
+						<?
+						$todaysDate = date('Y-m-d');
+						$toDate 	= date("Y-m-d");
+						$fromDate 	= date("Y-m-01", strtotime("-12 months"));
+						if($_REQUEST['show']=="current_order"){
 								$sort_order_arrtxt = "SORT_ASC";
 								if ($_REQUEST["sort_order"] != "") {
 									if ($_REQUEST["sort_order"] == "ASC") {
@@ -10003,7 +9500,7 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 									$sort_order_arrtxt = "SORT_DESC";
 								}
 							
-								$MGArray = $_SESSION['sortarrayn_dsh'];
+								$MGArray = $_SESSION['sortarrayn_dsh_curr_ord'];
 								if($_REQUEST["sort"] == "order_id")
 								{
 									foreach ($MGArray as $MGArraytmp) {
@@ -10119,17 +9616,18 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 										array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
 									}
 								}
+							
 								$i = 0;
 								foreach ($MGArray as $MGArraytmp2) {
 									if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
 									$total_loc[] = $MGArraytmp2["comp_id"];
 									?>
 									<tr vAlign="center" class="<?=$rowclr?>">
-										<? if ($child_comp != "") { 
-										?>
-										<td class="style3"  align="center">	
-											<? echo $MGArraytmp2["company"]; ?>
-										</td>
+										<? if ($child_comp_new != "") { 
+											?>
+											<td class="style3"  align="center">	
+												<? echo $MGArraytmp2["company"]; ?>
+											</td>
 										<? } ?>
 										<td class="style3"  align="center">	
 											<? echo $MGArraytmp2["order_id"]; ?>
@@ -10145,7 +9643,7 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 										</td>
 										<? } ?>
 										<? 
-										if ($section_lastship_col3_flg == "yes") { ?>
+											if ($section_lastship_col3_flg == "yes") { ?>
 											<td class="style3"  align="center" id="po_order_show<?=$tmpcnt;?>">	
 												<? echo $MGArraytmp2["purchase_order"]; ?>
 											</td>
@@ -10170,9 +9668,9 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 										<? } ?>
 
 										<? if ($section_lastship_col4_flg == "yes") { ?>
-											<td class="style3"  align="center">
-												<? echo $MGArraytmp2["dt_delv"]; ?>
-											</td>
+										<td class="style3"  align="center">
+											<? echo $MGArraytmp2["dt_delv"]; ?>
+										</td>
 										<? } ?>
 										<? if ($section_lastship_col5_flg == "yes") { ?>
 										<td class="style3"  align="center">	
@@ -10206,150 +9704,163 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 									$tmpcnt = $tmpcnt + 1;
 									$i++;
 								}
-								if ($section_lastship_col6_flg == "yes") {
-									if ($tot_inv_amount > 0 ){?>
-									<tr  class="rowdata" >
-										<td bgColor="#e4e4e4" colspan="<? echo $col_cnt_tmp+1; ?>" class="style3" align="right"><b>Total Amount:</b>&nbsp;</td><td bgColor="#e4e4e4" class="style3" align="right"><strong><? echo "$" . number_format($tot_inv_amount,2); ?></strong></td><td bgColor="#e4e4e4">&nbsp;</td></tr>
-									<?	
-									}
-									if ($child_comp != "") { 
-										if($total_trans>0){
-										?>
-										<tr  class="rowdata">
-											<td bgColor="#e4e4e4" colspan="12" class="style3" align="right">
-											<?
-												echo "<font size='1'><b>Total Number of Locations: ".$report_total_loc."";
-											?>
-											</td>
-											<td bgColor="#e4e4e4">&nbsp;</td>
-										</tr>
-										<tr  class="rowdata">
-											<td bgColor="#e4e4e4" colspan="12" class="style3" align="right">
-												<?
-												echo "<font size='1'><b>Total Number of Transactions: ".$total_trans."";
-												?>
-											</td>
-											<td bgColor="#e4e4e4">&nbsp;</td>
-										</tr>
+								
+							if ($section_lastship_col6_flg == "yes") {
+								if ($tot_inv_amount > 0 ){?>
+									<tr  class="rowdata" ><td bgColor="#e4e4e4" colspan="<? echo $col_cnt_tmp+1; ?>" class="style3" align="right"><b>Total Amount:</b>&nbsp;</td><td bgColor="#e4e4e4" class="style3" align="right"><strong><? echo "$" . number_format($tot_inv_amount,2); ?></strong></td><td bgColor="#e4e4e4">&nbsp;</td></tr>
+								<?	
+								}
+								if ($child_comp != "") { 
+									if($total_trans>0){
+									?>
+									<tr  class="rowdata">
+										<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
 										<?
-										}
+											echo "<font size='1'><b>Total Number of Locations: ".$report_total_loc."";
+										?>
+										</td>
+										<td bgColor="#e4e4e4">&nbsp;</td>
+									</tr>
+									<tr  class="rowdata">
+										<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
+											<?
+											echo "<font size='1'><b>Total Number of Transactions: ".$total_trans."";
+											?>
+										</td>
+										<td bgColor="#e4e4e4">&nbsp;</td>
+									</tr>
+									<?
 									}
 								}
+							}
+							
+						}else{
+							$query1 = "";
+							if($_REQUEST['dView'] == 'corp_view'){
+								
+							}
+							if ($_REQUEST['dView'] == 'corp_view' && $child_comp_new != "") {
+								$query1 = "SELECT loop_transaction_buyer.* FROM loop_transaction_buyer WHERE invoice_paid = 0 and loop_transaction_buyer.warehouse_id in ( " . $client_loopid . "," . $child_comp_new . ") AND loop_transaction_buyer.transaction_date BETWEEN '".$fromDate." 00:00:00' AND '".$toDate." 23:59:59' and loop_transaction_buyer.Leaderboard <> 'UCBZW' and loop_transaction_buyer.ignore = 0 ORDER BY warehouse_id asc, loop_transaction_buyer.id DESC";
 							}else{
-								$query1 = "";
-								db();
-								$sql = "SELECT id, warehouse_name FROM loop_warehouse where b2bid = '" . $client_companyid . "' ";
-								$result = db_query($sql );
-								while ($myrowsel = array_shift($result)) {
-									$client_loopid = $myrowsel["id"];
-								}
+								//This is for New rep #962
+								$child_comp_new = ""; $child_comp_num_new =""; 
+								$client_companyid = isset($_REQUEST['dView']) ? decrypt_password($_REQUEST['dView']) : $client_companyid;
+								$client_loopid = "";
+								if ($client_companyid > 0){
+									$sql = "SELECT id, warehouse_name FROM loop_warehouse where b2bid = '" . $client_companyid . "' ";
+									$result = db_query($sql );
+									while ($myrowsel = array_shift($result)) {
+										$client_loopid = $myrowsel["id"];
+									}
 								
-								if (isset($_REQUEST["vs_start_date"])){
-									if ($_REQUEST['dView'] == 2 && $child_comp_new != "") {
-										$query1 = "SELECT loop_transaction_buyer.original_planned_delivery_dt , loop_transaction_buyer.po_delivery_dt, loop_transaction_buyer.id, no_invoice, inv_date_of, so_entered, po_date, start_date, loop_transaction_buyer.warehouse_id, `ignore`, good_to_ship, po_file, po_ponumber, inv_file, inv_number, inv_amount FROM loop_transaction_buyer inner join loop_bol_files ON loop_bol_files.trans_rec_id = loop_transaction_buyer.id 
-										WHERE loop_transaction_buyer.warehouse_id in ( " . $client_loopid . "," . $child_comp_new . ") and date_format(str_to_date(bol_shipment_received_date, '%m/%d/%Y'), '%Y-%m-%d') BETWEEN '". date("Y-m-d" , strtotime($_REQUEST["vs_start_date"]))." 00:00:00' AND '". date("Y-m-d" , strtotime($_REQUEST["vs_end_date"])) ." 23:59:59' Group by loop_bol_files.trans_rec_id ORDER BY loop_transaction_buyer.warehouse_id, loop_transaction_buyer.id DESC";
+									db_b2b();
+									$sql="SELECT ID FROM companyInfo WHERE parent_comp_id = '" . $client_companyid . "'";
+									$result = db_query($sql);
+									while ($rq = array_shift($result)) {
+										db();
+										$sql1 = "SELECT id FROM loop_warehouse where b2bid = '" . $rq["ID"] . "' ";
+										$result1 = db_query($sql1 );
+										while ($myrowsel1 = array_shift($result1)) {
+											$child_comp_new = $child_comp_new . $myrowsel1["id"] . ",";
+											$child_comp_num_new=$child_comp_num_new+1;
+										}
+									}
+								
+									db();
+									if (trim($child_comp_new) != ""){
+										$child_comp_new = substr($child_comp_new, 0, strlen($child_comp_new) - 1);
+									}
+									if ($child_comp_new != ""){
+										$query1 = "SELECT loop_transaction_buyer.* FROM loop_transaction_buyer 
+										WHERE loop_transaction_buyer.Leaderboard <> 'UCBZW' and loop_transaction_buyer.ignore = 0 and loop_transaction_buyer.invoice_paid = 0 and loop_transaction_buyer.warehouse_id in ( " . $client_loopid . "," . $child_comp_new . ") AND loop_transaction_buyer.transaction_date BETWEEN '".$fromDate." 00:00:00' AND '".$toDate." 23:59:59' and loop_transaction_buyer.ignore = 0 GROUP BY loop_transaction_buyer.id ORDER BY loop_transaction_buyer.id DESC ";
 									}else{
-										$query1 = "SELECT loop_transaction_buyer.original_planned_delivery_dt , loop_transaction_buyer.po_delivery_dt , loop_transaction_buyer.id, no_invoice, inv_date_of, so_entered, po_date, start_date, loop_transaction_buyer.warehouse_id, `ignore`, good_to_ship, po_file, po_ponumber, inv_file, inv_number, inv_amount FROM loop_transaction_buyer inner join loop_bol_files ON loop_bol_files.trans_rec_id = loop_transaction_buyer.id 
-										WHERE loop_transaction_buyer.warehouse_id = '$client_loopid' and date_format(str_to_date(bol_shipment_received_date, '%m/%d/%Y'), '%Y-%m-%d') BETWEEN '". date("Y-m-d" , strtotime($_REQUEST["vs_start_date"]))." 00:00:00' AND '". date("Y-m-d" , strtotime($_REQUEST["vs_end_date"])) ." 23:59:59' Group by loop_bol_files.trans_rec_id ORDER BY loop_transaction_buyer.id DESC";
-									}								
-								}else{
-									if ($_REQUEST['dView'] == 2 && $child_comp_new != "") {
-										$query1 = "SELECT loop_transaction_buyer.original_planned_delivery_dt , loop_transaction_buyer.po_delivery_dt, loop_transaction_buyer.id, loop_transaction_buyer.inv_amount 
-										FROM loop_transaction_buyer WHERE loop_transaction_buyer.warehouse_id in ( " . $client_loopid . "," . $child_comp_new . ") AND loop_transaction_buyer.invoice_paid = 1 and loop_transaction_buyer.transaction_date BETWEEN '".$fromDate." 00:00:00' AND '".$toDate." 23:59:59'  ORDER BY warehouse_id asc, id DESC LIMIT 25";
-									}else{
-										if ($client_loopid != ""){
-											$query1 = "SELECT * FROM loop_transaction_buyer WHERE loop_transaction_buyer.warehouse_id = '$client_loopid' AND loop_transaction_buyer.invoice_paid = 1 and loop_transaction_buyer.transaction_date BETWEEN '".$fromDate." 00:00:00' AND '".$toDate." 23:59:59' ORDER BY id DESC LIMIT 25";
-										}	
+										$query1 = "SELECT loop_transaction_buyer.* FROM loop_transaction_buyer 
+										WHERE loop_transaction_buyer.Leaderboard <> 'UCBZW' and loop_transaction_buyer.ignore = 0 and loop_transaction_buyer.invoice_paid = 0 and loop_transaction_buyer.warehouse_id in ( " . $client_loopid . ") AND loop_transaction_buyer.transaction_date BETWEEN '".$fromDate." 00:00:00' AND '".$toDate." 23:59:59' and loop_transaction_buyer.ignore = 0 GROUP BY loop_transaction_buyer.id ORDER BY loop_transaction_buyer.id DESC ";
 									}
 								}
+							}
+							
+							if ($query1 != ""){
 								//echo "<br /> query1 - ".$query1;
-								
-								if ($query1 != ""){
-									$res1 = db_query($query1, db());
-									//echo "<pre> res1 - ";  print_r($res1); echo "</pre>";
-									$tmpcnt=0; $tot_inv_amount = 0; $total_trans=0;
-									$i = 0;
-									while($row1 = array_shift($res1)) {
-										$current_order_show_header_flg = "no";
-										$current_order_show_header_flg1 = "no";
+								$res1 = db_query($query1, db());
+								//echo "<pre> res1 - ";  print_r($res1); echo "</pre>";
+								$tmpcnt=0; $tot_inv_amount = 0; $total_trans=0;
+								$i = 0;
+								while($row1 = array_shift($res1)) {
+									if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
+									
+									$query = "SELECT SUM( loop_bol_tracking.qty ) AS A, loop_bol_tracking.bol_pickupdate AS B, loop_bol_tracking.trans_rec_id AS C FROM loop_bol_tracking WHERE trans_rec_id = ". $row1["id"] . " AND (STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') >= '" . $fromDate . "' and STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') <= '" . $toDate . "') ORDER BY C  DESC";
+									//echo "<br /> query - ".$query;	
+									$res = db_query($query);
+									//echo "<pre> res - ";  print_r($res); echo "</pre>";
+									while($row = array_shift($res)){
+										//DATE SHIPPED FETCH START
+										$resShippedDate = db_query("SELECT bol_shipped, bol_shipped_date FROM loop_bol_files WHERE trans_rec_id = ".$row1["id"], db());
+										//DATE SHIPPED FETCH END
+										//This is the payment Info for the Customer paying UCB
+										$payments_sql = "SELECT SUM(loop_buyer_payments.amount) AS A FROM loop_buyer_payments WHERE trans_rec_id = " . $row1["id"];
+										$payment_qry = db_query($payments_sql );
+										$payment = array_shift($payment_qry);
 										
-										if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
-										if (isset($_REQUEST["vs_start_date"])){
-											$query = "SELECT SUM( loop_bol_tracking.qty ) AS A, loop_bol_tracking.bol_pickupdate AS B, loop_bol_tracking.trans_rec_id AS C FROM loop_bol_tracking WHERE trans_rec_id = ". $row1["id"] . " and (STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') >= '" . date("Y-m-d" , strtotime($_REQUEST["vs_start_date"])) . "' and STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') <= '" . date("Y-m-d" , strtotime($_REQUEST["vs_end_date"])). "') ORDER BY C DESC ";
-											//GROUP BY trans_rec_id
-										}else {
-											$query = "SELECT SUM( loop_bol_tracking.qty ) AS A, loop_bol_tracking.bol_pickupdate AS B, loop_bol_tracking.trans_rec_id AS C FROM loop_bol_tracking WHERE trans_rec_id = ". $row1["id"] . " AND (STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') >= '" . $fromDate . "' and STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') <= '" . $toDate . "') ORDER BY C  DESC";
+										$tot_inv_amount = $tot_inv_amount + $row1["inv_amount"];
+										$total_trans=$total_trans +1;
+										//This is the payment info for UCB paying the related vendors
+										$vendor_sql = "SELECT COUNT(loop_transaction_buyer_payments.id) AS A, MIN(loop_transaction_buyer_payments.status) AS B, MAX(loop_transaction_buyer_payments.status) AS C FROM loop_transaction_buyer_payments WHERE loop_transaction_buyer_payments.transaction_buyer_id = " . $row1["id"];
+										$vendor_qry = db_query($vendor_sql );
+										$vendor = array_shift($vendor_qry);
+
+										//Info about Shipment
+										$bol_file_qry = "SELECT * FROM loop_bol_files WHERE trans_rec_id LIKE '" . $row1["id"] . "' ORDER BY id DESC";
+										//echo $bol_file_qry ;
+										$bol_file_res = db_query($bol_file_qry );
+										$bol_file_row = array_shift($bol_file_res);
+
+										/*GET UPLOAD PO TABLE INFO*/
+										$qryPOTable = "SELECT * FROM loop_transaction_buyer_poeml WHERE trans_rec_id LIKE '" . $row1["id"] . "' ORDER BY unqid DESC";
+										//echo $bol_file_qry ;
+										$resPOTable = db_query($qryPOTable);
+										$cntPOTable = tep_db_num_rows($resPOTable);
+										/*GET UPLOAD PO TABLE INFO*/
+
+										$fbooksql = "SELECT * FROM loop_transaction_freight WHERE trans_rec_id=" . $row1["id"];
+										$fbookresult = db_query($fbooksql );
+										$freightbooking = array_shift($fbookresult);
+
+										$vendors_paid = 0; //Are the vendors paid
+										$vendors_entered = 0; //Has a vendor transaction been entered?
+										$invoice_paid = 0; //Have they paid their invoice?
+										$invoice_entered=0; //Has the inovice been entered
+										$signed_customer_bol= 0; 	//Customer Signed BOL Uploaded
+										$courtesy_followup = 0; 	//Courtesy Follow Up Made
+										$delivered = 0; 	//Delivered
+										$signed_driver_bol = 0; 	//BOL Signed By Driver
+										$shipped = 0; 	//Shipped
+										$bol_received = 0; 	//BOL Received @ WH
+										$bol_sent = 0; 	//BOL Sent to WH"
+										$bol_created = 0; 	//BOL Created
+										$freight_booked = 0; //freight booked
+										$sales_order = 0;   // Sales Order entered
+										$po_uploaded = 0;  //po uploaded 
+						 
+										//Are all the vendors paid?
+										if ($vendor["B"] == 2 && $vendor["C"] == 2) 
+										{ 
+											$vendors_paid = 1; 
 										}
-										//echo "<br /> query - ".$query;	
-										$res = db_query($query);
-										//echo "<pre> res - ";  print_r($res); echo "</pre>";
-										while($row = array_shift($res)){
-											//DATE SHIPPED FETCH START
-											$resShippedDate = db_query("SELECT bol_shipped, bol_shipped_date FROM loop_bol_files WHERE trans_rec_id = ".$row1["id"], db());
-											//DATE SHIPPED FETCH END
-											//This is the payment Info for the Customer paying UCB
-											$payments_sql = "SELECT SUM(loop_buyer_payments.amount) AS A FROM loop_buyer_payments WHERE trans_rec_id = " . $row1["id"];
-											$payment_qry = db_query($payments_sql );
-											$payment = array_shift($payment_qry);
-											
-											$tot_inv_amount = $tot_inv_amount + $row1["inv_amount"];
-											$total_trans=$total_trans +1;
-											//This is the payment info for UCB paying the related vendors
-											$vendor_sql = "SELECT COUNT(loop_transaction_buyer_payments.id) AS A, MIN(loop_transaction_buyer_payments.status) AS B, MAX(loop_transaction_buyer_payments.status) AS C FROM loop_transaction_buyer_payments WHERE loop_transaction_buyer_payments.transaction_buyer_id = " . $row1["id"];
-											$vendor_qry = db_query($vendor_sql );
-											$vendor = array_shift($vendor_qry);
+										
+										//Have we entered a vendor transaction?
+										if ($vendor["A"] > 0) { 
+											$vendors_entered = 1; 
+										} 		
 
-											//Info about Shipment
-											$bol_file_qry = "SELECT * FROM loop_bol_files WHERE trans_rec_id LIKE '" . $row1["id"] . "' ORDER BY id DESC";
-											//echo $bol_file_qry ;
-											$bol_file_res = db_query($bol_file_qry );
-											$bol_file_row = array_shift($bol_file_res);
+										//Have they paid their invoice?
+										if (number_format($row1["inv_amount"],2) == number_format($payment["A"],2) && $row1["inv_amount"] != "") 
+										{ 
+											$invoice_paid = 1; 
+										} 
+										if ($row1["no_invoice"] == 1) {				$invoice_paid = 1; 			}
 
-											/*GET UPLOAD PO TABLE INFO*/
-											$qryPOTable = "SELECT * FROM loop_transaction_buyer_poeml WHERE trans_rec_id LIKE '" . $row1["id"] . "' ORDER BY unqid DESC";
-											//echo $bol_file_qry ;
-											$resPOTable = db_query($qryPOTable);
-											$cntPOTable = tep_db_num_rows($resPOTable);
-											/*GET UPLOAD PO TABLE INFO*/
-
-											$fbooksql = "SELECT * FROM loop_transaction_freight WHERE trans_rec_id=" . $row1["id"];
-											$fbookresult = db_query($fbooksql );
-											$freightbooking = array_shift($fbookresult);
-
-											$vendors_paid = 0; //Are the vendors paid
-											$vendors_entered = 0; //Has a vendor transaction been entered?
-											$invoice_paid = 0; //Have they paid their invoice?
-											$invoice_entered=0; //Has the inovice been entered
-											$signed_customer_bol= 0; 	//Customer Signed BOL Uploaded
-											$courtesy_followup = 0; 	//Courtesy Follow Up Made
-											$delivered = 0; 	//Delivered
-											$signed_driver_bol = 0; 	//BOL Signed By Driver
-											$shipped = 0; 	//Shipped
-											$bol_received = 0; 	//BOL Received @ WH
-											$bol_sent = 0; 	//BOL Sent to WH"
-											$bol_created = 0; 	//BOL Created
-											$freight_booked = 0; //freight booked
-											$sales_order = 0;   // Sales Order entered
-											$po_uploaded = 0;  //po uploaded 
-							 
-											//Are all the vendors paid?
-											if ($vendor["B"] == 2 && $vendor["C"] == 2) 
-											{ 
-												$vendors_paid = 1; 
-											}
-											
-											//Have we entered a vendor transaction?
-											if ($vendor["A"] > 0) { 
-												$vendors_entered = 1; 
-											} 		
-
-											//Have they paid their invoice?
-											if (number_format($row1["inv_amount"],2) == number_format($payment["A"],2) && $row1["inv_amount"] != "") 
-											{ 
-												$invoice_paid = 1; 
-											} 
-											if ($row1["no_invoice"] == 1) {				$invoice_paid = 1; 			}
-
+										if ($invoice_paid == 0){
 											//Has an invoice amount been entered?
 											if ($row1["inv_amount"] > 0) { 
 												$invoice_entered=1; 
@@ -10367,7 +9878,7 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 											if ($freightbooking["id"] > 0 ) { $freight_booked = 1;} //freight booked
 											
 											$start_t = strtotime($row1["inv_date_of"]);
-											$end_time =  strtotime(now);
+											$end_time =  strtotime('now');
 											$invoice_age = number_format(($end_time-$start_t)/(3600*24),0);		
 											
 											if (($row1["so_entered"] == 1)) {	 $sales_order = 1; } //sales order created
@@ -10380,6 +9891,7 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 											$dt_submitted_sort = date('Y-m-d', strtotime($row1["start_date"]));
 											
 											$dt_shipped = ""; $dt_delv = ""; $boxes = ""; $inv_age = ""; $purchase_order = ""; $viewbol = ""; $invoice ="";
+											
 											if ($row["B"] > 0)  { $dt_shipped = date('m-d-Y', strtotime($row["B"])); $dt_shipped_sort = date('Y-m-d', strtotime($row["B"]));}
 											if ($bol_file_row['bol_shipment_received_date'] > 0)  { $dt_delv = date('m-d-Y', strtotime($bol_file_row['bol_shipment_received_date'])); $dt_delv_sort = date('Y-m-d', strtotime($bol_file_row['bol_shipment_received_date']));}
 											if ($row["A"] > 0)   { $boxes = number_format($row["A"],0); $boxes_sort = $row["A"]; } 
@@ -10391,175 +9903,13 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 											if ($row1["po_delivery_dt"] != ""){
 												$po_delivery_dt = date('m/d/Y', strtotime($row1["po_delivery_dt"]));
 											}	
-
-											if ($current_order_show_header_flg == "no" && $show_comp_flg == "yes"){
-												$current_order_show_header_flg = "yes";
-												
-												$current_order_show_header_flg1 = "yes";
-											?>											
-											<div id="products-table-view" class="mt-3">
-											<table width="100%" cellspacing="1" cellpadding="1" border="0" >
-												<thead>
-												<? if ($show_comp_flg == "yes") {
-													$show_comp_flg = "no";
-													?>
-													<tr >
-														<th colspan="6" align="center"><?php echo $company_nm['nickname']; ?></th>
-													</tr>
-												
-													<tr >
-													<?  $col_cnt_tmp = 0; 	?>
-													<?
-													if ($child_comp_new != "" && ($_REQUEST['dView'] == 2)) { 
-														$col_cnt_tmp = $col_cnt_tmp + 1;
-														?>
-														<th  align="center">
-															<? if (isset($_REQUEST["vs_start_date"])){?>
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=location&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Location</a>
-															<? } else{?>
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=location&sort_order=<?=$sort_order;?>&sorting_ship=yes">Location</a>
-															<? } ?>
-														</th>
-													<? } ?>
-													<th  align="center">
-														<!-- <? if (isset($_REQUEST["vs_start_date"])){?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=order_id&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Order ID</a>
-														<? } else{?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=order_id&sort_order=<?=$sort_order;?>&sorting_ship=yes">Order ID</a>
-														<? } ?> -->
-														Order ID
-													</th>
-
-													<? if ($section_lastship_col1_flg == "yes") { 
-														$col_cnt_tmp = $col_cnt_tmp + 1;
-													?>
-													<th  align="center">
-														<!-- <? if (isset($_REQUEST["vs_start_date"])){?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=datesubmit&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Date Submitted</a>
-														<? } else{?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=datesubmit&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Submitted</a>
-														<? } ?> -->
-														Date Submitted
-													</th>
-													<? } ?>
-
-													<? if ($section_lastship_col2_flg == "yes") { 
-														$col_cnt_tmp = $col_cnt_tmp + 1;
-													?>
-													<th align="center">
-														<!-- <? if (isset($_REQUEST["vs_start_date"])){?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=status&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Status</a>
-														<? } else{?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=status&sort_order=<?=$sort_order;?>&sorting_ship=yes">Status</a>
-														<? }
-														?>
-														<div class="tooltip"><i class="fa fa-info-circle" aria-hidden="true"></i>
-															<span class="tooltiptext">
-																Cancelled <br />Invoice sent<br />Customer Signed BOL<br />Courtesy Followup Made<br/>Delivered<br/>Shipped - Driver Signed<br/>Shipped</br/>BOL @ Warehouse<br/>BOL Sent to Warehouse<br />BOL Created<br />Freight Booked<br />Sales Order Entered<br />PO Uploaded<br/> Order Entered - UPLOAD PO TABLE <br /> Pre-order - UPLOAD PO + Marked as Preorder <br /> Accumulating Inventory - UPLOAD PO + Unmarked as Preorder <br /> Arranging Pickup - Ready to hand to freight manager
-															</span>
-														</div> -->
-														Status									
-													</th>
-													<? } ?>
-
-													<? if ($section_lastship_col3_flg == "yes") { 
-														$col_cnt_tmp = $col_cnt_tmp + 1;
-													?>
-														<th class="blackFont" align="center">
-															Purchase Order
-														</th>
-													<? } ?>
-
-													<? if ($section_lastship_col7_flg == "yes") { 
-														$col_cnt_tmp = $col_cnt_tmp + 1;
-													?>
-														<th align="middle" style="width: 70px" class="blackFont" align="center">
-															View BOL
-														</th>
-
-														<th class="blackFont" align="center">
-															<? if (isset($_REQUEST["vs_start_date"])){?>
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&original_planned_delivery_dt=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Original Planned Delivery Date</a>
-															<? } else{?>
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&original_planned_delivery_dt=yes">Original Planned Delivery Date</a>
-															<? } ?>
-														</th>
-
-														<th class="blackFont" align="center">
-															<? if (isset($_REQUEST["vs_start_date"])){?>
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&curr_planned_del=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Current Planned Delivery Date</a>
-															<? } else{?>
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&curr_planned_del=yes">Current Planned Delivery Date</a>
-															<? } ?>
-														</th>
-													<? } ?>
-
-													<? if ($section_lastship_col4_flg == "yes") { 
-														$col_cnt_tmp = $col_cnt_tmp + 3;
-													?>
-														<th class="blackFont" align="center">
-															<? if (isset($_REQUEST["vs_start_date"])){?>
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Date Shipped</a>
-															<? } else{?>
-																<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Shipped</a>
-															<? } ?>
-														</th>
-													<? } ?>
-													<? if ($section_lastship_col4_flg == "yes") { 
-														$col_cnt_tmp = $col_cnt_tmp + 1;
-													?>
-													<th class="blackFont" align="center">
-														<? if (isset($_REQUEST["vs_start_date"])){?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=datedeliver&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Date Delivered</a>
-														<? } else{?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=datedeliver&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Delivered</a>
-														<? } ?>
-													</th>
-													<? } ?>
-
-													<? if ($section_lastship_col5_flg == "yes") { 
-														$col_cnt_tmp = $col_cnt_tmp + 1;
-													?>
-													<th class="blackFont" align="center">
-														<? if (isset($_REQUEST["vs_start_date"])){?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=boxes&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Quantity</a>
-														<? } else{?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=boxes&sort_order=<?=$sort_order;?>&sorting_ship=yes">Quantity</a></b>
-														<? } ?>
-													</th>
-													<? } ?>
-
-													<? if ($section_lastship_col6_flg == "yes") { 
-														$col_cnt_tmp = $col_cnt_tmp + 1;
-													?>
-													<th class="blackFont" align="center">
-														Invoice
-													</th>
-													<th class="blackFont" align="center">
-														<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=invamt&sort_order=<?=$sort_order;?>&sorting_ship=yes">Amount</a>
-													</th>
-													<? } ?>
-													<? if ($section_lastship_col8_flg == "yes") {  ?>
-													<th class="blackFont" align="center">
-														<? if (isset($_REQUEST["vs_start_date"])){?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=invage&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Invoice Age</a></b>
-														<? } else{?>
-															<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=invage&sort_order=<?=$sort_order;?>&sorting_ship=yes">Invoice Age</a>
-														<? } ?>
-													</th>
-													<? } ?>
-												</tr>		
-											<? }?>
-											</thead>
-											<?
-											}
+											
 											?>
-											<tbody>
 											<tr vAlign="center"  class="<?=$rowclr?>">
 												<? 
 												$nickname = "";
 												
-												if (($child_comp_new != "") && ($_REQUEST['dView'] == 2) )  { 
+												if (($_REQUEST['dView'] == 'corp_view') && ($child_comp_new != "")) { 
 													db_b2b();
 													$sql1 = "SELECT ID,nickname,assignedto, company, shipCity, shipState FROM companyInfo where loopid = '" . $row1["warehouse_id"] . "'";
 													
@@ -10583,28 +9933,29 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 														$total_loc[] = $comp_id;
 														
 														$arr = explode(",", $row_comp["assignedto"]);
-
+															
 														db();
 													}
 													
-												?>
+													?>
 													<td class="style3"  align="center">	
 														<? echo $nickname; ?>
 													</td>
 												<? } ?>
-												<td class="style3"  align="center" width="33%">	
+												
+												<td class="style3"  align="center">	
 													<? echo $row1["id"]; ?>
 												</td>
 												
 												<? if ($section_lastship_col1_flg == "yes") { 
 												?>
-												<td class="style3"  align="center" width="33%">	
+												<td class="style3"  align="center">	
 													<? echo date('m/d/Y', strtotime($row1["start_date"])); ?>
 												</td>
 												<? } ?>
 												<? if ($section_lastship_col2_flg == "yes") {
 												?>
-												<td class="style3"  align="center" width="33%">	
+												<td class="style3"  align="center">	
 													<?	
 														if (($row1["ignore"] == 1)) { Echo "Cancelled"; $status ="Cancelled";}
 														elseif ($invoice_paid == 1)
@@ -10630,14 +9981,13 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 													?>					
 												</td>
 												<? } ?>
-												
 												<? 
 												if ($section_lastship_col3_flg == "yes") { 
 													?>
 													<td class="style3"  align="center" id="po_order_show<?=$tmpcnt;?>">	
 														<a href="javascript:void(0);" onclick="display_file('https://loops.usedcardboardboxes.com/po/<?=str_replace(" ", "%20", $row1["po_file"]);?>', 'Purchase order',<?=$tmpcnt;?>)"><font color="blue"><u><? echo "&nbsp;" . $row1["po_ponumber"]; ?></u></font></a>
 													</td>
-													<? $purchase_order = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_file('https://loops.usedcardboardboxes.com/po/" . str_replace(" ", "%20", $row1["po_file"]) . "', 'Purchase order'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>&nbsp;" . $row1["po_ponumber"] . "</u></font></a>";
+												<? $purchase_order = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_file('https://loops.usedcardboardboxes.com/po/" . str_replace(" ", "%20", $row1["po_file"]) . "', 'Purchase order'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>&nbsp;" . $row1["po_ponumber"] . "</u></font></a>";
 												} ?>
 
 												<? if ($section_lastship_col7_flg == "yes") { 
@@ -10668,13 +10018,13 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 													<td class="style3"  align="center">
 														<? echo $po_delivery_dt; ?>
 													</td>
+													
 												<? } ?>
 												
 												<? if ($section_lastship_col4_flg == "yes") { 
-												
 												?>
 													<td class="style3"  align="center">
-														<? //if ($row["B"] > 0)  echo date('m/d/Y', strtotime($row["B"])); ?>
+														<? //if ($row["B"] > 0)  echo date('m-d-Y', strtotime($row["B"])); ?>
 														<? if ($bol_file_row["bol_shipped"] > 0)  echo date('m/d/Y', strtotime($bol_file_row["bol_shipped_date"])); ?>
 													</td>
 												<? } ?>
@@ -10687,9 +10037,9 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 												<? } ?>
 												<? if ($section_lastship_col5_flg == "yes") { 
 												?>
-												<td class="style3"  align="center">	
-													<? if ($row["A"] > 0)   echo number_format($row["A"],0); ?>
-												</td>
+													<td class="style3"  align="center">	
+														<? if ($row["A"] > 0)   echo number_format($row["A"],0); ?>
+													</td>
 												<? } ?>
 
 												<? if ($section_lastship_col6_flg == "yes") { ?>
@@ -10760,7 +10110,7 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 															$invoice_age_internal = $invoice_age;
 															$invoice_age_color = "#e4e4e4";
 															?>
-															<td class="style3" align="center" >
+															<td class="style3" align="center">
 																<?  echo $invoice_age; ?>
 															</td>
 													<?
@@ -10775,65 +10125,928 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 											$report_total_loc=count(array_unique($total_loc));
 											$tmpcnt = $tmpcnt + 1;
 										
-											$MGArray[] = array( 'inv_amount' => $row1["inv_amount"], 'accountowner' => $accountowner, 'dt_submitted_sort' => $dt_submitted_sort, 'dt_shipped_sort' => $dt_shipped_sort, 'dt_delv_sort' => $dt_delv_sort, 
-											'purchase_order' => $purchase_order, 'viewbol' => $viewbol, 'invoice' => $invoice, 'company' => $nickname, 'dt_submitted' => $dt_submitted , 'status' => $status, 
-											'original_planned_delivery_dt' => $original_planned_delivery_dt, 'po_delivery_dt' => $po_delivery_dt, 
-											'dt_shipped' => $dt_shipped , 'dt_delv' => $dt_delv , 'boxes' => $boxes, 'boxes_sort' => $boxes_sort, 'invoice_age' => $invoice_age_internal, 'invoice_age_color' => $invoice_age_color, 
-											'total_trans' => $total_trans, 'report_total_loc' => $report_total_loc, 'comp_id' =>$comp_id, 'order_id' => $row1["id"]);
+											$MGArray_current_order[] = array( 'inv_amount' => $row1["inv_amount"], 'accountowner' => $accountowner, 
+											'dt_submitted_sort' => $dt_submitted_sort, 'dt_shipped_sort' => $dt_shipped_sort, 'dt_delv_sort' => $dt_delv_sort, 'purchase_order' => $purchase_order, 'viewbol' => $viewbol, 'invoice' => $invoice, 'company' => $nickname, 'dt_submitted' => $dt_submitted , 'status' => $status, 'dt_shipped' => $dt_shipped , 
+											'original_planned_delivery_dt' => $original_planned_delivery_dt, 'po_delivery_dt' => $po_delivery_dt,
+											'dt_delv' => $dt_delv , 'boxes' => $boxes, 'boxes_sort' => $boxes_sort, 'invoice_age' => $invoice_age_internal, 'invoice_age_color' => $invoice_age_color, 'total_trans' => $total_trans, 'report_total_loc' => $report_total_loc, 'comp_id' =>$comp_id, 'order_id' => $row1["id"]);
 											//print_r($MGArray)."<br>";
 										}
-										$i++;
 									}
-									
-									if ($current_order_show_header_flg1 == "yes"  && $show_comp_flg == "yes"){
-										//echo "</table></div>";
-									}											
-									
+									$i++;
 								}
-
-								if ($section_lastship_col6_flg == "yes") {
-									if ($tot_inv_amount > 0 ){?>
-									<tr><td bgColor="#e4e4e4" colspan="<? echo $col_cnt_tmp+1; ?>" class="style3" align="right"><b>Total Amount:</b>&nbsp;</td><td bgColor="#e4e4e4" class="style3" align="right"><strong><? echo "$" . number_format($tot_inv_amount,2); ?></strong></td><td bgColor="#e4e4e4">&nbsp;</td></tr>
-									
-									<?	}
-									if ($child_comp != "") { 
-										if($total_trans>0)
-										{
-											?>
-											<tr>
-												<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
-												<?
-													echo "<font size='1'><b>Total Number of Locations: ".$report_total_loc."";
-												?>
-												</td>
-												<td bgColor="#e4e4e4">&nbsp;</td>
-											</tr>
-											<tr>
-												<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
-													<?
-													echo "<font size='1'><b>Total Number of Transactions: ".$total_trans."";
-													?>
-												</td>
-												<td bgColor="#e4e4e4">&nbsp;</td>
-											</tr>
-											<?
-										}
-									}
-								}
-								$_SESSION['sortarrayn_dsh'] = $MGArray; 
 							}
-						}
+							if ($section_lastship_col6_flg == "yes") {
+								if ($tot_inv_amount > 0 ){?>
+								<tr><td bgColor="#e4e4e4" colspan="<? echo $col_cnt_tmp+1; ?>" class="style3" align="right"><b>Total Amount:</b>&nbsp;</td><td bgColor="#e4e4e4" class="style3" align="right"><strong><? echo "$" . number_format($tot_inv_amount,2); ?></strong></td><td bgColor="#e4e4e4">&nbsp;</td></tr>
+								
+								<?	}
+								if ($child_comp != "") { 
+									if($total_trans>0)
+									{
+										?>
+										<tr>
+											<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
+											<?
+												echo "<font size='1'><b>Total Number of Locations: ".$report_total_loc."";
+											?>
+											</td>
+											<td bgColor="#e4e4e4">&nbsp;</td>
+										</tr>
+										<tr>
+											<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
+												<?
+												echo "<font size='1'><b>Total Number of Transactions: ".$total_trans."";
+												?>
+											</td>
+											<td bgColor="#e4e4e4">&nbsp;</td>
+										</tr>
+										<?
+									}
+								}
+							}
+							$_SESSION['sortarrayn_dsh_curr_ord'] = $MGArray_current_order; 
 						}
 						?>					
-						<!-- Current Order history-->
-						</table>
-						</td></tr>
+						<!-- Current Order-->
+
+						<tr ><td colspan="13">&nbsp;</td></tr>
+					<? //} ?>
+					
+					<tr class="headrow"><td colspan="14">
+						<? if (isset($_REQUEST["vs_start_date"])){
+							?>
+							Order history (Showing for <? echo $_REQUEST["vs_start_date"];?> To <? echo $_REQUEST["vs_end_date"];?>)
+						<? } else{?>
+							Order history (Showing last 25 transaction)
+						<? }?>	
+					</td></tr>
+
+					<tr class="headrow">
+						<?  $col_cnt_tmp = 0; 	?>
+					    <?
+					    if ($child_comp_new != "" && ($_REQUEST['dView'] == 2)) { 
+							$col_cnt_tmp = $col_cnt_tmp + 1;
+							?>
+							<td class="blackFont" align="center">
+								<? if (isset($_REQUEST["vs_start_date"])){?>
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=location&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Location</a>
+								<? } else{?>
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=location&sort_order=<?=$sort_order;?>&sorting_ship=yes">Location</a>
+								<? } ?>
+							</td>
+						<? } ?>
+					   	<td class="blackFont" align="center">
+							<? if (isset($_REQUEST["vs_start_date"])){?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=order_id&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Order ID</a>
+							<? } else{?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=order_id&sort_order=<?=$sort_order;?>&sorting_ship=yes">Order ID</a>
+							<? } ?>
+						</td>
+
+			 		   	<? if ($section_lastship_col1_flg == "yes") { 
+							$col_cnt_tmp = $col_cnt_tmp + 1;
+					   	?>
+						<td class="blackFont" align="center">
+							<? if (isset($_REQUEST["vs_start_date"])){?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=datesubmit&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Date Submitted</a>
+							<? } else{?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=datesubmit&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Submitted</a>
+							<? } ?>
+						</td>
+			 		   	<? } ?>
+
+			 		   	<? if ($section_lastship_col2_flg == "yes") { 
+							$col_cnt_tmp = $col_cnt_tmp + 1;
+					   	?>
+						<td class="blackFont" align="center">
+							<? if (isset($_REQUEST["vs_start_date"])){?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=status&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Status</a>
+							<? } else{?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=status&sort_order=<?=$sort_order;?>&sorting_ship=yes">Status</a>
+							<? }
+							?>
+							<div class="tooltip"><i class="fa fa-info-circle" aria-hidden="true"></i>
+								<span class="tooltiptext">
+									Cancelled <br />Invoice sent<br />Customer Signed BOL<br />Courtesy Followup Made<br/>Delivered<br/>Shipped - Driver Signed<br/>Shipped</br/>BOL @ Warehouse<br/>BOL Sent to Warehouse<br />BOL Created<br />Freight Booked<br />Sales Order Entered<br />PO Uploaded<br/> Order Entered - UPLOAD PO TABLE <br /> Pre-order - UPLOAD PO + Marked as Preorder <br /> Accumulating Inventory - UPLOAD PO + Unmarked as Preorder <br /> Arranging Pickup - Ready to hand to freight manager
+								</span>
+							</div>
+						</td>
+			 		   	<? } ?>
+
+			 		   	<? if ($section_lastship_col3_flg == "yes") { 
+							$col_cnt_tmp = $col_cnt_tmp + 1;
+					   	?>
+							<td class="blackFont" align="center">
+								Purchase Order
+							</td>
+			 		   	<? } ?>
+
+			 		   	<? if ($section_lastship_col7_flg == "yes") { 
+							$col_cnt_tmp = $col_cnt_tmp + 1;
+					   	?>
+							<td align="middle" style="width: 70px" class="blackFont" align="center">
+								View BOL
+							</td>
+
+							<td class="blackFont" align="center">
+								<? if (isset($_REQUEST["vs_start_date"])){?>
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&original_planned_delivery_dt=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Original Planned Delivery Date</a>
+								<? } else{?>
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&original_planned_delivery_dt=yes">Original Planned Delivery Date</a>
+								<? } ?>
+							</td>
+
+							<td class="blackFont" align="center">
+								<? if (isset($_REQUEST["vs_start_date"])){?>
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&curr_planned_del=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Current Planned Delivery Date</a>
+								<? } else{?>
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&curr_planned_del=yes">Current Planned Delivery Date</a>
+								<? } ?>
+							</td>
+			 		   	<? } ?>
+
+			 		   	<? if ($section_lastship_col4_flg == "yes") { 
+							$col_cnt_tmp = $col_cnt_tmp + 3;
+					   	?>
+							<td class="blackFont" align="center">
+								<? if (isset($_REQUEST["vs_start_date"])){?>
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Date Shipped</a>
+								<? } else{?>
+									<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=dateshipped&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Shipped</a>
+								<? } ?>
+							</td>
+			 		   	<? } ?>
+					   	<? if ($section_lastship_col4_flg == "yes") { 
+							$col_cnt_tmp = $col_cnt_tmp + 1;
+					   	?>
+						<td class="blackFont" align="center">
+							<? if (isset($_REQUEST["vs_start_date"])){?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=datedeliver&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Date Delivered</a>
+							<? } else{?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=datedeliver&sort_order=<?=$sort_order;?>&sorting_ship=yes">Date Delivered</a>
+							<? } ?>
+						</td>
+			 		   	<? } ?>
+
+			 		   	<? if ($section_lastship_col5_flg == "yes") { 
+							$col_cnt_tmp = $col_cnt_tmp + 1;
+					   	?>
+						<td class="blackFont" align="center">
+							<? if (isset($_REQUEST["vs_start_date"])){?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=boxes&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Quantity</a>
+							<? } else{?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=boxes&sort_order=<?=$sort_order;?>&sorting_ship=yes">Quantity</a></b>
+							<? } ?>
+						</td>
+			 		   	<? } ?>
+
+			 		   	<? if ($section_lastship_col6_flg == "yes") { 
+							$col_cnt_tmp = $col_cnt_tmp + 1;
+					   	?>
+						<td class="blackFont" align="center">
+							Invoice
+						</td>
+						<td class="blackFont" align="center">
+							<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=invamt&sort_order=<?=$sort_order;?>&sorting_ship=yes">Amount</a>
+						</td>
+			 		   	<? } ?>
+			 		   	<? if ($section_lastship_col8_flg == "yes") {  ?>
+						<td class="blackFont" align="center">
+							<? if (isset($_REQUEST["vs_start_date"])){?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=invage&sort_order=<?=$sort_order;?>&sorting_ship=yes&vs_start_date=<? echo $_REQUEST["vs_start_date"];?>&vs_end_date=<? echo $_REQUEST["vs_end_date"];?>">Invoice Age</a></b>
+							<? } else{?>
+								<a href="client_dashboard_new.php?compnewid=<?=$_REQUEST['compnewid'];?>&show=history&repchk=<?=$_REQUEST["repchk"];?>&sort=invage&sort_order=<?=$sort_order;?>&sorting_ship=yes">Invoice Age</a>
+							<? } ?>
+						</td>
+			 		   	<? } ?>
+					</tr>
+					<?
+					$todaysDate = date('Y-m-d');
+					$toDate 	= date("Y-m-d", strtotime('last day of previous month'));
+					$fromDate 	= date("Y-m-01", strtotime("-12 months"));
+					if($_REQUEST['sorting_ship']=="yes"){
+						$sort_order_arrtxt = "SORT_ASC";
+						if ($_REQUEST["sort_order"] != "") {
+							if ($_REQUEST["sort_order"] == "ASC") {
+								$sort_order_arrtxt = "SORT_ASC";
+							} else {
+								$sort_order_arrtxt = "SORT_DESC";
+							}
+						} else {
+							$sort_order_arrtxt = "SORT_DESC";
+						}
+					
+						$MGArray = $_SESSION['sortarrayn_dsh'];
+						if($_REQUEST["sort"] == "order_id")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['order_id'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
+							}
+						}
+
+						if($_REQUEST["sort"] == "location")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['company'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
+							}
+						}
+						
+						if($_REQUEST["sort"] == "datesubmit")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['dt_submitted_sort'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
+								
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
+								
+							}
+						}
+						if($_REQUEST["sort"] == "accout_manager")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['accountowner'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
+							}
+						}
+						
+						if($_REQUEST["sort"] == "status")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['status'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
+							}
+						}
+						if($_REQUEST["sort"] == "dateshipped")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['dt_shipped_sort'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
+							}
+						}
+						if($_REQUEST["sort"] == "datedeliver")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['dt_delv_sort'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
+							}
+						}
+						if($_REQUEST["sort"] == "invamt")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['inv_amount'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_NUMERIC,$MGArray); 
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_NUMERIC,$MGArray); 
+							}
+						}
+						if($_REQUEST["sort"] == "boxes")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['boxes_sort'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
+							}
+						}
+						if($_REQUEST["sort"] == "invage")
+						{
+							foreach ($MGArray as $MGArraytmp) {
+								$MGArraysort[] = $MGArraytmp['invoice_age'];
+							}
+							if ($sort_order_arrtxt == "SORT_ASC") {
+								array_multisort($MGArraysort,SORT_ASC,SORT_STRING,$MGArray); 
+							}else{
+								array_multisort($MGArraysort,SORT_DESC,SORT_STRING,$MGArray); 
+							}
+						}
+						$i = 0;
+						foreach ($MGArray as $MGArraytmp2) {
+							if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
+							$total_loc[] = $MGArraytmp2["comp_id"];
+							?>
+							<tr vAlign="center" class="<?=$rowclr?>">
+								<? if ($child_comp != "") { 
+								?>
+								<td class="style3"  align="center">	
+									<? echo $MGArraytmp2["company"]; ?>
+								</td>
+								<? } ?>
+								<td class="style3"  align="center">	
+									<? echo $MGArraytmp2["order_id"]; ?>
+								</td>
+								<? if ($section_lastship_col1_flg == "yes") { ?>
+								<td class="style3"  align="center">	
+									<? echo $MGArraytmp2["dt_submitted"]; ?>
+								</td>
+								<? } ?>
+								<? if ($section_lastship_col2_flg == "yes") { ?>
+								<td class="style3"  align="center">	
+									<? echo $MGArraytmp2["status"]; ?>
+								</td>
+								<? } ?>
+								<? 
+								if ($section_lastship_col3_flg == "yes") { ?>
+									<td class="style3"  align="center" id="po_order_show<?=$tmpcnt;?>">	
+										<? echo $MGArraytmp2["purchase_order"]; ?>
+									</td>
+								<? } ?>
+
+								<? if ($section_lastship_col7_flg == "yes") { ?>
+									<td class="style3" align="center" id="bol_show<?=$tmpcnt;?>">	
+										<? echo $MGArraytmp2["viewbol"]; ?>
+									</td>
+									<td class="style3"  align="center">
+										<? echo $MGArraytmp2["original_planned_delivery_dt"]; ?>
+									</td>
+									<td class="style3"  align="center">
+										<? echo $MGArraytmp2["po_delivery_dt"]; ?>
+									</td>
+								<? } ?>
+								
+								<? if ($section_lastship_col4_flg == "yes") { ?>
+									<td class="style3"  align="center">
+										<? echo $MGArraytmp2["dt_shipped"]; ?>
+									</td>
+								<? } ?>
+
+								<? if ($section_lastship_col4_flg == "yes") { ?>
+									<td class="style3"  align="center">
+										<? echo $MGArraytmp2["dt_delv"]; ?>
+									</td>
+								<? } ?>
+								<? if ($section_lastship_col5_flg == "yes") { ?>
+								<td class="style3"  align="center">	
+									<? echo $MGArraytmp2["boxes"]; ?>
+								</td>
+								<? } ?>
+
+								<? if ($section_lastship_col6_flg == "yes") { ?>
+								<td class="style3"  align="center" id="inv_file_show<?=$tmpcnt;?>">	
+									<? echo $MGArraytmp2["invoice"]; ?>
+								</td>
+								<td class="style3"  align="right">	
+									<? echo number_format($MGArraytmp2["inv_amount"],2); ?>
+								</td>
+								<? } ?>
+
+								<? if ($section_lastship_col8_flg == "yes") { ?>
+									<td bgColor="<? echo $MGArraytmp2["invoice_age_color"];?>" class="style3" align="center" >
+										<?  echo $invoice_age; ?>
+									</td>
+								 <?
+									}
+
+									$tot_inv_amount = $tot_inv_amount + $MGArraytmp2["inv_amount"];			
+									$total_trans=$total_trans +1;			
+								?>				
+								
+							</tr>
+							<?
+							$report_total_loc=count(array_unique($total_loc));
+							$tmpcnt = $tmpcnt + 1;
+							$i++;
+						}
+						if ($section_lastship_col6_flg == "yes") {
+							if ($tot_inv_amount > 0 ){?>
+							<tr  class="rowdata" >
+								<td bgColor="#e4e4e4" colspan="<? echo $col_cnt_tmp+1; ?>" class="style3" align="right"><b>Total Amount:</b>&nbsp;</td><td bgColor="#e4e4e4" class="style3" align="right"><strong><? echo "$" . number_format($tot_inv_amount,2); ?></strong></td><td bgColor="#e4e4e4">&nbsp;</td></tr>
+							<?	
+							}
+							if ($child_comp != "") { 
+								if($total_trans>0){
+								?>
+								<tr  class="rowdata">
+									<td bgColor="#e4e4e4" colspan="12" class="style3" align="right">
+									<?
+										echo "<font size='1'><b>Total Number of Locations: ".$report_total_loc."";
+									?>
+									</td>
+									<td bgColor="#e4e4e4">&nbsp;</td>
+								</tr>
+								<tr  class="rowdata">
+									<td bgColor="#e4e4e4" colspan="12" class="style3" align="right">
+										<?
+										echo "<font size='1'><b>Total Number of Transactions: ".$total_trans."";
+										?>
+									</td>
+									<td bgColor="#e4e4e4">&nbsp;</td>
+								</tr>
+								<?
+								}
+							}
+						}
+					}else{
+						$query1 = "";
+						if (isset($_REQUEST["vs_start_date"])){
+							if ($_REQUEST['dView'] == 2 && $child_comp_new != "") {
+								$query1 = "SELECT loop_transaction_buyer.original_planned_delivery_dt , loop_transaction_buyer.po_delivery_dt, loop_transaction_buyer.id, no_invoice, inv_date_of, so_entered, po_date, start_date, loop_transaction_buyer.warehouse_id, `ignore`, good_to_ship, po_file, po_ponumber, inv_file, inv_number, inv_amount FROM loop_transaction_buyer inner join loop_bol_files ON loop_bol_files.trans_rec_id = loop_transaction_buyer.id 
+								WHERE loop_transaction_buyer.warehouse_id in ( " . $client_loopid . "," . $child_comp_new . ") and date_format(str_to_date(bol_shipment_received_date, '%m/%d/%Y'), '%Y-%m-%d') BETWEEN '". date("Y-m-d" , strtotime($_REQUEST["vs_start_date"]))." 00:00:00' AND '". date("Y-m-d" , strtotime($_REQUEST["vs_end_date"])) ." 23:59:59' Group by loop_bol_files.trans_rec_id ORDER BY loop_transaction_buyer.warehouse_id, loop_transaction_buyer.id DESC";
+							}else{
+								$query1 = "SELECT loop_transaction_buyer.original_planned_delivery_dt , loop_transaction_buyer.po_delivery_dt , loop_transaction_buyer.id, no_invoice, inv_date_of, so_entered, po_date, start_date, loop_transaction_buyer.warehouse_id, `ignore`, good_to_ship, po_file, po_ponumber, inv_file, inv_number, inv_amount FROM loop_transaction_buyer inner join loop_bol_files ON loop_bol_files.trans_rec_id = loop_transaction_buyer.id 
+								WHERE loop_transaction_buyer.warehouse_id = $client_loopid and date_format(str_to_date(bol_shipment_received_date, '%m/%d/%Y'), '%Y-%m-%d') BETWEEN '". date("Y-m-d" , strtotime($_REQUEST["vs_start_date"]))." 00:00:00' AND '". date("Y-m-d" , strtotime($_REQUEST["vs_end_date"])) ." 23:59:59' Group by loop_bol_files.trans_rec_id ORDER BY loop_transaction_buyer.id DESC";
+							}								
+						}else{
+							if ($_REQUEST['dView'] == 2 && $child_comp_new != "") {
+								$query1 = "SELECT loop_transaction_buyer.original_planned_delivery_dt , loop_transaction_buyer.po_delivery_dt, loop_transaction_buyer.id, loop_transaction_buyer.inv_amount FROM loop_transaction_buyer WHERE loop_transaction_buyer.warehouse_id in ( " . $client_loopid . "," . $child_comp_new . ") AND loop_transaction_buyer.invoice_paid = 1 and loop_transaction_buyer.transaction_date BETWEEN '".$fromDate." 00:00:00' AND '".$toDate." 23:59:59'  ORDER BY warehouse_id asc, id DESC LIMIT 25";
+							}else{
+								if ($client_loopid != ""){
+									$query1 = "SELECT * FROM loop_transaction_buyer WHERE loop_transaction_buyer.warehouse_id = $client_loopid AND loop_transaction_buyer.invoice_paid = 1 and loop_transaction_buyer.transaction_date BETWEEN '".$fromDate." 00:00:00' AND '".$toDate." 23:59:59' ORDER BY id DESC LIMIT 25";
+								}	
+							}
+						}
+						//echo "<br /> query1 - ".$query1;
+						
+						if ($query1 != ""){
+							$res1 = db_query($query1, db());
+							//echo "<pre> res1 - ";  print_r($res1); echo "</pre>";
+							$tmpcnt=0; $tot_inv_amount = 0; $total_trans=0;
+							$i = 0;
+							while($row1 = array_shift($res1)) {
+								if ($i % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
+								if (isset($_REQUEST["vs_start_date"])){
+									$query = "SELECT SUM( loop_bol_tracking.qty ) AS A, loop_bol_tracking.bol_pickupdate AS B, loop_bol_tracking.trans_rec_id AS C FROM loop_bol_tracking WHERE trans_rec_id = ". $row1["id"] . " and (STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') >= '" . date("Y-m-d" , strtotime($_REQUEST["vs_start_date"])) . "' and STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') <= '" . date("Y-m-d" , strtotime($_REQUEST["vs_end_date"])). "') ORDER BY C DESC ";
+									//GROUP BY trans_rec_id
+								}else {
+									$query = "SELECT SUM( loop_bol_tracking.qty ) AS A, loop_bol_tracking.bol_pickupdate AS B, loop_bol_tracking.trans_rec_id AS C FROM loop_bol_tracking WHERE trans_rec_id = ". $row1["id"] . " AND (STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') >= '" . $fromDate . "' and STR_TO_DATE(loop_bol_tracking.bol_pickupdate, '%m/%d/%Y') <= '" . $toDate . "') ORDER BY C  DESC";
+								}
+								//echo "<br /> query - ".$query;	
+								$res = db_query($query);
+								//echo "<pre> res - ";  print_r($res); echo "</pre>";
+								while($row = array_shift($res)){
+									//DATE SHIPPED FETCH START
+									$resShippedDate = db_query("SELECT bol_shipped, bol_shipped_date FROM loop_bol_files WHERE trans_rec_id = ".$row1["id"], db());
+									//DATE SHIPPED FETCH END
+									//This is the payment Info for the Customer paying UCB
+									$payments_sql = "SELECT SUM(loop_buyer_payments.amount) AS A FROM loop_buyer_payments WHERE trans_rec_id = " . $row1["id"];
+									$payment_qry = db_query($payments_sql );
+									$payment = array_shift($payment_qry);
+									
+									$tot_inv_amount = $tot_inv_amount + $row1["inv_amount"];
+									$total_trans=$total_trans +1;
+									//This is the payment info for UCB paying the related vendors
+									$vendor_sql = "SELECT COUNT(loop_transaction_buyer_payments.id) AS A, MIN(loop_transaction_buyer_payments.status) AS B, MAX(loop_transaction_buyer_payments.status) AS C FROM loop_transaction_buyer_payments WHERE loop_transaction_buyer_payments.transaction_buyer_id = " . $row1["id"];
+									$vendor_qry = db_query($vendor_sql );
+									$vendor = array_shift($vendor_qry);
+
+									//Info about Shipment
+									$bol_file_qry = "SELECT * FROM loop_bol_files WHERE trans_rec_id LIKE '" . $row1["id"] . "' ORDER BY id DESC";
+									//echo $bol_file_qry ;
+									$bol_file_res = db_query($bol_file_qry );
+									$bol_file_row = array_shift($bol_file_res);
+
+									/*GET UPLOAD PO TABLE INFO*/
+									$qryPOTable = "SELECT * FROM loop_transaction_buyer_poeml WHERE trans_rec_id LIKE '" . $row1["id"] . "' ORDER BY unqid DESC";
+									//echo $bol_file_qry ;
+									$resPOTable = db_query($qryPOTable);
+									$cntPOTable = tep_db_num_rows($resPOTable);
+									/*GET UPLOAD PO TABLE INFO*/
+
+									$fbooksql = "SELECT * FROM loop_transaction_freight WHERE trans_rec_id=" . $row1["id"];
+									$fbookresult = db_query($fbooksql );
+									$freightbooking = array_shift($fbookresult);
+
+									$vendors_paid = 0; //Are the vendors paid
+									$vendors_entered = 0; //Has a vendor transaction been entered?
+									$invoice_paid = 0; //Have they paid their invoice?
+									$invoice_entered=0; //Has the inovice been entered
+									$signed_customer_bol= 0; 	//Customer Signed BOL Uploaded
+									$courtesy_followup = 0; 	//Courtesy Follow Up Made
+									$delivered = 0; 	//Delivered
+									$signed_driver_bol = 0; 	//BOL Signed By Driver
+									$shipped = 0; 	//Shipped
+									$bol_received = 0; 	//BOL Received @ WH
+									$bol_sent = 0; 	//BOL Sent to WH"
+									$bol_created = 0; 	//BOL Created
+									$freight_booked = 0; //freight booked
+									$sales_order = 0;   // Sales Order entered
+									$po_uploaded = 0;  //po uploaded 
+					 
+									//Are all the vendors paid?
+									if ($vendor["B"] == 2 && $vendor["C"] == 2) 
+									{ 
+										$vendors_paid = 1; 
+									}
+									
+									//Have we entered a vendor transaction?
+									if ($vendor["A"] > 0) { 
+										$vendors_entered = 1; 
+									} 		
+
+									//Have they paid their invoice?
+									if (number_format($row1["inv_amount"],2) == number_format($payment["A"],2) && $row1["inv_amount"] != "") 
+									{ 
+										$invoice_paid = 1; 
+									} 
+									if ($row1["no_invoice"] == 1) {				$invoice_paid = 1; 			}
+
+									//Has an invoice amount been entered?
+									if ($row1["inv_amount"] > 0) { 
+										$invoice_entered=1; 
+									} 
+
+									if ($bol_file_row["bol_shipment_signed_customer_file_name"] != "") { $signed_customer_bol=1; }	//Customer Signed BOL Uploaded
+									if ($bol_file_row["bol_shipment_followup"] >0) { $courtesy_followup = 1; }	//Courtesy Follow Up Made
+									if ($bol_file_row["bol_shipment_received"] >0) { $delivered=1; }	//Delivered
+									if ($bol_file_row["bol_signed_file_name"]!= "") { $signed_driver_bol=1; }	//BOL Signed By Driver
+									if ($bol_file_row["bol_shipped"] >0) { $shipped = 1; }	//Shipped
+									if ($bol_file_row["bol_received"] >0) { $bol_received = 1; }	//BOL Received @ WH
+									if ($bol_file_row["bol_sent"] > 0) { $bol_sent = 1; }	//BOL Sent to WH"
+									if ($bol_file_row["id"] > 0) { $bol_created=1; }	//BOL Created
+
+									if ($freightbooking["id"] > 0 ) { $freight_booked = 1;} //freight booked
+									
+									$start_t = strtotime($row1["inv_date_of"]);
+									$end_time =  strtotime(now);
+									$invoice_age = number_format(($end_time-$start_t)/(3600*24),0);		
+									
+									if (($row1["so_entered"] == 1)) {	 $sales_order = 1; } //sales order created
+									if ($row1["po_date"] != "") { $po_uploaded = 1; } //po uploaded 			
+									
+									$nn =""; $dt_submitted = ""; $status = "";
+									$dt_submitted_sort = ""; $dt_shipped_sort = ""; $dt_delv_sort = "";
+									
+									$dt_submitted = date('m-d-Y', strtotime($row1["start_date"]));
+									$dt_submitted_sort = date('Y-m-d', strtotime($row1["start_date"]));
+									
+									$dt_shipped = ""; $dt_delv = ""; $boxes = ""; $inv_age = ""; $purchase_order = ""; $viewbol = ""; $invoice ="";
+									if ($row["B"] > 0)  { $dt_shipped = date('m-d-Y', strtotime($row["B"])); $dt_shipped_sort = date('Y-m-d', strtotime($row["B"]));}
+									if ($bol_file_row['bol_shipment_received_date'] > 0)  { $dt_delv = date('m-d-Y', strtotime($bol_file_row['bol_shipment_received_date'])); $dt_delv_sort = date('Y-m-d', strtotime($bol_file_row['bol_shipment_received_date']));}
+									if ($row["A"] > 0)   { $boxes = number_format($row["A"],0); $boxes_sort = $row["A"]; } 
+									
+									$original_planned_delivery_dt = ""; $po_delivery_dt = "";
+									if ($row1["original_planned_delivery_dt"] != ""){
+										$original_planned_delivery_dt = date('m/d/Y', strtotime($row1["original_planned_delivery_dt"]));
+									}	
+									if ($row1["po_delivery_dt"] != ""){
+										$po_delivery_dt = date('m/d/Y', strtotime($row1["po_delivery_dt"]));
+									}	
+									
+									?>
+									<tr vAlign="center"  class="<?=$rowclr?>">
+										<? 
+										$nickname = "";
+										
+										if (($child_comp_new != "") && ($_REQUEST['dView'] == 2) )  { 
+											db_b2b();
+											$sql1 = "SELECT ID,nickname,assignedto, company, shipCity, shipState FROM companyInfo where loopid = '" . $row1["warehouse_id"] . "'";
+											
+											$result_comp = db_query($sql1, db_b2b() );
+											while ($row_comp = array_shift($result_comp)) {
+												if ($row_comp["nickname"] != ""){
+													$nickname = $row_comp["nickname"];
+												}else{
+													$tmppos_1 = strpos($row_comp["company"], "-");
+													if ($tmppos_1 != false)
+													{
+														$nickname = $row_comp["company"];
+													}else {
+														if ($row_comp["shipCity"] <> "" || $row_comp["shipState"] <> "" ) 
+														{
+															$nickname = $row_comp["company"] . " - " . $row_comp["shipCity"] . ", " . $row_comp["shipState"] ;
+														}else { $nickname = $row_comp["company"]; }
+													}
+												}
+												$comp_id=$row_comp["ID"];
+												$total_loc[] = $comp_id;
+												
+												$arr = explode(",", $row_comp["assignedto"]);
+
+												db();
+											}
+											
+										?>
+											<td class="style3"  align="center">	
+												<? echo $nickname; ?>
+											</td>
+										<? } ?>
+										<td class="style3"  align="center">	
+											<? echo $row1["id"]; ?>
+										</td>
+										
+										<? if ($section_lastship_col1_flg == "yes") { 
+										?>
+										<td class="style3"  align="center">	
+											<? echo date('m/d/Y', strtotime($row1["start_date"])); ?>
+										</td>
+										<? } ?>
+										<? if ($section_lastship_col2_flg == "yes") {
+										?>
+										<td class="style3"  align="center">	
+											<?	
+												if (($row1["ignore"] == 1)) { Echo "Cancelled"; $status ="Cancelled";}
+												elseif ($invoice_paid == 1)
+												{		
+													echo "Paid"; $status ="Paid";
+												} elseif ($invoice_entered == 1) { Echo "Invoice sent"; $status ="Invoice sent";
+												} elseif ($signed_customer_bol == 1) { Echo "Customer Signed BOL"; $status ="Customer Signed BOL";
+												} elseif ($courtesy_followup == 1) { Echo "Courtesy Followup Made"; $status ="Courtesy Followup Made";
+												} elseif ($delivered == 1) { Echo "Delivered"; $status ="Delivered";
+												} elseif ($signed_driver_bol == 1) { Echo "Shipped - Driver Signed"; $status ="Shipped - Driver Signed";
+												} elseif ($shipped == 1) { Echo "Shipped"; $status ="Shipped";
+												} elseif ($bol_received == 1) { Echo "BOL @ Warehouse"; $status ="BOL @ Warehouse";
+												} elseif ($bol_sent == 1) { Echo "BOL Sent to Warehouse"; $status ="BOL Sent to Warehouse";
+												} elseif ($bol_created == 1) { Echo "BOL Created"; $status ="BOL Created";
+												} elseif ($freight_booked == 1) { Echo "Freight Booked"; $status ="Freight Booked";
+												} elseif ($sales_order == 1) { Echo "Sales Order Entered"; $status ="Sales Order Entered";
+												} elseif ($po_uploaded == 1) { Echo "PO Uploaded"; $status ="PO Uploaded";
+												} elseif ($cntPOTable > 0 ) { Echo "Order Entered"; $status ="Order Entered";
+												} elseif ($cntPOTable > 0 && $row1["Preorder"] == 1 ) { Echo "Pre-order"; $status ="Pre-order";
+												} elseif ($cntPOTable > 0 && $row1["Preorder"] == 0 ) { Echo "Accumulating Inventory"; $status ="Accumulating Inventory";
+												} elseif ($row1["good_to_ship"] == 1 ) { Echo "Arranging Pickup"; $status ="Arranging Pickup";
+												}
+											?>					
+										</td>
+										<? } ?>
+										
+										<? 
+										if ($section_lastship_col3_flg == "yes") { 
+											?>
+											<td class="style3"  align="center" id="po_order_show<?=$tmpcnt;?>">	
+												<a href="javascript:void(0);" onclick="display_file('https://loops.usedcardboardboxes.com/po/<?=str_replace(" ", "%20", $row1["po_file"]);?>', 'Purchase order',<?=$tmpcnt;?>)"><font color="blue"><u><? echo "&nbsp;" . $row1["po_ponumber"]; ?></u></font></a>
+											</td>
+											<? $purchase_order = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_file('https://loops.usedcardboardboxes.com/po/" . str_replace(" ", "%20", $row1["po_file"]) . "', 'Purchase order'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>&nbsp;" . $row1["po_ponumber"] . "</u></font></a>";
+										} ?>
+
+										<? if ($section_lastship_col7_flg == "yes") { 
+										?>
+										<td class="style3" align="center" id="bol_show<?=$tmpcnt;?>">	
+											<? 
+												$bol_view_qry = "SELECT * from loop_bol_files WHERE trans_rec_id = '" . $row1["id"] . "' ORDER BY id DESC";
+												$bol_view_res = db_query($bol_view_qry, db() );
+												while ($bol_view_row = array_shift($bol_view_res)) {					
+													if ($bol_view_row["trans_rec_id"] != '') {
+													?>
+														<a href="javascript:void(0);" onclick="display_bol_file('https://loops.usedcardboardboxes.com/bol/<?=str_replace(" ", "%20", $bol_view_row["file_name"]);?>', 'BOL',<?=$tmpcnt;?>)"><font color="blue"><u><? echo $bol_view_row["id"] . "-" . $bol_view_row["trans_rec_id"]; ?></u></font></a>
+													<? 
+														$viewbol = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_bol_file('https://loops.usedcardboardboxes.com/bol/" . str_replace(" ", "%20", $bol_view_row["file_name"]) . "', 'BOL'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>" . $bol_view_row["id"] . "-" . $bol_view_row["trans_rec_id"] . "</u></font></a>";
+													} else {
+													?>
+														<a href="javascript:void(0);" onclick="display_bol_file('https://loops.usedcardboardboxes.com/bol/<?=str_replace(" ", "%20", $bol_view_row["file_name"]);?>', 'BOL',<?=$tmpcnt;?>)"><font color="blue"><u>View BOL</u></font></a>
+													<?
+														$viewbol = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_bol_file('https://loops.usedcardboardboxes.com/bol/" . str_replace(" ", "%20", $bol_view_row["file_name"]) . "', 'BOL'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>View BOL</u></font></a>";
+													}
+												} 
+											?>
+											</td>
+											
+											<td class="style3"  align="center">
+												<? echo $original_planned_delivery_dt; ?>
+											</td>
+											<td class="style3"  align="center">
+												<? echo $po_delivery_dt; ?>
+											</td>
+										<? } ?>
+										
+										<? if ($section_lastship_col4_flg == "yes") { 
+										
+										?>
+											<td class="style3"  align="center">
+												<? //if ($row["B"] > 0)  echo date('m/d/Y', strtotime($row["B"])); ?>
+												<? if ($bol_file_row["bol_shipped"] > 0)  echo date('m/d/Y', strtotime($bol_file_row["bol_shipped_date"])); ?>
+											</td>
+										<? } ?>
+
+										<? if ($section_lastship_col4_flg == "yes") { 
+										?>
+											<td class="style3"  align="center">
+												<? if ($bol_file_row['bol_shipment_received_date'] > 0)  echo date('m/d/Y', strtotime($bol_file_row['bol_shipment_received_date'])); ?>
+											</td>
+										<? } ?>
+										<? if ($section_lastship_col5_flg == "yes") { 
+										?>
+										<td class="style3"  align="center">	
+											<? if ($row["A"] > 0)   echo number_format($row["A"],0); ?>
+										</td>
+										<? } ?>
+
+										<? if ($section_lastship_col6_flg == "yes") { ?>
+											<td class="style3"  align="center" id="inv_file_show<?=$tmpcnt;?>">	
+												<? if ($row1["inv_file"] > 0)   { 
+													if ($row1["inv_number"] != '')   { 
+													?>
+													<a href="javascript:void(0);" onclick="display_inv_file('https://loops.usedcardboardboxes.com/files/<?=str_replace(" ", "%20", $row1["inv_file"]);?>', 'Invoice',<?=$tmpcnt;?>)"><font color="blue"><u><? echo $row1["inv_number"]; ?></u></font></a>
+												<? 
+													$invoice = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_inv_file('https://loops.usedcardboardboxes.com/files/" . str_replace(" ", "%20", $row1["inv_file"]) . "', 'Invoice'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>" . $row1["inv_number"] . "</u></font></a>";
+													} else {
+													?>
+														<a href="javascript:void(0);"  onclick="display_inv_file('https://loops.usedcardboardboxes.com/files/<?=str_replace(" ", "%20", $row1["inv_file"]);?>', 'Invoice',<?=$tmpcnt;?>)"><font color="blue"><u>View Invoice</u></font></a>
+													<?
+														$invoice = "<a href='javascript:void(0);' onclick=" . chr(34) . "display_inv_file('https://loops.usedcardboardboxes.com/files/" . str_replace(" ", "%20", $row1["inv_file"]) . "', 'Invoice'," . $tmpcnt . ")" . chr(34) . "><font color='blue'><u>View Invoice</u></font></a>";
+													}
+												} 
+												?>
+											</td>
+
+											<td class="style3"  align="right">	
+												<? if ($row1["inv_amount"] > 0) {
+														echo "$" . number_format($row1["inv_amount"],2); 
+													}
+												?>
+											</td>
+										<? } ?>
+
+										<? 
+											$invoice_age_internal = ""; $invoice_age_color = "";
+											if ($section_lastship_col8_flg == "yes") {
+												if ($invoice_age > 30 && $invoice_age < 1000) 
+												{
+													if ($invoice_paid == 1) {
+														$invoice_age_internal = "";
+														$invoice_age_color = "#e4e4e4";
+											?>
+													<td class="style3" align="center" >&nbsp;
+														
+													</td>
+											<?
+												 }else{ $invoice_age_internal = $invoice_age;
+														$invoice_age_color = "#ff0000";
+														?>
+													<td class="style3" align="center" bgcolor="<? echo $invoice_age_color?>">
+														<?  echo $invoice_age; ?>
+													</td>
+												 <?}
+												} elseif (number_format(($end_time-$start_t)/(3600*24000),0) > 10)
+												{
+													$invoice_age_internal = "";
+													$invoice_age_color = "#e4e4e4";
+											?>
+													<td class="style3" align="center" >&nbsp;
+														
+													</td>
+											<?
+												} else
+												{
+													if ($invoice_paid == 1) {
+														$invoice_age_internal = "";
+														$invoice_age_color = "#e4e4e4";
+											?>
+													<td class="style3" align="center" >&nbsp;
+														
+													</td>
+												<? }else { 
+													$invoice_age_internal = $invoice_age;
+													$invoice_age_color = "#e4e4e4";
+													?>
+													<td class="style3" align="center" >
+														<?  echo $invoice_age; ?>
+													</td>
+											<?
+												  }
+												} 
+											}
+										?>				
+										
+									</tr>
+
+									<?
+									$report_total_loc=count(array_unique($total_loc));
+									$tmpcnt = $tmpcnt + 1;
+								
+									$MGArray[] = array( 'inv_amount' => $row1["inv_amount"], 'accountowner' => $accountowner, 'dt_submitted_sort' => $dt_submitted_sort, 'dt_shipped_sort' => $dt_shipped_sort, 'dt_delv_sort' => $dt_delv_sort, 
+									'purchase_order' => $purchase_order, 'viewbol' => $viewbol, 'invoice' => $invoice, 'company' => $nickname, 'dt_submitted' => $dt_submitted , 'status' => $status, 
+									'original_planned_delivery_dt' => $original_planned_delivery_dt, 'po_delivery_dt' => $po_delivery_dt, 
+									'dt_shipped' => $dt_shipped , 'dt_delv' => $dt_delv , 'boxes' => $boxes, 'boxes_sort' => $boxes_sort, 'invoice_age' => $invoice_age_internal, 'invoice_age_color' => $invoice_age_color, 
+									'total_trans' => $total_trans, 'report_total_loc' => $report_total_loc, 'comp_id' =>$comp_id, 'order_id' => $row1["id"]);
+									//print_r($MGArray)."<br>";
+								}
+								$i++;
+							}
+						}
+						if ($section_lastship_col6_flg == "yes") {
+							if ($tot_inv_amount > 0 ){?>
+							<tr><td bgColor="#e4e4e4" colspan="<? echo $col_cnt_tmp+1; ?>" class="style3" align="right"><b>Total Amount:</b>&nbsp;</td><td bgColor="#e4e4e4" class="style3" align="right"><strong><? echo "$" . number_format($tot_inv_amount,2); ?></strong></td><td bgColor="#e4e4e4">&nbsp;</td></tr>
 							
+							<?	}
+							if ($child_comp != "") { 
+								if($total_trans>0)
+								{
+									?>
+									<tr>
+										<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
+										<?
+											echo "<font size='1'><b>Total Number of Locations: ".$report_total_loc."";
+										?>
+										</td>
+										<td bgColor="#e4e4e4">&nbsp;</td>
+									</tr>
+									<tr>
+										<td bgColor="#e4e4e4" colspan="11" class="style3" align="right">
+											<?
+											echo "<font size='1'><b>Total Number of Transactions: ".$total_trans."";
+											?>
+										</td>
+										<td bgColor="#e4e4e4">&nbsp;</td>
+									</tr>
+									<?
+								}
+							}
+						}
+						$_SESSION['sortarrayn_dsh'] = $MGArray; 
+					}
+					?>
+					
 				</tbody>	
 				</table>
 			</td>
 		</tr>
-
+		<!-- <tr>
+			<td align="center">
+				<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10 tableBorder">
+				<tbody>
+				<tr class="headrow">
+					<td colspan="6">ACCOUNT DETAILS</td>
+				</tr>
+				<?
+				$resComp = db_query("SELECT loopid FROM companyInfo WHERE ID = '".$client_companyid . "'",db_b2b());
+				$rowComp = array_shift($resComp);
+				$dt_view_qry = "SELECT * FROM loop_warehouse WHERE id= '" . $rowComp['loopid'] ."' AND credit_application_file != ''";
+				$dt_view_res = db_query($dt_view_qry,db() );
+				$credit_file_found = "yes";
+				if (tep_db_num_rows($dt_view_res) == 0){
+					$credit_file_found = "no";
+					$dt_view_qry = "SELECT * FROM loop_warehouse WHERE id= '" . $rowComp['loopid'] ."' AND credit_application_file != ''";
+					$dt_view_res = db_query($dt_view_qry,db() );
+				}
+				//echo "<pre>"; print_r($dt_view_res); echo "</pre>";
+				$termSetupCnt = tep_db_num_rows($dt_view_res);
+				if($termSetupCnt > 0){
+					?>
+					<tr class="blackFont">
+						<td colspan="2">Filename</td>
+						<td colspan="2">User</td>
+						<td colspan="2">Date</td>
+					</tr>
+					<?
+					while ($dt_view_row = array_shift($dt_view_res)) {
+						?>
+						<tr>
+							<td colspan="2"><a target="_blank" href="https://loops.usedcardboardboxes.com/credit_application/<? echo preg_replace( "/'/", "\'", $dt_view_row["credit_application_file"]) ; ?>" >		<? echo $dt_view_row["credit_application_file"]; ?></a>	</td>
+							<td colspan="2"><? echo $dt_view_row["credit_application_by"]; ?></td>
+							<td colspan="2"><? echo date('m/d/Y', strtotime($dt_view_row["credit_application_date"])); ?></td>
+						</tr>
+						<tr class="blackFont">
+							<td>Net Term</td>
+							<td>Credit Amount</td>
+							<td>Notes</td>
+							<td>Approve</td>
+							<td>Approved By</td>
+							<td>Approved On</td>
+						</tr>
+						<tr>
+							<td><?=$dt_view_row["credit_application_net_term"];?></td>
+							<td><?=$dt_view_row["credit_application_credit_amt"]; ?></td>
+							<td><?=$dt_view_row["credit_application_notes"]; ?></td>
+							<td>Approve</td>
+							<td><?=$dt_view_row["credit_application_apprv_by"]; ?></td>
+							<td><?=date('m/d/Y', strtotime($dt_view_row["credit_application_apprv_dt"])); ?></td>
+						</tr>
+						<?
+					}
+				}else{
+					?>
+					<tr>
+						<td colspan="6">Want to apply for credit terms? Fill out our credit application and send it to <a href="mailto:CreditApproval@UsedCardboardBoxes.com">CreditApproval@UsedCardboardBoxes.com</a> </td>
+					</tr>
+					<?					
+				}
+				?>
+				</tbody>
+				</table>				
+			</td>
+		</tr> -->
 	</table>
 	<?php }else{
 		echo "<div class='alert alert-danger'><span>Need to Login, to access this page</span></div>";	
@@ -10893,12 +11106,10 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 	}
 }else if($_REQUEST['show'] == 'sales_quotes'){  
 	?>
-	<div class="alert text-center">
+	<div class="alert alert-light text-center">
 		<h3>Sales quotes</h3>
 		<h3 class="mt-1">QUOTES GENERATED</h3>
 	</div>
-	
-	<div id="products-table-view" class="mt-3">
 	<?php 
 		db();
 		$user_companies = db_query("SELECT company_id FROM boomerang_user_companies where user_id = '".$user_id."'");
@@ -10909,22 +11120,19 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 			$company_nm_qry = db_query("SELECT nickname FROM companyInfo where ID = $usr_company_id ORDER BY company");
 			$company_nm = array_shift($company_nm_qry);
 		?>
-		<table width="100%" cellspacing="1" cellpadding="1"border="0" >
-			<thead>
-			<tr >
-				<th colspan="6" align="center"><?php echo $company_nm['nickname']; ?></th>
-			</tr>
-			<tr >
-				<th>UCB Quote #</th>
-				<th>Quote Type</th>
-				<th>PO #</th>
-				<th>Quote Date</th>
-				<th>Quote Amount</th>
-				<th>Status</th>
-			</tr>
-			</thead>
-			
+		<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10 tableBorder">
 			<tbody>
+			<tr class="headrow">
+				<td colspan="6" align="center"><?php echo $company_nm['nickname']; ?></td>
+			</tr>
+			<tr class="style17">
+				<td>UCB Quote #</td>
+				<td>Quote Type</td>
+				<td>PO #</td>
+				<td>Quote Date</td>
+				<td>Quote Amount</td>
+				<td>Status</td>
+			</tr>
 			<?
 			$quotes_archive_date = "";
 			$query = "SELECT variablevalue FROM tblvariable where variablename = 'quotes_archive_date'";
@@ -11013,43 +11221,18 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 			</tbody>
 		</table>
 		<?
-			} ?>
-			
-		</div>	
-		
-		<?
+			}
 		} else{
 			echo "<div class='alert alert-danger'><span>No data found.</span></div>";
 		}
-		
 }else if($_REQUEST['show'] == 'inventory' && $show_boxprofile_inv == 'yes'){  
 ?>
-<style>
-	body, html {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden; /* Prevent horizontal scrollbar */
-        }
-        iframe {
-            width: 100%;
-            border: none;
-            overflow: hidden; /* Hide the iframe scrollbar */
-        }
-	</style>
-	<iframe  onload="resizeIframe(this)" src="https://loops.usedcardboardboxes.com/B2Binventory_Gaylords_new.php?shown_in_client_flg=1&client_companyid=<? echo $client_companyid?>&client_loginid=<? echo $client_loginid;?>&loginid=<? echo $_COOKIE['loginid'];?>" name="ifrmgayloardplp" id="ifrmgayloardplp"></iframe>
+
+	<iframe src="https://loops.usedcardboardboxes.com/B2Binventory_Gaylords_new.php?shown_in_client_flg=1&client_companyid=<? echo $client_companyid?>&client_loginid=<? echo $client_loginid;?>" name="ifrmgayloardplp" id="ifrmgayloardplp" frameborder="0" width="100%" height="800px"
+	scrolling="auto" >
 	
 	<script>
-		 function resizeIframe(iframe) {
-            iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
-        }
-        
-        // Resize iframe on window resize
-        window.addEventListener('resize', function() {
-            const iframe = document.getElementById('iframe');
-            resizeIframe(iframe);
-        });
-		/*function ifrmgayloardplp_load() {
-			alert("Yes called here");
+		function ifrmgayloardplp_load() {
 			ifrmaeobj = document.getElementById("ifrmgayloardplp");
 			var objheight = ifrmaeobj.contentWindow.document.body.offsetHeight;
 			objheight = objheight + 30;
@@ -11059,7 +11242,7 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 			var objwidth = ifrmaeobj.contentWindow.document.body.offsetWidth;
 			objwidth = objwidth + 10;
 			//ifrmaeobj.style.width  = objwidth + 'px';		
-		}	*/
+		}	
 	
 	</script>				
 	
@@ -11068,7 +11251,7 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 	?>
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-12 alert">
+			<div class="col-md-12 alert alert-light">
 			<h3 class="text-success text-center">Tutorials</h3>
 			</div>
 			<div class="col-md-6">
@@ -11221,7 +11404,7 @@ if($_REQUEST['show'] == 'box_profile' && $show_boxprofile_inv == 'yes'){ ?>
 			<div class="col-md-6 mt-4">
 				<div class="card">
 					<div class="video-heading">
-						<b>Favorites</b>
+						<b>Favorites/Re-order</b>
 					</div>
 					<iframe 
 							width="540" height="315"
@@ -11468,9 +11651,7 @@ function showchild_invnotpaid($comp_nm, $warehouseid){
 		$display_row="1"; $tblecnt=0; $rowcolor = 0;
 	?>
 	<br>
-	<div id="products-table-view" class="mt-3">
-	<table  width="100%" cellspacing="1" cellpadding="1" border="0" >
-		<thead>
+	<table class="mb-10 tableBorder" width="100%" cellspacing="1" cellpadding="1" border="0" >
 		<?
 		foreach($not_paid_MGArray as $not_paid_array)
 		{
@@ -11478,29 +11659,28 @@ function showchild_invnotpaid($comp_nm, $warehouseid){
 			{
 				$display_row="0";
 			?>
-			<tr >
-				<th colspan="16" align="center"><? echo $not_paid_array["comp_nm"];?></th>	
+			<tr class="headrow">
+				<td colspan="16" align="center"><? echo $not_paid_array["comp_nm"];?></td>	
 			</tr>
 			
 			<tr class="headrow">
-				<th colspan="16" class="blackFont" align="center">INVOICED AND ACTIVE STATUS</th>	
+				<td colspan="16" class="blackFont" align="center">INVOICED AND ACTIVE STATUS</td>	
 			</tr>
 			<tr>
-				<th class="blackFont" align="center">ID</th>
-				<th class="blackFont" align="center">Invoice Number</th>
-				<th class="blackFont" align="center">Invoice Date</th>
-				<th class="blackFont" align="center">Invoiced Amount</th>
-				<th class="blackFont" align="center">Balance</th>
-				<th class="blackFont" align="center">Invoice Age</th>
+				<td class="blackFont" align="center">ID</td>
+				<td class="blackFont" align="center">Invoice Number</td>
+				<td class="blackFont" align="center">Invoice Date</td>
+				<td class="blackFont" align="center">Invoiced Amount</td>
+				<td class="blackFont" align="center">Balance</td>
+				<td class="blackFont" align="center">Invoice Age</td>
 			</tr>
-		</thead>
+				
 		<?
 		}
 		
 		if ($rowcolor % 2 == 0){ $rowclr = 'rowalt2';  }else{ $rowclr = 'rowalt1'; }
 		$rowcolor = $rowcolor + 1;
 	?>
-	
 		<tr class="<? echo $rowclr;?>">
 	
 			 <td bgColor="#e4e4e4" class="txt_style12" align="center">
@@ -11681,7 +11861,6 @@ function showchild_invnotpaid($comp_nm, $warehouseid){
 		?>
 		<tr><td bgColor="#e4e4e4" class="txt_style12" ></td><td bgColor="#e4e4e4" class="txt_style12" ></td><td bgColor="#e4e4e4" class="txt_style12" >Total:</td><td bgColor="#e4e4e4" class="txt_style12" align="right" >$<?=number_format($total_balance_not_paid,2);?></td><td colspan= 2 bgColor="#e4e4e4" class="txt_style12" ></td></tr>
 	</table>
-	</div>
 <?  
 }//End Not paid arr
 //
@@ -11690,22 +11869,19 @@ $total_balance_p2p = 0;
 if(!empty($p2p_MGArray)){
 ?>
 <br>
-<div id="products-table-view" class="mt-3">
-<table width="100%" cellspacing="1" cellpadding="1" border="0" >
-	<thead>
-		<tr >
-			<th colspan="16" align="center">INVOICED AND PROMISE TO PAY</th>	
-		</tr>
+<table class="mb-10 tableBorder" width="100%" cellspacing="1" cellpadding="1" border="0" >
+	<tr class="headrow">
+		<td colspan="16" align="center">INVOICED AND PROMISE TO PAY</td>	
+	</tr>
 
-		<tr>
-			<th align="center">ID</th>
-			<th align="center">Invoice Number</th>
-			<th align="center">Invoice Date</th>
-			<th align="center">Invoiced Amount</th>
-			<th align="center">Balance</th>
-			<th align="center">Invoice Age</th>
-		</tr>
-	</thead>
+	<tr>
+		<td class="blackFont" align="center">ID</td>
+		<td class="blackFont" align="center">Invoice Number</td>
+		<td class="blackFont" align="center">Invoice Date</td>
+		<td class="blackFont" align="center">Invoiced Amount</td>
+		<td class="blackFont" align="center">Balance</td>
+		<td class="blackFont" align="center">Invoice Age</td>
+	</tr>
 <?
 	foreach($p2p_MGArray as $paid_array)
 	{
@@ -11886,7 +12062,6 @@ if(!empty($p2p_MGArray)){
 ?>
 	<tr><td bgColor="#e4e4e4" class="txt_style12" ></td><td bgColor="#e4e4e4" class="txt_style12" ></td><td bgColor="#e4e4e4" class="txt_style12" >Total:</td><td bgColor="#e4e4e4" class="txt_style12" align="right">$<?=number_format($total_balance_p2p,2);?></td><td colspan= 2 bgColor="#e4e4e4" class="txt_style12" ></td></tr>
 </table>
-</div>
 <?  
 }//End P2p Status array
 
@@ -11894,22 +12069,19 @@ if(!empty($p2p_MGArray)){
 if(!empty($paid_MGArray)){
 ?>
 <br>
-<div id="products-table-view" class="mt-3">
-	<table width="100%" cellspacing="1" cellpadding="1" border="0" >
-		<thead>
+	<table class="mb-10 tableBorder" width="100%" cellspacing="1" cellpadding="1" border="0" >
 		<tr class="headrow">
-			<th colspan="16" align="center">INVOICED AND PAID STATUS</th>	
+			<td colspan="16" align="center">INVOICED AND PAID STATUS</td>	
 		</tr>
 	
 		<tr>
-			<th class="blackFont" align="center">ID</th>
-			<th class="blackFont" align="center">Invoice Number</th>
-			<th class="blackFont" align="center">Invoice Date</th>
-			<th class="blackFont" align="center">Invoiced Amount</th>
-			<th class="blackFont" align="center">Balance</th>
-			<th class="blackFont" align="center">Invoice Age</th>
+			<td class="blackFont" align="center">ID</td>
+			<td class="blackFont" align="center">Invoice Number</td>
+			<td class="blackFont" align="center">Invoice Date</td>
+			<td class="blackFont" align="center">Invoiced Amount</td>
+			<td class="blackFont" align="center">Balance</td>
+			<td class="blackFont" align="center">Invoice Age</td>
 		</tr>
-		</thead>
 <?
 	$rowColor = 0;
 	foreach($paid_MGArray as $paid_array)
@@ -12096,7 +12268,6 @@ $end_time =  strtotime('now');
 ?>
 <tr><td bgColor="#e4e4e4" class="txt_style12" ></td><td bgColor="#e4e4e4" class="txt_style12" ></td><td bgColor="#e4e4e4" class="txt_style12" >Total:</td><td bgColor="#e4e4e4" class="txt_style12" align="right">$<?=number_format($total_balance_paid,2);?></td><td colspan= 2 bgColor="#e4e4e4" class="txt_style12" ></td></tr>
 </table>
-</div>
 <?  
 }//End paid arr
 
@@ -12126,20 +12297,16 @@ if(tep_db_num_rows($user_companies) > 0){
 	$warehouseid = $company_nm['loopid'];
 	?>
 	<table width="100%">
-		<thead>
 		<tr>
 			<td align="center">
-				<div id="products-table-view" class="mt-3">
-				<table width="100%" cellspacing="1" cellpadding="1"border="0" >
-				<thead>
-					<tr>
-						<th colspan="6" align="center">Account details: &nbsp; <b><?php echo $company_nm['nickname']; ?></b>	&nbsp;
-							<a href="UCB_Credit_App_2021.pdf" target="_blank"><font size="1" color="black"><u>New Customer Packet</u></font></a>
-						</th>
-					</tr>
-				</thead>
-
+				<table width="100%" cellspacing="1" cellpadding="1"border="0" class="mb-10 tableBorder">
 				<tbody>
+
+				<tr class="headrow">
+					<td colspan="6" align="center">Account details: &nbsp; <b><?php echo $company_nm['nickname']; ?></b>	&nbsp;
+					<a href="UCB_Credit_App_2021.pdf" target="_blank"><font size="1" color="black"><u>New Customer Packet</u></font></a>
+					</td>
+				</tr>
 				<?
 				$on_hold = 0;
 				$parent_child_flg = ""; $parent_child_compid = "";  $parent_comp_loopid = 0; $current_comp_loopid = 0;
@@ -12150,7 +12317,7 @@ if(tep_db_num_rows($user_companies) > 0){
 				$termSetupCnt = tep_db_num_rows($dt_view_res);
 				if($termSetupCnt > 0){
 					?>
-					<tr >
+					<tr class="blackFont">
 						<td colspan="2">Filename</td>
 						<td colspan="2">User</td>
 						<td colspan="2">Date</td>
@@ -12163,7 +12330,7 @@ if(tep_db_num_rows($user_companies) > 0){
 							<td colspan="2"><? echo $dt_view_row["credit_application_by"]; ?></td>
 							<td colspan="2"><? echo date('m/d/Y', strtotime($dt_view_row["credit_application_date"])); ?></td>
 						</tr>
-						<tr >
+						<tr class="blackFont">
 							<td>Net Term</td>
 							<td>Credit Amount</td>
 							<td>Notes</td>
@@ -12200,8 +12367,7 @@ if(tep_db_num_rows($user_companies) > 0){
 				?>
 				
 				</tbody>
-				</table>
-				</div>				
+				</table>				
 			</td>
 		</tr>
 	</table>
@@ -12325,9 +12491,7 @@ if(tep_db_num_rows($user_companies) > 0){
 				$display_row="1"; $tblecnt=0;
 			?>
 			<br>
-			<div id="products-table-view" class="mt-3">
-			<table width="100%" cellspacing="1" cellpadding="1" border="0" >
-				
+			<table class="mb-10 tableBorder" width="100%" cellspacing="1" cellpadding="1" border="0" >
 				<?
 				$rowcolor = 0;
 				foreach($not_paid_MGArray as $not_paid_array) {
@@ -12336,20 +12500,18 @@ if(tep_db_num_rows($user_companies) > 0){
 					if($display_row=="1") {
 						$display_row="0";
 						?>
-						<thead>
-							<tr >
-								<th colspan="16" align="center">Outstanding invoices</th>	
-							</tr>
-							<tr>
-								<th  align="center">ID</th>
-								<th  align="center">Invoice Number</th>
-								<th  align="center">Invoice Date</th>
-								<!-- <th  align="center">Last Action</th> -->
-								<th  align="center">Invoiced Amount</th>
-								<th  align="center">Balance</th>
-								<th  align="center">Invoice Age</th>
-							</tr>
-						</thead>
+						<tr class="headrow">
+							<td colspan="16" align="center">Outstanding invoices</td>	
+						</tr>
+						<tr>
+							<td class="blackFont" align="center">ID</td>
+							<td class="blackFont" align="center">Invoice Number</td>
+							<td class="blackFont" align="center">Invoice Date</td>
+							<!-- <td class="blackFont" align="center">Last Action</td> -->
+							<td class="blackFont" align="center">Invoiced Amount</td>
+							<td class="blackFont" align="center">Balance</td>
+							<td class="blackFont" align="center">Invoice Age</td>
+						</tr>
 						<?
 					}
 					?>
@@ -12554,7 +12716,6 @@ if(tep_db_num_rows($user_companies) > 0){
 					<td colspan ="2"   align="center" ></td>
 				</tr>
 			</table>
-			</div>
 		<?  
 		}//End Not paid arr
 
@@ -12672,13 +12833,6 @@ if(tep_db_num_rows($user_companies) > 0){
 }else if($_REQUEST['show'] == 'why_boomerang'){  
 	?>
 	<table width="100%">
-		<tr>
-			<td align="center">
-				<embed src="The First and Only E-Commerce Store for Used Gaylord Totes and Pallets!.pdf" type="application/pdf" width="1000" height="600">
-			</td>
-		</tr>		
-	</table>		
-	<!-- <table width="100%">
 		<tr >
 		<td align="center"><h3>Why Boomerang by <span class="boomrang_main_heading">UsedCardboardBoxes?</span></h3></td>
 		</tr>
@@ -12780,7 +12934,7 @@ if(tep_db_num_rows($user_companies) > 0){
 			</td>
 		</tr>
 		
-	</table> -->
+	</table>
 	<?
 }
 else{ ?> 

@@ -568,7 +568,7 @@ require("mainfunctions/general-functions.php");
 																							$option_val = $fields_arr_generic['field_val'];
 																							$selected_op = $fields_arr_generic['field_name'];
 																						}
-																						echo '<option ' . (trim($fields_arr_generic['field_name']) == $no_account_data['field_name'] ? "selected" : "") . ' value="' . $fields_arr_generic['field_name'] . '" cor_x = "' . $coordinates_op[0] . '" cor_y = "' . $coordinates_op[1] . '" w="' . $coordinates_op[2] . '"  pageNo="' . $pageNo . '"  option_val="' . $fields_arr_generic['field_val'] . '">'
+																						echo '<option ' . (trim($fields_arr_generic['field_name']) == $no_account_data['field_name'] ? "selected" : "") . ' value="' . $fields_arr_generic['field_name'] . '" cor_x = "' . $coordinates_op[0] . '" cor_y = "' . $coordinates_op[1] . '" w="' . $coordinates_op[2] . '" h="' . $coordinates_op[3] . '" pageNo="' . $pageNo . '"  option_val="' . $fields_arr_generic['field_val'] . '">'
 																							. $fields_arr_generic['field_name']
 																							. '</option>';
 																					}

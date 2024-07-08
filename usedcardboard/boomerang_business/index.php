@@ -1,10 +1,30 @@
 <?
 require ("mainfunctions/database.php");
 require ("mainfunctions/general-functions.php");
+
+function decrypt_password_new($txt){
+	$key = "hastb47#1skdsjh";
+	
+	$c = base64_decode($txt);
+	$ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
+	$iv = substr($c, 0, $ivlen);
+	$hmac = substr($c, $ivlen, $sha2len=32);
+	$ciphertext_raw = substr($c, $ivlen+$sha2len);
+	$original_plaintext = openssl_decrypt($ciphertext_raw, $cipher, $key, $options=OPENSSL_RAW_DATA, $iv);
+	$calcmac = hash_hmac('sha256', $ciphertext_raw, $key, $as_binary=true);
+	if (hash_equals($hmac, $calcmac))// timing attack safe comparison
+	{
+		return $original_plaintext;
+	}
+}		
+
 if (isset($_REQUEST["param1"])) {
+
 	if ($_REQUEST["param1"] != "") {
-		$sql="Select loginid from boomerang_usermaster where loginid = '" . $_REQUEST["param1"] ."'";
-		$result = db_query($sql, db());
+
+		db();
+		$sql="Select loginid from boomerang_usermaster where loginid = '" . decrypt_password_new($_REQUEST["param1"]) ."'";
+		$result = db_query($sql);
 		$rec_found = "no";
 		while ($rq = array_shift($result)) {
 			$rec_found = "yes";
@@ -14,15 +34,14 @@ if (isset($_REQUEST["param1"])) {
 		if ($rec_found == "yes"){
 			$date_of_expiry = time() + 6100 ;
 			setcookie("loginid", $loginid, $date_of_expiry);
+			redirect("home.php");
 			
-			echo "<script type=\"text/javascript\">";
-			echo "window.location.href=\"client_dashboard.php\";";
+			/*echo "<script type=\"text/javascript\">";
+			echo "window.location.href=\"home.php\";";
 			echo "</script>";
 			echo "<noscript>";
-			echo "<meta http-equiv=\"refresh\" content=\"0;url=client_dashboard.php\" />";
-			echo "</noscript>"; exit;
-
-			//redirect("https://boomerang.usedcardboardboxes.com/client_dashboard.php?compnewid=". urlencode(encrypt_password($companyid)));
+			echo "<meta http-equiv=\"refresh\" content=\"0;url=home.php\" />";
+			echo "</noscript>"; exit;*/
 		}
 			
 	}
@@ -275,7 +294,7 @@ if (isset($_REQUEST["hd_forgot_pwd"])) {
 				
 				<tr>
 					<td align="center" class="TBL_COL_HDR_NOSHADE">
-						Don't have a UCB User Portal Access?
+						Don't have a Boomerang Login?
 					</td>
 				</tr>
 				<tr>
@@ -284,8 +303,8 @@ if (isset($_REQUEST["hd_forgot_pwd"])) {
 				<tr>
 					<td align="center">
 						<input type="submit" class="button" name="btn_forgotpwd" value="Click Here to Contact Us" onclick="callmailto()">
-						<a class="contactbtn" id="btnmailto" style="display:none;" href="mailto:info@usedcardboardboxes.com?Subject=Interested in Learning about UCB's Client Portals" target="_top">
-						Click Here to Contact Us</a>
+						<a class="contactbtn" id="btnmailto" style="display:none;" href="mailto:info@usedcardboardboxes.com?Subject=Interested in Registering for User Account, Boomerang by UsedCardboardBoxes" target="_top">
+						Contact Us to Request a Login</a>
 					</td>
 				</tr>
 				

@@ -3,14 +3,10 @@ ob_start(); // Turn on output buffering
 if(isset($_REQUEST['action'] ) && $_REQUEST['action'] == 'logout'){
   $date_of_expiry = time() - 2 ;
   setcookie( "loginid", "", $date_of_expiry );
-  
-  echo "<script type=\"text/javascript\">";
-  echo "window.location.href=\"index.php\";";
-  echo "</script>";
-  echo "<noscript>";
-  echo "<meta http-equiv=\"refresh\" content=\"0;url=index.php\" />";
-  echo "</noscript>"; exit;
+  header("Location: index.php");
+  exit('Redirecting...'); // Ensure the remaining script doesn't execute
 }
+
 ?>
 <title>My Profile - Boomerange Portal</title>
 <?php
@@ -28,7 +24,16 @@ require_once('boomerange_common_header.php');
           <button class="nav-link active" id="my-profile-tab" data-toggle="pill" data-target="#my-profile" role="tab" aria-controls="my-profile" aria-selected="true">My Profile</button>
           <button class="nav-link" id="change-password-tab" data-toggle="pill" data-target="#change-password" role="tab" aria-controls="change-password" aria-selected="false">Change Password</button>
           <button class="nav-link" id="manage-address-tab" data-toggle="pill" data-target="#manage-address" role="tab" aria-controls="manage-address" aria-selected="false">Manage Addresses</button>
-          <a href="user_profile.php?action=logout" class="nav-link" >Logout</a>
+		  
+		  <a class="nav-link" href="client_dashboard_new.php?show=closed_loop_inv<?= $repchk_str ?>" onclick="show_loading()">Closed Loop Inventory</a>
+		  <a class="nav-link" href="client_dashboard_new.php?show=sales_quotes<?= $repchk_str ?>" onclick="show_loading()">Sales quotes</a>
+		  <a class="nav-link" href="client_dashboard_new.php?show=favorites<?= $repchk_str ?>" onclick="show_loading()">Favorites</a>
+		  <a class="nav-link" href="client_dashboard_new.php?show=prev_order<?= $repchk_str ?>" onclick="show_loading()">Previously Ordered</a>
+		  <a class="nav-link" href="client_dashboard_new.php?show=current_order<?= $repchk_str ?>" onclick="show_loading()">Open Orders</a>
+		  <a class="nav-link" href="client_dashboard_new.php?show=current_order_history<?= $repchk_str ?>" onclick="show_loading()">Order History</a>
+		  <a class="nav-link" href="client_dashboard_new.php?show=accounting<?= $repchk_str ?>" onclick="show_loading()">Accounting</a>
+		  <a class="nav-link" href="client_dashboard_new.php?show=reports<?= $repchk_str ?>" onclick="show_loading()">Reports</a>
+		  <a href="user_profile.php?action=logout" class="nav-link" >Logout</a>
         </div>
       </div>
       <div class="col-9">
@@ -37,9 +42,12 @@ require_once('boomerange_common_header.php');
             <?php
             $loginid = $_COOKIE['loginid'];
             db();
-            $user_info_qry = db_query("SELECT user_name,user_email,password FROM boomerang_usermaster WHERE loginid = '" . $loginid . "'");
+            $user_info_qry = db_query("SELECT user_name,user_email,password, user_last_name, user_phone, user_company FROM boomerang_usermaster WHERE loginid = '" . $loginid . "'");
             $user_info = array_shift($user_info_qry);
             $user_name = $user_info['user_name'];
+			$user_last_name = $user_info['user_last_name'];
+			$user_phone = $user_info['user_phone'];
+			$user_company = $user_info['user_company'];
             ?>
             <div class="container_fluid">
               <div class="row">
@@ -47,14 +55,34 @@ require_once('boomerange_common_header.php');
                   <form id="edit_profile_form">
                     <div class="form-group">
                       <label>Name</label>
-                      <input id="user_name" type="text" class="form-control form-control-sm" name="user_name" placeholder="Enter Name" value="<?php echo $user_name; ?>">
-                      <span class="form_error d-none" id="user_name_error">Username Can't Be Blank</span>
+						<div class="row">
+						  <div class="col-md-6">
+							<input id="user_name" type="text" class="form-control form-control-sm" name="user_name" placeholder="Enter First Name" value="<?php echo $user_name; ?>">
+							<span class="form_error d-none" id="user_name_error">Username can't be blank</span>
+						  </div>
+						  <div class="col-md-6">					  
+							<input id="user_last_name" type="text" class="form-control form-control-sm" name="user_last_name" placeholder="Enter Last Name" value="<?php echo $user_last_name; ?>">
+						  </div>
+						</div>
                     </div>
+                    <div class="form-group">
+                      <label>Company</label>
+                      <input id="user_company" type="text" class="form-control form-control-sm" name="user_company" placeholder="Enter Company" value="<?php echo $user_info['user_company']; ?>">
+                      <span class="form_error d-none" id="user_email_error">Company can't be blank</span>
+                    </div>
+
                     <div class="form-group">
                       <label>Email</label>
                       <input id="user_email" type="email" class="form-control form-control-sm" name="user_email" placeholder="Enter Email" value="<?php echo $user_info['user_email']; ?>">
                       <span class="form_error d-none" id="user_email_error">Email Can't Be Blank</span>
                     </div>
+
+                    <div class="form-group">
+                      <label>Phone</label>
+                      <input id="user_phone" type="text" class="form-control form-control-sm" name="user_phone" placeholder="Enter Phone" value="<?php echo $user_info['user_phone']; ?>">
+                      <span class="form_error d-none" id="user_email_error">Phone can't be blank</span>
+                    </div>
+					
                     <div class="col-md-12 mb-3">
                       <input type="hidden" name="form_action" value="edit_profile">
                       <input type="hidden" name="user_id" value="<?php echo $loginid; ?>">
@@ -63,8 +91,10 @@ require_once('boomerange_common_header.php');
                   </form>
                 </div>
                 <div class="col-md-4">
-                  <p class="mt-2"><b>Name:</b> <?php echo $user_name; ?></p>
+                  <p class="mt-2"><b>Name:</b> <?php echo $user_name . " " . $user_last_name; ?></p>
+				  <p class="mt-2"><b>Company:</b> <?php echo $user_info['user_company']; ?></p>
                   <p class="mt-2"><b>Email:</b> <?php echo $user_info['user_email']; ?></p>
+				  <p class="mt-2"><b>Phone:</b> <?php echo $user_info['user_phone']; ?></p>
                 </div>
               </div>
             </div>
@@ -95,6 +125,7 @@ require_once('boomerange_common_header.php');
               </form>
             </div>
           </div>
+		  
           <div class="tab-pane fade" id="manage-address" role="tabpanel" aria-labelledby="manage-address-tab">
             <div class="text-right mb-3">
               <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addAddressModal">Add Address</button>
@@ -137,11 +168,13 @@ require_once('boomerange_common_header.php');
             }
             ?>
           </div>
+		  
         </div>
       </div>
     </div>
   </div>
 </main>
+
 <div class="modal fade" id="addAddressModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
   <form id="add_address_form">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -171,7 +204,11 @@ require_once('boomerange_common_header.php');
             </div>
             <div class="form-group col-md-6">
               <label>Country</label>
-              <input id="add_country" type="text" class="form-control form-control-sm" name="country" placeholder="Enter Country" value="USA">
+              <select id="add_country" class="form-control form-control-sm" name="country">
+                <option value="USA">USA</option>
+                <option value="Canada">Canada</option>
+                <option value="Mexico">Mexico</option>
+			  </select>
               <span class="form_error d-none" id="add_country_error">Country Can't Be Blank</span>
             </div>
             <div class="form-group col-md-12">
@@ -226,7 +263,7 @@ require_once('boomerange_common_header.php');
             </div>
             <div class="form-group col-md-6">
               <label>Email </label>
-              <input id="add_email" type="text" class="form-control form-control-sm" name="email" placeholder="Enter Mobile No">
+              <input id="add_email" type="text" class="form-control form-control-sm" name="email" placeholder="Enter Email">
               <span class="form_error d-none" id="add_email_error">Email Can't Be Blank</span>
             </div>
             <div class="form-group col-md-6">
@@ -234,6 +271,12 @@ require_once('boomerange_common_header.php');
               <input id="dock_hours" type="text" class="form-control form-control-sm" name="dock_hours" placeholder="Your Dock Hours (days open, open time - close time)">
               <span class="form_error d-none" id="add_dock_hours_error">Dock Hours Can't Be Blank</span>
             </div>
+			
+            <div class="form-group col-md-12" id="div_def_add">
+              <label>Set as default</label>
+              <input id="add_set_as_def" type="checkbox" name="add_set_as_def" value="1">
+            </div>
+			
           </div>
         </div>
         <div class="modal-footer">
@@ -280,6 +323,98 @@ require_once('boomerange_common_header.php');
   });
 */
   $(document).ready(function() {
+
+	function getParameterByName(name) {
+        var url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    }
+
+	function reloadWithParameter(paramName, paramValue) {
+        var url = new URL(window.location.href);
+        url.searchParams.set(paramName, paramValue);
+        window.location.href = url.href;
+    }		
+
+  // Check for the parameter value after the page reloads
+    var paramValue = getParameterByName('parammark_default_add');
+    if (paramValue) {
+		var element = document.getElementById("manage-address");
+		var element_def = document.getElementById("my-profile");
+		var element_mg_add = document.getElementById("manage-address-tab"); 
+		var element_myprf_add = document.getElementById("my-profile-tab"); 
+		
+		element_def.classList.remove('active');
+		element.classList.add('show');
+		element.classList.add('active');
+		
+		element_myprf_add.classList.remove('active');
+		element_mg_add.classList.add('active');
+		
+		var urlParams = new URLSearchParams(window.location.search);
+		
+		// Remove the parameter from the URL without reloading the page
+		urlParams.delete('parammark_default_add');
+		var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + urlParams.toString();
+		window.history.replaceState({}, document.title, newUrl);				
+		
+        // Change the class of the div if the parameter exists
+        if (paramValue === 'true') {
+           // $('#myDiv').removeClass('original-class').addClass('new-class');
+        }
+    }
+	
+	/*window.onload = function() {
+
+		//if (localStorage.getItem('AddchangeClass') === 'true') {
+			// Add click event listener to the button
+			//var element = document.getElementById("manage-address");
+			//var element_def = document.getElementById("my-profile");
+			//var element_mg_add = document.getElementById("manage-address-tab"); 
+			//var element_myprf_add = document.getElementById("my-profile-tab"); 
+			
+			//element_def.classList.remove('active');
+			//element.classList.add('show');
+			//element.classList.add('active');
+			
+			//element_myprf_add.classList.remove('active');
+			//element_mg_add.classList.add('active');
+
+			// Remove the flag from local storage
+			//localStorage.removeItem('AddchangeClass');
+		//}
+			
+		// Get the URL parameters
+		//var urlParams = new URLSearchParams(window.location.search);
+		
+		const paramValue = getParameterByName('selectedElement');
+		alert("tt");
+		//if (urlParams.has('selectedElement')) {
+		if (paramValue) {	
+			//var elementId = urlParams.get('selectedElement');
+			
+			// Find the element by its ID
+			//if (elementId == "mark_default_add"){
+				// Add click event listener to the button
+				var element = document.getElementById("manage-address");
+				var element_def = document.getElementById("my-profile");
+				var element_mg_add = document.getElementById("manage-address-tab"); 
+				var element_myprf_add = document.getElementById("my-profile-tab"); 
+				
+				element_def.classList.remove('active');
+				element.classList.add('show');
+				element.classList.add('active');
+				
+				element_myprf_add.classList.remove('active');
+				element_mg_add.classList.add('active');
+				
+				// Remove the parameter from the URL without reloading the page
+                urlParams.delete('selectedElement');
+                var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + urlParams.toString();
+                window.history.replaceState({}, document.title, newUrl);				
+			//}
+		}
+    };*/
+	  
     $("#edit_profile_form").submit(function() {
       var user_name = $('#user_name').val();
       var user_email = $('#user_email').val();
@@ -317,6 +452,7 @@ require_once('boomerange_common_header.php');
       }
       return false;
     });
+	
     $("#change_password_form").submit(function() {
       var user_password = $("#user_password").val();
       var user_old_password = $("#user_old_password").val();
@@ -390,6 +526,7 @@ require_once('boomerange_common_header.php');
       }
       return false;
     });
+	
     $("#add_address_form").submit(function() {
       var flag = true;
       var add_first_name = $('#add_first_name').val();
@@ -486,8 +623,9 @@ require_once('boomerange_common_header.php');
           success: function(response) {
             console.log(response);
             if (response == 1) {
-              alert('Address Added successfully');
-              location.reload();
+				alert('Address Added successfully');
+				reloadWithParameter('parammark_default_add', 'true');
+				//location.reload();
             } else {
               alert('Something went wrong, try again later');
             }
@@ -496,6 +634,7 @@ require_once('boomerange_common_header.php');
       }
       return false;
     });
+	
     $("body").on('click', '.edit_address_btn', function() {
       var address_id = $(this).attr('address_id');
       $.ajax({
@@ -518,6 +657,11 @@ require_once('boomerange_common_header.php');
           $("#add_country").val(response.country);
           $("#add_addressline1").val(response.addressline1);
           $("#add_addressline2").val(response.addressline2);
+		  if (response.mark_default == 1){
+			$("#div_def_add").html("<span class='text-success'><span class='fa fa-check'></span>Default Address</span>");
+		  }else{
+			  $("#div_def_add").html("");
+		  }
           $("#add_city").val(response.city);
           $("#add_state").val(response.state);
           $("#add_zip").val(response.zip);
@@ -529,6 +673,7 @@ require_once('boomerange_common_header.php');
         }
       })
     });
+	
     $('.mark_default_add').click(function() {
       var address_id = $(this).attr('address_id');
       $.ajax({
@@ -541,8 +686,11 @@ require_once('boomerange_common_header.php');
         async: false,
         success: function(res) {
           if (res == 1) {
+			//localStorage.setItem('AddchangeClass', 'true');
+
             alert('Address marked as default');
-            location.reload();
+			reloadWithParameter('parammark_default_add', 'true');
+            //location.reload();
           } else {
             alert('Something went wrong, try again later');
           }
@@ -563,7 +711,8 @@ require_once('boomerange_common_header.php');
         success: function(res) {
           if (res == 1) {
             alert('Address deleted successfully');
-            location.reload();
+			reloadWithParameter('parammark_default_add', 'true');
+            //location.reload();
           } else {
             alert('Something went wrong, try again later');
           }

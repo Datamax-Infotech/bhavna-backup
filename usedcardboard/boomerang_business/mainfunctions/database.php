@@ -2,28 +2,23 @@
 
 function db()
 {
-	$dbuser		= "ucbdata_ucbuser"; 
+	$dbuser		= "usedcard_prod"; 
 	$dbserver	= "localhost"; 
-	$dbpass		= "!3P%6R#ay6xq"; 
-	$dbname		= "ucbdata_usedcard_production";
+	$dbpass		= "WowNoIts@Attac#45421"; 
+	$dbname		= "usedcard_production";
 
 	//CONNECTION STRING
 	$con_db = 'db_link';
 	global $$con_db;
 	$$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
-	/*if ($conn->connect_error) {
-	  die("Connection failed: " . $conn->connect_error);
-	}
-	echo "Connected successfully";
-	*/
 }
 	
 function db_b2b()
 {
-	$dbuser		= "ucbdata_ucbuser"; 
+	$dbuser		= "usedcard_b2buser"; 
 	$dbserver	= "localhost"; 
-	$dbpass		= "!3P%6R#ay6xq"; 
-	$dbname		= "ucbdata_usedcard_b2b";
+	$dbpass		= "GodSave@isDo%1414"; 
+	$dbname		= "usedcard_b2b";
 
 	//CONNECTION STRING
 	$con_db = 'db_link';
@@ -33,10 +28,10 @@ function db_b2b()
 
 function db_email_com()
 {
-	$dbuser		= "ucbdata_ucbuser"; 
+	$dbuser		= "usedcard_ucbmail"; 
 	$dbserver	= "localhost"; 
-	$dbpass		= "!3P%6R#ay6xq"; 
-	$dbname		= "ucbdata_ucbmail";
+	$dbpass		= "NewEmalPwd@141#Chk"; 
+	$dbname		= "usedcard_ucbmail";
 	
 	//CONNECTION STRING
 	$con_db = 'db_link';
@@ -46,10 +41,10 @@ function db_email_com()
 
 function db_email()
 {
-	$dbuser		= "ucbdata_ucbuser"; 
-	$dbserver	= "localhost"; 
-	$dbpass		= "!3P%6R#ay6xq"; 
-	$dbname		= "ucbdata_ucbmail";
+	$dbuser		= "usedcard_ucbmail"; 
+	$dbserver	= "107.180.114.22"; 
+	$dbpass		= "Yell@owgapto655"; 
+	$dbname		= "usedcard_ucbmail";
 	
 	//CONNECTION STRING
 	$con_db = 'db_link';
@@ -59,10 +54,10 @@ function db_email()
 
 function db_water_inbox_email()
 {
-	$dbuser		= "ucbdata_ucbuser"; 
+	$dbuser		= "usedcardboardbox_water_inbox_usr"; 
 	$dbserver	= "localhost"; 
-	$dbpass		= "!3P%6R#ay6xq"; 
-	$dbname		= "ucbdata_water_inbox_email";
+	$dbpass		= "NewParty@TO65Hk"; 
+	$dbname		= "usedcardboardbox_water_inbox_email";
 	
 	//CONNECTION STRING
 	$con_db = 'db_link';
@@ -72,9 +67,9 @@ function db_water_inbox_email()
 
 function db_b2c_email_new()
 {
-	$dbuser		= "ucbdata_ucbuser"; 
+	$dbuser		= "usedcard_b2c_mail"; 
 	$dbserver	= "localhost"; 
-	$dbpass		= "!3P%6R#ay6xq"; 
+	$dbpass		= "~ZMIW.Z%y)#]"; 
 	$dbname		= "usedcard_b2c_email";
 
 	//CONNECTION STRING
@@ -85,19 +80,20 @@ function db_b2c_email_new()
 
 function db_project_mgmt()
 {
-	$dbuser		= "ucbdata_ucbuser"; 
+	$dbuser		= "usedcardboardbox_prj_mgmt_user"; 
 	$dbserver	= "localhost"; 
-	$dbpass		= "!3P%6R#ay6xq"; 
-	$dbname		= "ucbdata_project_mgmt";
+	$dbpass		= "pLmV7@Omx)fm"; 
+	$dbname		= "usedcardboardbox_project_mgmt";
 
 	//CONNECTION STRING
 	$con_db = 'db_link';
 	global $$con_db;
 	$$con_db = new mysqli($dbserver, $dbuser, $dbpass, $dbname);
-	if ($$con_db ->connect_error) {
+	/*if ($$con_db ->connect_error) {
 	  die("Connection failed: " . $conn->connect_error);
+	}else{
+	echo "Connected successfully";
 	}
-	//echo "Connected successfully";
-
+	*/
 }
 ?>

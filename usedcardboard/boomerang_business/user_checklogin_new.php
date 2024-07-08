@@ -13,16 +13,10 @@ Date           By            Description
 ======================================================================================================
 */
 
-ini_set("display_errors", "1");
-error_reporting(E_ALL);
-
 require("mainfunctions/database.php");
 require("mainfunctions/general-functions.php");
 
 //ob_start();
-
-ini_set("display_errors", "1");
-error_reporting(E_ALL);
 
 // username and password sent from form here the username is email after change. 
 $myusername = $_POST['myusername'];

@@ -16,8 +16,7 @@ Date           By            system_description
 require ("mainfunctions/database.php");
 require ("mainfunctions/general-functions.php");
 /*ini_set("display_errors", "1");
-error_reporting(E_ALL);
-*/
+error_reporting(E_ALL);*/
 function encrypt_password($txt){
 	$key = "1sw54@$sa$offj";
 	$ivlen = openssl_cipher_iv_length($cipher="AES-128-CBC");
@@ -188,9 +187,9 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 		if(in_array('2', $top_config_val)){
 			if($top_config == ""){
 				if ($top_config_val_3 == "yes" || $top_config_val_4 == "yes"){
-					$top_config = " AND (inventory.top_nolid = 1";
+					$top_config = " AND (inventory.top_remove = 1";
 				}else{
-					$top_config = " AND inventory.top_nolid = 1";
+					$top_config = " AND inventory.top_remove = 1";
 				}
 			}
 		}
@@ -384,7 +383,11 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 	$dropoff_add2 = strval($_REQUEST["txtaddress2"]); 
 	$dropoff_city = strval($_REQUEST["txtcity"]); 
 	$dropoff_state = strval($_REQUEST["txtstate"]); 
-	$dropoff_country = $_REQUEST["txtcountry"]; 
+	if ($_REQUEST["txtcountry"] == ""){
+		$dropoff_country = "USA"; 
+	}else{
+		$dropoff_country = $_REQUEST["txtcountry"]; 
+	}
 	if (strtolower($_REQUEST["txtcountry"]) == "usa"){
 		$dropoff_zip = substr(strval($_REQUEST["txtzipcode"]),0,5); 
 	}else{
@@ -690,7 +693,7 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 				$description = ucfirst($box_type_txt).": ". $dt_view_row["bwall"] . "ply" . $box_sub_type_str . " (ID " . $dt_view_row["ID"] . ")";
 			}
 			
-			$boxwall = $dt_view_row["bwall"];
+			$boxwall = $dt_view_row["bwall"] . "ply";
 			
 		}else{
 			$wall_str = "";
@@ -700,7 +703,7 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 			}else{
 				$wall_str = $dt_view_row["bwall_min"] . "-" . $dt_view_row["bwall_max"];
 			}
-			$boxwall = $wall_str;
+			$boxwall = $wall_str . "ply";
 			
 			if(isset($_REQUEST['view_type']) && $_REQUEST['view_type']=="grid_view"){
 				$description = ucfirst($box_type_txt).": ". $wall_str . "ply" . $box_sub_type_str . " <br>(ID " . $dt_view_row["ID"] . ")";
@@ -835,7 +838,7 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 				$bheight = $sku_val["bdepth"];
 				$bheight = preg_replace("(\n)", "<BR>", $bheight);
 				
-				$boxheight = $bheight;
+				$boxheight = $bheight . chr(34);
 				$boxwidth = $bwidth;
 				$boxlength = $blength;				
 				
@@ -908,9 +911,9 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 				$bcubicfootage = $item_bcubicfootage_min." - ". $item_bcubicfootage_max;
 
 				if ($bheight_min==$bheight_max){
-					$boxheight = rtrim(number_format($bheight_max, 2), '0.');
+					$boxheight = rtrim(number_format($bheight_max, 2), '0.'). chr(34);
 				}else{
-					$boxheight = rtrim(number_format($bheight_min, 2), '0.') . "-". rtrim(number_format($bheight_max, 2), '0.');
+					$boxheight = rtrim(number_format($bheight_min, 2), '0.') . "-". rtrim(number_format($bheight_max, 2), '0.'). chr(34);
 				}
 
 				if ($bwidth_min==$bwidth_max){
@@ -1074,48 +1077,11 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 				}	
 			}	
 
-			$getEstimatedNextLoad = getEstimatedNextLoad_New($dt_view_row["loops_id"], $box_warehouse_id, $next_load_available_date, $lead_time, $lead_time, $txt_after_po_new, $boxes_per_trailer, $sku_val['expected_loads_per_mo'], $status_key, 'no');
+			//$getEstimatedNextLoad = getEstimatedNextLoad_New($dt_view_row["loops_id"], $box_warehouse_id, $next_load_available_date, $lead_time, $lead_time, $txt_after_po_new, $boxes_per_trailer, $sku_val['expected_loads_per_mo'], $status_key, 'no');
+			$getEstimatedNextLoad = "1";
 			$lead_time_for_FTL = $getEstimatedNextLoad;
 
-			$lead_time_days = 0;
-			if ($lead_time_for_FTL != ""){
-				$lead_time_for_FTL_org = $lead_time_for_FTL;
-				$tmppos_1 = strpos($lead_time_for_FTL_org, 'Now');
-				if ($tmppos_1 != false) {
-					$lead_time_days = 0;
-				}
-				
-				if ($lead_time_for_FTL_org == 'Now') {
-					$lead_time_days = -1;
-				}
 
-				$tmppos_1 = strpos($lead_time_for_FTL_org, 'Never (sell the');
-				if ($tmppos_1 != false) {
-					$lead_time_days = 8000; //$lead_time;
-				}
-
-				$lead_time_for_FTL_org = str_replace("<font color=green>", "", $lead_time_for_FTL_org);
-				$lead_time_for_FTL_org = str_replace("</font>", "", $lead_time_for_FTL_org);
-				
-				$lead_time_for_FTL_org = str_replace("<span color=green>", "", $lead_time_for_FTL_org);
-				$lead_time_for_FTL_org = str_replace("</span>", "", $lead_time_for_FTL_org);
-
-				$lead_time_arr = explode(" ", $lead_time_for_FTL_org, 2);
-				
-				if ($lead_time_arr[1] == 'Week'){
-					$lead_time_days = $lead_time_arr[0]*7;
-				}
-				if ($lead_time_arr[1] == 'Weeks'){
-					$lead_time_days = $lead_time_arr[0]*7;
-				}
-				if ($lead_time_arr[1] == 'Day'){
-					$lead_time_days = $lead_time_arr[0];
-				}
-				if ($lead_time_arr[1] == 'Days'){
-					$lead_time_days = $lead_time_arr[0];
-				}
-			}
-			
             $b2b_ulineDollar = round($dt_view_row["ulineDollar"]);
             $b2b_ulineCents = $dt_view_row["ulineCents"];
             $b2b_fob = $b2b_ulineDollar + $b2b_ulineCents;
@@ -1512,8 +1478,8 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 				$quantity_availableValue_new = $actual_po;
 			}*/
 			
-			$quantity_availableValue_new1 = getQtyAvNow($loop_id, $box_warehouse_id, $lead_time, $ship_ltl, $dt_view_row["after_actual_inventory"], $dt_view_row["quantity"], $dt_view_row["actual_qty_calculated"], $sales_order_qty );			
-
+			//$quantity_availableValue_new1 = getQtyAvNow($loop_id, $box_warehouse_id, $lead_time, $ship_ltl, $dt_view_row["after_actual_inventory"], $dt_view_row["quantity"], $dt_view_row["actual_qty_calculated"], $sales_order_qty );			
+			$quantity_availableValue_new1 = 100;
 			if (($actual_po > $quantity_availableValue_new1) && ($actual_po > 0)){
 				$quantity_availableValue_new = $actual_po;
 			}else{
@@ -1555,8 +1521,8 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 			}
 			
 			//New logic changes
-			$box_lead_time = getLeadTime($loop_id, $quantity_availableValue_new, $lead_time);
-			
+			//$box_lead_time = getLeadTime($loop_id, $quantity_availableValue_new, $lead_time);
+			$box_lead_time = "1";
 			$td_leadtime_bg_color = "";
 			
 			if (isset($_REQUEST["shown_in_client_flg"]) && $_REQUEST["shown_in_client_flg"] == 1){
@@ -1569,6 +1535,46 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 					}
 				}
 			}
+			
+			$lead_time_days = 0;
+			if ($box_lead_time != ""){
+				$lead_time_for_FTL_org = $box_lead_time;
+				$tmppos_1 = strpos($lead_time_for_FTL_org, 'Now');
+				if ($tmppos_1 != false) {
+					$lead_time_days = 0;
+				}
+				
+				if ($lead_time_for_FTL_org == 'Now') {
+					$lead_time_days = -1;
+				}
+
+				$tmppos_1 = strpos($lead_time_for_FTL_org, 'Never (sell the');
+				if ($tmppos_1 != false) {
+					$lead_time_days = 8000; //$lead_time;
+				}
+
+				$lead_time_for_FTL_org = str_replace("<font color=green>", "", $lead_time_for_FTL_org);
+				$lead_time_for_FTL_org = str_replace("</font>", "", $lead_time_for_FTL_org);
+				
+				$lead_time_for_FTL_org = str_replace("<span color=green>", "", $lead_time_for_FTL_org);
+				$lead_time_for_FTL_org = str_replace("</span>", "", $lead_time_for_FTL_org);
+
+				$lead_time_arr = explode(" ", $lead_time_for_FTL_org, 2);
+				
+				if ($lead_time_arr[1] == 'Week'){
+					$lead_time_days = $lead_time_arr[0]*7;
+				}
+				if ($lead_time_arr[1] == 'Weeks'){
+					$lead_time_days = $lead_time_arr[0]*7;
+				}
+				if ($lead_time_arr[1] == 'Day'){
+					$lead_time_days = $lead_time_arr[0];
+				}
+				if ($lead_time_arr[1] == 'Days'){
+					$lead_time_days = $lead_time_arr[0];
+				}
+			}
+						
 		}
 		
 		
@@ -1706,6 +1712,7 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 				'cubicfootage'=>$bcubicfootage,
                 'loop_id_encrypt_str'=> urlencode(encrypt_password($loop_id)),
 				'favorite'=> $favorite,
+				'show_urgent_box' => isset($_REQUEST['show_urgent_box']) && $_REQUEST['show_urgent_box'] == 1 ? 1 : "", 
                 );
             }else{
                 if(isset($_REQUEST["min_price"]) && $_REQUEST["min_price"] != 0 || isset($_REQUEST['max_price']) && $_REQUEST["max_price"] != 500){
@@ -1770,9 +1777,11 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 						'width'=>$bwidth,
 						'depth'=>$bdepth,
 						'cubicfootage'=>$bcubicfootage,
-						'QTYfunction'=> display_preoder_sel($query_count,$reccnt,$loop_id,$box_warehouse_id),
+						//'QTYfunction'=> display_preoder_sel($query_count,$reccnt,$loop_id,$box_warehouse_id),
+						'QTYfunction'=> "Here",
                         'loop_id_encrypt_str'=> urlencode(encrypt_password($loop_id)),
 						'favorite'=> $favorite,
+						'show_urgent_box' => isset($_REQUEST['show_urgent_box']) && $_REQUEST['show_urgent_box'] == 1 ? 1 : "",
                         );
                     }
                 }
@@ -1840,6 +1849,7 @@ if(isset($_REQUEST['change_fav_status']) && $_REQUEST['change_fav_status'] == 1)
 						'cubicfootage'=>$bcubicfootage,
                         'loop_id_encrypt_str'=> urlencode(encrypt_password($loop_id)),
 						'favorite'=> $favorite,
+						'show_urgent_box' => isset($_REQUEST['show_urgent_box']) && $_REQUEST['show_urgent_box'] == 1 ? 1 : "",
                         );
                     /*}*/
                 }
